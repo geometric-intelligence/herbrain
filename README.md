@@ -1,4 +1,4 @@
-# herbrain
+# ![wbhi_logo](https://github.com/user-attachments/assets/a39881aa-ccce-4954-abf4-209abbfd61ef) HerBrain
 HerBrain uses AI for quantifying changes in the female brain during menstruation, pregnancy, and menopause.
 
 [![Demo](/images/HerBrainDemo_thumbnail.png)](https://youtu.be/zUucJbwaaO4)
