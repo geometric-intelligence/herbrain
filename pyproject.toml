@@ -1,0 +1,71 @@
+[tool.poetry]
+name = "my28brains"
+version = "0.1.0"
+description = "Brain Shape Analysis through the Menstrual Cycle"
+authors = ["Adele Myers <adele@ucsb.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+geomstats = { git = "https://github.com/geomstats/geomstats.git" }
+joblib = "*"
+matplotlib = "*"
+nibabel = "*"
+nilearn = "*"
+open3d = "*"
+pykeops = "*"
+plotly = "*"
+psutil = "*"
+requests = "*"
+rtree = "*"
+scikit-image = "*"
+trimesh = "*"
+wandb = "*"
+jupyter = "*"
+pandas = "*"
+jupyterlab = "*"
+pytest = "*"
+jupyterlab-code-formatter = "*"
+pre-commit = "*"
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+Flake8-pyproject = "*"
+isort = "*"
+pyvista = "^0.43.3"
+dash = "^2.15.0"
+addict = "*"
+tqdm = "^4.66.2"
+statsmodels = "^0.14.1"
+islp = "^0.3.22"
+dash-bootstrap-components = "^1.5.0"
+neuraloperator = {git = "https://github.com/neuraloperator/neuraloperator.git"}
+torch-harmonics = "^0.6.5"
+
+[tool.flake8]
+application_import_names = "my28brains"
+docstring-convention = "numpy"
+import_order_style = "smarkets"
+max-line-length = 88
+extend-exclude = [".venv"]
+extend-ignore = ["E501", "F401", "E203"]
+per-file-ignores = [
+    "*/__init__.py: F401,F403,D104"
+]
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+skip = [".gitignore", ".venv"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+packages = [
+    { include = "src" },
+    { include = "project_menstrual" },
+    { include = "project_pregnancy" },
+    { include = "project_regression" },
+]
