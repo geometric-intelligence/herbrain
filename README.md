@@ -46,6 +46,8 @@ If this code is useful to your research, please cite:
 
 ## 🏃‍♀️ How to Run the Code ##
 
+Once you download the data,
+
 1. Choose whether to launch pregnancy or menstrual cycle app. Pregnancy app is in the `project_pregnancy` folder, and menstrual app is in the `project_menstrual` folder.
 2. Run the `main_3_dash_app.py` file by running:
 
