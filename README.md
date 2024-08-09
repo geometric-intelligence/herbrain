@@ -1,9 +1,11 @@
 # 🧠 HerBrain
 HerBrain uses AI for quantifying changes in the female brain during menstruation, pregnancy, and menopause.
 
+## 🎬 HerBrain App Demo ##
+
 [![Demo](/images/HerBrainDemo_thumbnail.png)](https://youtu.be/zUucJbwaaO4)
 
-## 🎤 We are developing AI to transform the field of NeuroImaging and Womens' Brain Health: See our Beginner-Friendly Public Talk at Brass Bear Brewing ##
+## 🎤 Our Public Talk on Womens' Brain Health and AI ##
 
 [![BBB Talk](/images/bbb_thumbnail.png)](https://youtu.be/BsdNQUcwb1M)
 Visual on thumbnail slide taken from: Caitlin M Taylor, Laura Pritschet, and Emily G Jacobs. The scientific body of knowledge–whose body does it serve? A spotlight on oral contraceptives and women’s health factors in neuroimaging. Frontiers in neuroendocrinology, 60:100874, 2021.
