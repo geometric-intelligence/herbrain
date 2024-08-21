@@ -1,6 +1,9 @@
 # 🧠 HerBrain
 HerBrain uses AI for quantifying changes in the female brain during menstruation, pregnancy, and menopause.
 
+[![DOI](https://zenodo.org/badge/827974965.svg)](https://zenodo.org/doi/10.5281/zenodo.13356094)
+
+
 ## 🎬 HerBrain App Demo ##
 
 [![Demo](/images/HerBrainDemo_thumbnail.png)](https://youtu.be/zUucJbwaaO4)
