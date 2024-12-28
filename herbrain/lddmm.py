@@ -1,6 +1,29 @@
+import time
+import pandas as pd
 from os.path import join
 from api.deformetrica import Deformetrica
-import time
+
+
+def preprocess_full_structure(mesh, align=False, target_mesh=None):
+    new_mesh = mesh
+    if align and target_mesh is not None:
+        new_mesh = new_mesh.align(target_mesh, max_iterations=100)
+    new_mesh = new_mesh.smooth_taubin(n_iter=30)
+    target_reduction = 1 - (5000 / mesh.n_points)
+    new_mesh = new_mesh.decimate(target_reduction)
+    return new_mesh
+
+
+def preprocess_substructure(mesh, label, labels, align=False, target_mesh=None):
+    new_mesh = mesh
+    if align and target_mesh is not None:
+        new_mesh = new_mesh.align(target_mesh, max_iterations=100)
+    labels_df = pd.DataFrame(new_mesh.get_array('RGBA'))
+    labels_df['label'] = labels_df.apply(tuple, axis=1).map(labels)
+    new_mesh['label'] = labels_df['label']
+    structure = new_mesh.extract_points(
+        labels_df.loc[labels_df.label == label].index, adjacent_cells=False)
+    return structure.extract_surface().smooth_taubin(30)
 
 
 def registration(
