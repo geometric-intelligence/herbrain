@@ -106,11 +106,13 @@ def spline_regression(
     :param use_rk2_for_shoot:
     :param use_rk2_for_flow:
     :param dimension:
+    :param metric
+    :param tol
     :return:
     """
     template = {
         'shape': {
-            'deformable_object_type': 'polyline', 'kernel_type': kernel_type,
+            'deformable_object_type': 'SurfaceMesh', 'kernel_type': kernel_type,
             'kernel_width': kernel_width, 'kernel_device': kernel_device,
             'noise_std': regularisation, 'filename': source,
             'noise_variance_prior_scale_std': None,
@@ -123,7 +125,7 @@ def spline_regression(
     model = {'deformation_kernel_type': kernel_type,
              'deformation_kernel_width': kernel_width,
              'deformation_kernel_device': kernel_device,
-             'number_of_time_points': number_of_time_steps,
+             # 'number_of_time_points': number_of_time_steps,
              'concentration_of_time_points': number_of_time_steps - 1,
              'use_rk2_for_flow': use_rk2_for_flow, 'freeze_template': True,
              'freeze_control_points': freeze_control_points,
@@ -134,7 +136,7 @@ def spline_regression(
              'initial_control_points': initial_control_points,
              'initial_cp_spacing': None, 'initial_momenta': None, 'dense_mode': False,
              'number_of_processes': 1, 'dimension': dimension,
-             'random_seed': None, 't0': t0, 'tmin': t0, 'tmax': 1.,
+             'random_seed': None, 't0': t0, 'tmin': min(times), 'tmax': max(times),
              'target_weights': target_weights,
              'geodesic_weight': geodesic_weight}
 

@@ -58,10 +58,12 @@ if __name__ == '__main__':
             decimate_name = f'{side}_full_{day:02}.vtk'
 
             try:
+                # center, smooth and reduce nb of vertices of full structure
                 day_mesh = pv.read(data_dir / name)
                 preproc, aligned_day = preprocess_full_structure(day_mesh, ref_mesh)
                 preproc.save(smooth_dir / decimate_name)
 
+                # extract sub regeions, center and smooth each
                 for z in zones:
                     struc_name = f'{side}_{z}_t{day:02}.vtk'
                     substruc_mesh = preprocess_substructure(
@@ -73,3 +75,17 @@ if __name__ == '__main__':
 
             except FileNotFoundError:
                 continue
+
+    # compute fraction of gest time and add to covariates
+    covariates = pd.read_csv(project_dir / '28Baby_Hormones.csv')
+    covariates['day'] = covariates.sessionID.str.split('-').apply(lambda k: k[-1])
+    covariates['times'] = covariates.gestWeek / 40
+
+    # some subregions are not segmented on a few sessions
+    for z in zones:
+        covariates[z] = True
+
+    covariates.loc[covariates.sessionID == 'ses-13', 'PostHipp'] = False
+    covariates.loc[covariates.sessionID == 'ses-14', 'PostHipp'] = False
+    covariates.loc[covariates.sessionID == 'ses-15', zones] = False
+    covariates.to_csv(project_dir / 'covariates.csv', index=False)
