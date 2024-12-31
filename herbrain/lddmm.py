@@ -125,7 +125,7 @@ def spline_regression(
     model = {'deformation_kernel_type': kernel_type,
              'deformation_kernel_width': kernel_width,
              'deformation_kernel_device': kernel_device,
-             # 'number_of_time_points': number_of_time_steps,
+             'number_of_time_points': number_of_time_steps,
              'concentration_of_time_points': number_of_time_steps - 1,
              'use_rk2_for_flow': use_rk2_for_flow, 'freeze_template': True,
              'freeze_control_points': freeze_control_points,

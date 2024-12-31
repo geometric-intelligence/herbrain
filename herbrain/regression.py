@@ -7,7 +7,7 @@ def get_data_set(
         data_dir: Path, hemisphere: str, structure: str, covariates: pd.DataFrame):
     data_list = covariates[covariates[structure]]  # remove excluded
     data_list = data_list[
-        (1 < data_list['gestWeek']) & (data_list['gestWeek'] < 40)]  # select phase
+        (1 < data_list['gestWeek']) & (data_list['gestWeek'] < 25)]  # select phase
     data_path = data_dir / structure / 'raw'
     dataset = [{'shape': data_path / f'{hemisphere}_{structure}_t01.vtk'}] + [
         {
@@ -24,16 +24,17 @@ struct = "PostHipp"
 
 spline_args = {
     'freeze_control_points': False,
-    'max_iter': 5,
+    'max_iter': 1000,
     'kernel_width': 5.,
     'initial_step_size': 100,
     'freeze_external_forces': True,
-    'use_rk2_for_flow': False,
-    'regularisation': 1.,
+    'use_rk2_for_flow': True,
+    'regularisation': 5.,
     'tol': 1e-10, 'geodesic_weight': 1.,
     'metric': 'varifold'}
 
 data_set, times = get_data_set(output_dir, 'left', struct, covariate)
+times = (times - times.min()) / (times.max() - times.min())
 target_weights = [1 / len(data_set)] * len(data_set)
 
 spline_regression(
@@ -42,7 +43,6 @@ spline_regression(
     output_dir=output_dir / struct / 'regression',
     times=times.tolist(),
     t0=min(times),
-    number_of_time_steps=13,
     subject_id=[struct],
     target_weights=target_weights, **spline_args)
 
