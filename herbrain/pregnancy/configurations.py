@@ -1,0 +1,128 @@
+"""Parameters to study different time frames of pregnancy with LDDMM."""
+
+configurations = []
+
+# 1. PostHipp from preconception to 2nd trimester
+configurations.append(dict(
+    config_id="preTo2nd",
+    structure="PostHipp",
+    tmin=1,
+    tmax=25,
+    day_ref=3,
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1.,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 2. preconception to 1st trimester
+configurations.append(dict(
+    config_id="firstTrim",
+    structure="PostHipp",
+    tmin=1.5,
+    tmax=13,
+    day_ref=4,
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 3. 1st trimester to 2nd
+configurations.append(dict(
+    config_id="secondTrim",
+    structure="PostHipp",
+    tmin=12,
+    tmax=25,
+    day_ref=8,
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 4. 3rd trimester
+configurations.append(dict(
+    config_id="thirdTrim",
+    structure="PostHipp",
+    tmin=25,
+    tmax=40,
+    day_ref=12,
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 4. PostPartum
+configurations.append(dict(
+    config_id="thirdTrim",
+    structure="PostHipp",
+    tmin=40,
+    tmax=163,
+    day_ref=19,
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))

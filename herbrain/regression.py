@@ -6,11 +6,12 @@ from strings import cp_str
 
 
 def get_data_set(
-        data_dir: Path, hemisphere: str, structure: str, covariates: pd.DataFrame):
+        data_dir: Path, hemisphere: str, structure: str, covariates: pd.DataFrame,
+        tmin: int, tmax: int, day_ref: int):
     data_list = covariates[covariates[structure]]  # remove excluded
     data_list = data_list[
-        ((1 < data_list['gestWeek']) & (data_list['gestWeek'] < 25))
-        | (data_list['day'] == 3)]  # select phase + template at day 3
+        ((tmin < data_list['gestWeek']) & (data_list['gestWeek'] < tmax))
+        | (data_list['day'] == day_ref)]  # select phase + template at day ref
     data_path = data_dir / structure / 'raw'
     dataset = [
         {
@@ -19,55 +20,43 @@ def get_data_set(
     return dataset, data_list['times']
 
 
-project_dir = Path('/user/nguigui/home/Documents/UCSB')
-output_dir = project_dir / 'meshes_nico'
+def main(
+        covariates, output_dir, config_id="0", structure="PostHipp", tmin=1, tmax=25,
+        day_ref=3, registration_args=None, spline_args=None):
+    if registration_args is None:
+        registration_args = {}
+    if spline_args is None:
+        spline_args = {}
 
-covariate = pd.read_csv(project_dir / 'covariates.csv')
-struct = "PostHipp"
+    # Filter meshes between to tmin, tmax and ref day
+    data_set, times = get_data_set(
+        output_dir, 'left', structure, covariates, tmin, tmax, day_ref)
+    times = (times - times.min()) / (times.max() - times.min())
+    target_weights = [1 / len(data_set)] * len(data_set)
 
-data_set, times = get_data_set(output_dir, 'left', struct, covariate)
-times = (times - times.min()) / (times.max() - times.min())
-target_weights = [1 / len(data_set)] * len(data_set)
+    # registration to optimize control points
+    source = data_set[0]['shape']
+    target = data_set[-1]['shape']
+    registration_dir = output_dir / structure / config_id / 'inital_registration'
+    lddmm.registration(source, target, registration_dir, **registration_args)
 
-# registration to optimize control points
-source = data_set[0]['shape']
-target = data_set[-1]['shape']
-registration_args = {
-    'kernel_width': 4.,
-    'regularisation': 1,
-    'max_iter': 2000,
-    'freeze_control_points': False,
-    'metric': 'varifold',
-    'tol': 1e-10,
-    'filter_cp': True,
-    'threshold': .75}
-
-registration_dir = output_dir / struct / 'inital_registration'
-lddmm.registration(source, target, registration_dir, **registration_args)
+    # geodesic or spline regression (depending on freeze_external_forces)
+    all_spline_args = registration_args.copy()
+    all_spline_args.update(spline_args)
+    all_spline_args['initial_control_points'] = registration_dir / cp_str
+    regression_dir = output_dir / structure / config_id / 'regression'
+    lddmm.spline_regression(
+        source=data_set[0]['shape'], target=data_set,
+        output_dir=regression_dir, subject_id=[''],
+        times=times.tolist(), t0=min(times),
+        target_weights=target_weights, **all_spline_args)
 
 
-spline_args = registration_args.copy()
-spline_args.update({
-    'initial_step_size': 100,
-    'regularisation': 1.,
-    'freeze_external_forces': True,
-    'freeze_control_points': True,
-    'initial_control_points': registration_dir / cp_str,
-})
-
-regression_dir = output_dir / struct / 'regression'
-lddmm.spline_regression(
-    source=data_set[0]['shape'],
-    target=data_set,
-    output_dir=regression_dir,
-    times=times.tolist(),
-    t0=min(times),
-    subject_id=[''],
-    target_weights=target_weights, **spline_args)
-
-# plotter = pv.Plotter()
-# plotter.add_mesh(target_struct[z], color='red')
-# plotter.add_mesh(substruc_mesh_aligned, color='blue')
-# plotter.add_mesh(substruc_mesh_unaligned, color='green')
-# plotter.show()
-
+if __name__ == '__main__':
+    from herbrain.pregnancy.configurations import configurations
+    project_dir = Path('/user/nguigui/home/Documents/UCSB')
+    covariate = pd.read_csv(project_dir / 'covariates.csv')
+    out_dir = project_dir / 'meshes_nico'
+    # for config in configurations:
+    #     main(covariate, out_dir, **config)
+    main(covariate, out_dir, **configurations[-1])
