@@ -1,0 +1,6 @@
+cp_str = 'DeterministicAtlas__EstimatedParameters__ControlPoints.txt'
+reconstruction_str = 'DeterministicAtlas__Reconstruction__shape__subject_ventricle.vtk'
+momenta_str = 'DeterministicAtlas__EstimatedParameters__Momenta.txt'
+mom_str_spline = 'SplineRegression__EstimatedParameters__Momenta.txt'
+cp_str_spline = 'SplineRegression__EstimatedParameters__ControlPoints.txt'
+ext_forces_str = 'SplineRegression__EstimatedParameters__ExternalForces.txt'

@@ -1,6 +1,8 @@
 import pandas as pd
 from pathlib import Path
-from herbrain.lddmm import spline_regression
+
+import herbrain.lddmm as lddmm
+from strings import cp_str
 
 
 def get_data_set(
@@ -22,28 +24,44 @@ output_dir = project_dir / 'meshes_nico'
 covariate = pd.read_csv(project_dir / 'covariates.csv')
 struct = "PostHipp"
 
-spline_args = {
-    'freeze_control_points': False,
-    'max_iter': 1000,
-    'kernel_width': 5.,
-    'initial_step_size': 100,
-    'freeze_external_forces': True,
-    'use_rk2_for_flow': True,
-    'regularisation': 5.,
-    'tol': 1e-10, 'geodesic_weight': 1.,
-    'metric': 'varifold'}
-
 data_set, times = get_data_set(output_dir, 'left', struct, covariate)
 times = (times - times.min()) / (times.max() - times.min())
 target_weights = [1 / len(data_set)] * len(data_set)
 
-spline_regression(
+# registration to optimize control points
+source = data_set[0]['shape']
+target = data_set[-1]['shape']
+registration_args = {
+    'kernel_width': 4.,
+    'regularisation': 1,
+    'max_iter': 2000,
+    'freeze_control_points': False,
+    'metric': 'varifold',
+    'tol': 1e-10,
+    'filter_cp': True,
+    'threshold': .5}
+
+registration_dir = output_dir / struct / 'inital_registration'
+# lddmm.registration(source, target, registration_dir, **registration_args)
+
+
+spline_args = registration_args.copy()
+spline_args.update({
+    'initial_step_size': 100,
+    'regularisation': 1.,
+    'freeze_external_forces': False,
+    'freeze_control_points': True,
+    'initial_control_points': registration_dir / cp_str,
+})
+
+regression_dir = output_dir / struct / 'regression'
+lddmm.spline_regression(
     source=data_set[0]['shape'],
     target=data_set,
-    output_dir=output_dir / struct / 'regression',
+    output_dir=regression_dir,
     times=times.tolist(),
     t0=min(times),
-    subject_id=[struct],
+    subject_id=[''],
     target_weights=target_weights, **spline_args)
 
 # plotter = pv.Plotter()

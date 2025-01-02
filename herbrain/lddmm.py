@@ -1,15 +1,22 @@
+import numpy as np
+import pyvista as pv
 import time
 from os.path import join
 from api.deformetrica import Deformetrica
+from in_out.array_readers_and_writers import read_2D_array, read_3D_array
+from support.kernels.torch_kernel import TorchKernel
+
+import strings
 
 
 def registration(
         source, target, output_dir, kernel_width=20.0, regularisation=1.0,
         number_of_time_steps=11, metric='landmark', kernel_type='torch',
-        kernel_device='cuda',
+        kernel_device='cuda', tol=1e-5,
         use_svf=False, initial_control_points=None, max_iter=200,
         freeze_control_points=False, use_rk2_for_shoot=False, use_rk2_for_flow=False,
-        dimension=3, use_rk4_for_shoot=False, preserve_volume=False, print_every=20):
+        dimension=3, use_rk4_for_shoot=False, preserve_volume=False, print_every=20,
+        filter_cp=False, threshold=1.):
     """
     Wrapper to Registration in Deformetrica
     :param preserve_volume:
@@ -34,12 +41,12 @@ def registration(
         'max_iterations': max_iter,
         'freeze_template': False, 'freeze_control_points': freeze_control_points,
         'freeze_momenta': False, 'use_sobolev_gradient': True,
-        'sobolev_kernel_width_ratio': 1,
+        'sobolev_kernel_width_ratio': 1, 'max_line_search_iterations': 50,
         'initial_control_points': initial_control_points,
         'initial_cp_spacing': None, 'initial_momenta': None,
         'dense_mode': False, 'number_of_threads': 1, 'print_every_n_iters': print_every,
-        'downsampling_factor': 1, 'dimension': 3,
-        'optimization_method_type': 'ScipyLBFGS'}
+        'downsampling_factor': 1, 'dimension': dimension,
+        'optimization_method_type': 'ScipyLBFGS', 'convergence_tolerance': tol}
 
     # register source on target
     deformetrica = Deformetrica(output_dir, verbosity='DEBUG')
@@ -75,6 +82,16 @@ def registration(
         template_specifications=template, dataset_specifications=data_set,
         model_options=model_options, estimator_options=optimization_parameters)
 
+    path_cp = join(output_dir, strings.cp_str)
+    cp = read_2D_array(path_cp)
+
+    path_momenta = join(output_dir, strings.momenta_str)
+    momenta = read_3D_array(path_momenta)
+    poly_cp = momenta_to_vtk(cp, momenta, kernel_width, filter_cp, threshold)
+    poly_cp.save(join(output_dir, 'initial_control_points.vtk'))
+
+    return time.gmtime()
+
 
 def spline_regression(
         source, target, output_dir, times, subject_id='patient', t0=0,
@@ -82,7 +99,8 @@ def spline_regression(
         initial_step_size=1e-4, kernel_type='torch', kernel_device='auto',
         initial_control_points=None, tol=1e-5, freeze_control_points=False,
         use_rk2_for_flow=False, dimension=3, freeze_external_forces=False,
-        target_weights=None, geodesic_weight=0.1, metric='landmark'):
+        target_weights=None, geodesic_weight=0.1, metric='landmark',
+        filter_cp=False, threshold=1.):
     """
     :param geodesic_weight:
     :param target_weights:
@@ -157,5 +175,58 @@ def spline_regression(
     deformetrica.estimate_spline_regression(
         template_specifications=template, dataset_specifications=data_set,
         model_options=model, estimator_options=optimization_parameters)
+
+    # agregate results in vtk file for paraview
+    path_cp = join(output_dir, strings.cp_str_spline)
+    cp = read_2D_array(path_cp)
+    path_momenta = join(output_dir, strings.mom_str_spline)
+    momenta = read_3D_array(path_momenta)
+    poly_cp = momenta_to_vtk(
+        cp, momenta, kernel_width, filter_cp, threshold)
+    poly_cp.save(join(output_dir, 'initial_control_points.vtk'))
+
+    if not freeze_external_forces:
+        forces = read_3D_array(join(output_dir, strings.ext_forces_str))
+        for i, f in enumerate(forces):
+            filename = join(output_dir, f'cp_with_external_forces_{i}.vtk')
+            if filter_cp:
+                mask = np.linalg.norm(f, axis=-1) > threshold
+                cp_filtered = cp[mask, :]
+                f = f[mask]
+                poly_cp = pv.PolyData(cp_filtered)
+            else:
+                poly_cp = pv.PolyData(cp)
+            poly_cp['external_force'] = f
+            poly_cp.save(filename)
+
     return time.gmtime()
 
+
+def momenta_to_vtk(cp, momenta, kernel_width=5., filter_cp=True, threshold=1.):
+    kernel = TorchKernel(kernel_width=kernel_width)
+    velocity = kernel.convolve(cp, cp, momenta)
+
+    if filter_cp:
+        vel_thresholded = np.linalg.norm(velocity, axis=-1) > threshold
+        cp = cp[vel_thresholded, :]
+        momenta = momenta[vel_thresholded, :]
+        velocity = velocity[vel_thresholded, :]
+
+    poly = pv.PolyData(cp)
+    poly['Momentum'] = momenta
+    poly['Velocity'] = velocity
+    return poly
+
+
+def external_forces_to_vtk(cp, forces, output_dir, filter_cp=True, threshold=1.):
+    for i, f in enumerate(forces):
+        filename = join(output_dir, f'cp_with_external_forces_{i}.vtk')
+        if filter_cp:
+            mask = np.linalg.norm(f, axis=-1) > threshold
+            cp_filtered = cp[mask, :]
+            f = f[mask]
+            poly_cp = pv.PolyData(cp_filtered)
+        else:
+            poly_cp = pv.PolyData(cp)
+        poly_cp['external_force'] = f
+        poly_cp.save(filename)
