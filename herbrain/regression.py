@@ -9,9 +9,10 @@ def get_data_set(
         data_dir: Path, hemisphere: str, structure: str, covariates: pd.DataFrame):
     data_list = covariates[covariates[structure]]  # remove excluded
     data_list = data_list[
-        (1 < data_list['gestWeek']) & (data_list['gestWeek'] < 25)]  # select phase
+        ((1 < data_list['gestWeek']) & (data_list['gestWeek'] < 25))
+        | (data_list['day'] == 3)]  # select phase + template at day 3
     data_path = data_dir / structure / 'raw'
-    dataset = [{'shape': data_path / f'{hemisphere}_{structure}_t01.vtk'}] + [
+    dataset = [
         {
             'shape': data_path / f'{hemisphere}_{structure}_t{k:02}.vtk'
          } for k in data_list['day']]
@@ -39,10 +40,10 @@ registration_args = {
     'metric': 'varifold',
     'tol': 1e-10,
     'filter_cp': True,
-    'threshold': .5}
+    'threshold': .75}
 
 registration_dir = output_dir / struct / 'inital_registration'
-# lddmm.registration(source, target, registration_dir, **registration_args)
+lddmm.registration(source, target, registration_dir, **registration_args)
 
 
 spline_args = registration_args.copy()
