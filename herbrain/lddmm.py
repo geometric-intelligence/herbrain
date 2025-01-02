@@ -187,17 +187,7 @@ def spline_regression(
 
     if not freeze_external_forces:
         forces = read_3D_array(join(output_dir, strings.ext_forces_str))
-        for i, f in enumerate(forces):
-            filename = join(output_dir, f'cp_with_external_forces_{i}.vtk')
-            if filter_cp:
-                mask = np.linalg.norm(f, axis=-1) > threshold
-                cp_filtered = cp[mask, :]
-                f = f[mask]
-                poly_cp = pv.PolyData(cp_filtered)
-            else:
-                poly_cp = pv.PolyData(cp)
-            poly_cp['external_force'] = f
-            poly_cp.save(filename)
+        external_forces_to_vtk(cp, forces, output_dir, filter_cp, threshold)
 
     return time.gmtime()
 
@@ -219,10 +209,10 @@ def momenta_to_vtk(cp, momenta, kernel_width=5., filter_cp=True, threshold=1.):
 
 
 def external_forces_to_vtk(cp, forces, output_dir, filter_cp=True, threshold=1.):
-    for i, f in enumerate(forces):
+    mask = np.linalg.norm(forces, axis=-1) > threshold
+    for i, f in enumerate(forces[:-1]):
         filename = join(output_dir, f'cp_with_external_forces_{i}.vtk')
         if filter_cp:
-            mask = np.linalg.norm(f, axis=-1) > threshold
             cp_filtered = cp[mask, :]
             f = f[mask]
             poly_cp = pv.PolyData(cp_filtered)

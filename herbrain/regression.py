@@ -49,7 +49,7 @@ spline_args = registration_args.copy()
 spline_args.update({
     'initial_step_size': 100,
     'regularisation': 1.,
-    'freeze_external_forces': False,
+    'freeze_external_forces': True,
     'freeze_control_points': True,
     'initial_control_points': registration_dir / cp_str,
 })
