@@ -89,7 +89,7 @@ def registration(
     momenta = read_3D_array(path_momenta)
     poly_cp = momenta_to_vtk(cp, momenta, kernel_width, filter_cp, threshold)
     poly_cp.save(join(output_dir, 'initial_control_points.vtk'))
-
+    pv.read(target).save(join(output_dir, 'target_shape.vtk'))
     return time.gmtime()
 
 

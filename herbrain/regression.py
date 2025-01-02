@@ -57,6 +57,6 @@ if __name__ == '__main__':
     project_dir = Path('/user/nguigui/home/Documents/UCSB')
     covariate = pd.read_csv(project_dir / 'covariates.csv')
     out_dir = project_dir / 'meshes_nico'
-    # for config in configurations:
-    #     main(covariate, out_dir, **config)
-    main(covariate, out_dir, **configurations[-1])
+    for config in configurations[-2:]:
+        main(covariate, out_dir, **config)
+    # main(covariate, out_dir, **configurations[-1])

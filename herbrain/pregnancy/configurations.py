@@ -104,7 +104,7 @@ configurations.append(dict(
 
 # 4. PostPartum
 configurations.append(dict(
-    config_id="thirdTrim",
+    config_id="PostPartum",
     structure="PostHipp",
     tmin=40,
     tmax=163,
