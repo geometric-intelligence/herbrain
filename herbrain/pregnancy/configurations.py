@@ -14,6 +14,7 @@ configurations.append(dict(
         regularisation=1.,
         max_iter=2000,
         freeze_control_points=False,
+        attachment_kernel_width=1.,
         metric='varifold',
         tol=1e-10,
         filter_cp=True,
@@ -40,6 +41,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
+        attachment_kernel_width=4.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -64,7 +66,7 @@ configurations.append(dict(
         regularisation=1,
         max_iter=2000,
         freeze_control_points=False,
-        metric='varifold',
+        metric='varifold', attachment_kernel_width=4.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -90,6 +92,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
+        attachment_kernel_width=4.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -115,6 +118,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
+        attachment_kernel_width=4.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75

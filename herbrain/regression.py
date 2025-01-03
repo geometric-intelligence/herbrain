@@ -54,9 +54,19 @@ def main(
 
 if __name__ == '__main__':
     from herbrain.pregnancy.configurations import configurations
+    from herbrain.lddmm import update_pvsm_file
     project_dir = Path('/user/nguigui/home/Documents/UCSB')
     covariate = pd.read_csv(project_dir / 'covariates.csv')
     out_dir = project_dir / 'meshes_nico'
-    for config in configurations[-2:]:
-        main(covariate, out_dir, **config)
-    # main(covariate, out_dir, **configurations[-1])
+    # for config in configurations[-2:]:
+    #     main(covariate, out_dir, **config)
+    main(covariate, out_dir, **configurations[0])
+    paraviews = project_dir / 'paraviews'
+    template = paraviews / 'PostHipp_PreTo2nd.pvsm'
+    structure_ = configurations[-1]['structure']
+    id_ = configurations[-1]['config_id']
+    output = paraviews / f"{structure_}_" \
+                         f"{id_}.psvm"
+    data_folders = {
+        "PostHipp":  project_dir / structure_, "PreTo2nd": project_dir / id_}
+    update_pvsm_file(template, output, structure_, id_, data_folders)
