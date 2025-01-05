@@ -7,22 +7,23 @@ from strings import cp_str
 
 def get_data_set(
         data_dir: Path, hemisphere: str, structure: str, covariates: pd.DataFrame,
-        tmin: int, tmax: int, day_ref: int):
+        tmin: int, tmax: int, day_ref: int, variable='times'):
     data_list = covariates[covariates[structure]]  # remove excluded
     data_list = data_list[
         ((tmin < data_list['gestWeek']) & (data_list['gestWeek'] < tmax))
         | (data_list['day'] == day_ref)]  # select phase + template at day ref
+    data_list = data_list.dropna(subset=variable)
     data_path = data_dir / structure / 'raw'
     dataset = [
         {
             'shape': data_path / f'{hemisphere}_{structure}_t{k:02}.vtk'
          } for k in data_list['day']]
-    return dataset, data_list['times']
+    return dataset, data_list[variable]
 
 
 def main(
         covariates, output_dir, config_id="0", structure="PostHipp", tmin=1, tmax=25,
-        day_ref=3, registration_args=None, spline_args=None):
+        day_ref=3, variable='times', registration_args=None, spline_args=None):
     if registration_args is None:
         registration_args = {}
     if spline_args is None:
@@ -30,7 +31,7 @@ def main(
 
     # Filter meshes between to tmin, tmax and ref day
     data_set, times = get_data_set(
-        output_dir, 'left', structure, covariates, tmin, tmax, day_ref)
+        output_dir, 'left', structure, covariates, tmin, tmax, day_ref, variable)
     times = (times - times.min()) / (times.max() - times.min())
     target_weights = [1 / len(data_set)] * len(data_set)
 
@@ -54,19 +55,11 @@ def main(
 
 if __name__ == '__main__':
     from herbrain.pregnancy.configurations import configurations
-    from herbrain.lddmm import update_pvsm_file
+    # from herbrain.paraview import update_pvsm_file
     project_dir = Path('/user/nguigui/home/Documents/UCSB')
     covariate = pd.read_csv(project_dir / 'covariates.csv')
     out_dir = project_dir / 'meshes_nico'
     # for config in configurations[-2:]:
     #     main(covariate, out_dir, **config)
     main(covariate, out_dir, **configurations[0])
-    paraviews = project_dir / 'paraviews'
-    template = paraviews / 'PostHipp_PreTo2nd.pvsm'
-    structure_ = configurations[-1]['structure']
-    id_ = configurations[-1]['config_id']
-    output = paraviews / f"{structure_}_" \
-                         f"{id_}.psvm"
-    data_folders = {
-        "PostHipp":  project_dir / structure_, "PreTo2nd": project_dir / id_}
-    update_pvsm_file(template, output, structure_, id_, data_folders)
+    main(covariate, out_dir, **configurations[-1])

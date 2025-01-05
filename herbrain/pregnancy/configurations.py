@@ -130,3 +130,84 @@ configurations.append(dict(
         freeze_control_points=True,
     )
 ))
+
+# 5. PostHipp all wrt prog
+configurations.append(dict(
+    config_id="Prog",
+    structure="PostHipp",
+    tmin=-5,
+    tmax=163,
+    day_ref=1,
+    variable='prog',
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 6. PostHipp all wrt estro
+configurations.append(dict(
+    config_id="Estro",
+    structure="PostHipp",
+    tmin=-5,
+    tmax=163,
+    day_ref=1,
+    variable='estro',
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 7. PostHipp all wrt lh
+configurations.append(dict(
+    config_id="LH",
+    structure="PostHipp",
+    tmin=-5,
+    tmax=163,
+    day_ref=1,
+    variable='lh',
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))

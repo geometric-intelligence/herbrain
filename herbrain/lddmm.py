@@ -1,8 +1,6 @@
 import numpy as np
-import os
 import pyvista as pv
 import time
-import xml.etree.ElementTree as ET
 from os.path import join
 from api.deformetrica import Deformetrica
 from in_out.array_readers_and_writers import read_2D_array, read_3D_array
@@ -222,59 +220,3 @@ def external_forces_to_vtk(cp, forces, output_dir, filter_cp=True, threshold=1.)
             poly_cp = pv.PolyData(cp)
         poly_cp['external_force'] = f
         poly_cp.save(filename)
-
-
-def discover_frames(data_folder):
-    """
-    Discover all frame identifiers in a given folder.
-
-    Args:
-        data_folder (str): Path to the data folder.
-
-    Returns:
-        list: A list of frame identifiers (e.g., ['age_0.03', 'age_0.055']).
-    """
-    frames = []
-    for root, _, files in os.walk(data_folder):
-        for file in files:
-            if "age_" in file:  # Assuming frame identifiers contain "age_"
-                frame_id = file.split("__")[-1].split(".")[0]  # Extract identifier
-                frames.append(frame_id)
-    return sorted(set(frames))
-
-
-def update_pvsm_file(input_file, output_file, struct, config_id, data_folders):
-    """
-    Updates a ParaView .pvsm file to reflect new data folder and frame mappings.
-
-    Args:
-        input_file (str): Path to the input .pvsm file.
-        output_file (str): Path to save the updated .pvsm file.
-        struct (dict): Structure.
-        config_id:
-        data_folders (dict): Mapping of old folder names to new folder paths.
-    """
-    # Parse the XML file
-    tree = ET.parse(input_file)
-    root = tree.getroot()
-
-    folder_mapping = {"PostHipp": struct, "PreTo2nd": config_id}
-
-    # Update folder paths
-    for elem in root.iter():
-        if elem.text:
-            for old_folder, new_folder in folder_mapping.items():
-                if old_folder in elem.text:
-                    elem.text = elem.text.replace(old_folder, new_folder)
-
-    # Discover frames in the new folders and update frame identifiers
-    for old_folder, new_folder_path in data_folders.items():
-        new_frames = discover_frames(new_folder_path)
-        for elem in root.iter():
-            if elem.text and old_folder in elem.text:
-                for new_frame in new_frames:
-                    if new_frame not in elem.text:
-                        elem.text = elem.text.replace(old_folder, new_folder_path)
-
-    # Save the updated XML to a new file
-    tree.write(output_file, encoding="utf-8", xml_declaration=True)
