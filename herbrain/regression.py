@@ -39,28 +39,28 @@ def main(
     source = data_set[0]['shape']
     target = data_set[-1]['shape']
     registration_dir = output_dir / structure / config_id / 'initial_registration'
-    # lddmm.registration(source, target, registration_dir, **registration_args)
+    lddmm.registration(source, target, registration_dir, **registration_args)
 
     # geodesic or spline regression (depending on freeze_external_forces)
     all_spline_args = registration_args.copy()
     all_spline_args.update(spline_args)
     all_spline_args['initial_control_points'] = registration_dir / cp_str
     regression_dir = output_dir / structure / config_id / 'regression'
-    # lddmm.spline_regression(
-    #     source=data_set[0]['shape'], target=data_set,
-    #     output_dir=regression_dir, subject_id=[''],
-    #     times=times.tolist(), t0=min(times),
-    #     target_weights=target_weights, **all_spline_args)
-    viz_json(registration_dir, regression_dir, data_set, times)
+    lddmm.spline_regression(
+        source=data_set[0]['shape'], target=data_set,
+        output_dir=regression_dir, subject_id=[''],
+        times=times.tolist(), t0=min(times),
+        target_weights=target_weights, **all_spline_args)
+    generate_visualization(registration_dir, regression_dir, data_set, times)
 
 
 if __name__ == '__main__':
     from herbrain.pregnancy.configurations import configurations
-    from herbrain.paraview import viz_json
+    from pregnancy.visualization.paraview import generate_visualization
     project_dir = Path('/user/nguigui/home/Documents/UCSB')
     covariate = pd.read_csv(project_dir / 'covariates.csv')
     out_dir = project_dir / 'meshes_nico'
-    # for config in configurations[-2:]:
-    #     main(covariate, out_dir, **config)
+    for config in configurations[-4:]:
+        main(covariate, out_dir, **config)
     # main(covariate, out_dir, **configurations[0])
-    main(covariate, out_dir, **configurations[-1])
+    # main(covariate, out_dir, **configurations[-1])

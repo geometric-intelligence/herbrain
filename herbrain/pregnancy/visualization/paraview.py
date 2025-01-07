@@ -1,9 +1,10 @@
 import json
+import re
 
 import strings
 
 
-def viz_json(registration_dir, regression_dir, data_set, times):
+def generate_visualization(registration_dir, regression_dir, data_set, times):
     filenames = dict(
         registration={
             'registrationName': 'registration',
@@ -33,5 +34,14 @@ def viz_json(registration_dir, regression_dir, data_set, times):
             'registrationName': 'raw_data',
             'FileNames': [k['shape'].as_posix() for k in data_set]}
     )
+
     with open(registration_dir.parent / f'visualisation_names.json', 'w') as fp:
         json.dump(filenames, fp)
+
+    with open('pregnancy/visualization/template.py', 'r') as file:
+        content = file.read()
+
+    pattern = re.compile('result_path_place_holder')
+    updated_content = pattern.sub(registration_dir.parent.as_posix(), content)
+    with open(registration_dir.parent / 'viz.py', 'w') as file:
+        file.write(updated_content)

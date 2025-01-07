@@ -49,6 +49,17 @@ if __name__ == '__main__':
         (0, 0, 255, 255): "DG",
         (0, 255, 0, 255): "CA2+3"}
 
+    swap_list = [1, 2, 3, 4, 5, 6, 18, 19]
+    tmp_dir = data_dir / 'tmp'
+    tmp_dir.mkdir(exist_ok=True)
+    for day in swap_list:
+        file_left = data_dir / f'left_structure_-1_day{day:02}.ply'
+        file_left_tmp = data_dir / 'tmp' / file_left.name
+        file_left.rename(file_left_tmp)
+        file_right = data_dir / f'right_structure_-1_day{day:02}.ply'
+        file_right.rename(data_dir / f'left_structure_-1_day{day:02}.ply')
+        file_left_tmp.rename(file_right)
+
     for side in ["left"]:  # , "right"]:
         ref_mesh = pv.read(data_dir / f'{side}_structure_-1_day01.ply')
         target_struct = {k: None for k in zones}

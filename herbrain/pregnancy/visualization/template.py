@@ -1,7 +1,7 @@
 # state file generated using paraview version 5.9.1
 import json
 with open(
-        '/user/nguigui/home/Documents/UCSB/meshes_nico/PostHipp/LH'
+        'result_path_place_holder'
         '/visualisation_names.json', 'r') as fp:
     filenames = json.load(fp)
 
