@@ -220,3 +220,36 @@ def external_forces_to_vtk(cp, forces, output_dir, filter_cp=True, threshold=1.)
             poly_cp = pv.PolyData(cp)
         poly_cp['external_force'] = f
         poly_cp.save(filename)
+
+
+def register_sequence(pid, source_dir, target_dir):
+    tmp_dir = join('/tmp')
+    f_list = get_frame_list(pid, source_dir)
+    frame_d = [k for k in f_list if 'D' in k][0]
+    source = join(source_dir, pid, frame_d)
+    subprocess.call(['mkdir', join(target_dir, pid)])
+
+    for frame in f_list:
+        target_path, frame_num = set_names(pid, source_dir, frame)
+        if f'cp_{frame_num}.txt' in os.listdir(join(target_dir, pid)):
+            continue
+        output_name = join(tmp_dir, f'{pid}_registration_{frame_num}')
+
+        registration(source=source, target=target_path, output_dir=output_name,
+                     use_rk4_for_shoot=(target_path == atlas),
+                     use_rk2_for_shoot=(target_path != atlas),
+                     **config.registration_args)
+
+        to_move = [strings.cp_str, strings.momenta_str,
+                   strings.residual_str]
+        move_to = [f'cp_{frame_num}.txt', f'momenta_{frame_num}.txt',
+                   f'registration_error_{frame_num}.txt']
+
+        for src, dest in zip(to_move, move_to):
+            subprocess.call([
+                'mv',
+                join(output_name, src),
+                join(target_dir, pid, dest)])
+        subprocess.call(['rm', '-r', output_name])
+
+    return time.gmtime()

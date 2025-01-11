@@ -10,6 +10,14 @@ def preprocess_full_structure(mesh: pv.DataSet, target_mesh=None):
     return new_mesh, aligned
 
 
+def add_labels(mesh: pv.DataSet, labels: dict):
+    new_mesh = mesh
+    labels_df = pd.DataFrame(new_mesh.get_array('RGBA'))
+    labels_df['label'] = labels_df.apply(tuple, axis=1).map(labels)
+    new_mesh['label'] = labels_df['label']
+    return new_mesh
+
+
 def preprocess_substructure(
         mesh: pv.DataSet, label: str, labels: dict, align=False,
         target_mesh=None):
@@ -24,21 +32,8 @@ def preprocess_substructure(
     return structure.extract_surface().smooth_taubin(20)
 
 
-if __name__ == '__main__':
-    from pathlib import Path
-
-    project_dir = Path('/user/nguigui/home/Documents/UCSB')
-    data_dir = project_dir / 'meshes_adele' / 'a_meshed'
-    output_dir = project_dir / 'meshes_nico'
-    output_dir.mkdir(exist_ok=True)
-    smooth_dir = output_dir / 'full_structure' / 'raw'
-    smooth_dir.mkdir(parents=True, exist_ok=True)
-
-    zones = ["PRC", "PHC", "PostHipp", "CA2+3", "ERC"]
-    for z in zones:
-        (output_dir / z / 'raw').mkdir(parents=True, exist_ok=True)
-
-    ref_labels = {
+def get_ref_labels():
+    return {
         (255, 0, 255, 255): "PRC",
         (0, 255, 255, 255): "PHC",
         (255, 215, 0, 255): "AntHipp",
@@ -47,45 +42,72 @@ if __name__ == '__main__':
         (184, 115, 51, 255): "PostHipp",
         (255, 0, 0, 255): "CA1",
         (0, 0, 255, 255): "DG",
-        (0, 255, 0, 255): "CA2+3"}
+        (0, 255, 0, 255): "CA2+3"
+    }
+
+
+def main(day_min, day_max, day_ref, side, data_dir, output_dir):
+    output_dir.mkdir(exist_ok=True)
+    raw_dir = output_dir / 'full_structure' / 'raw'
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    smooth_dir = output_dir / 'full_structure' / 'smooth'
+    smooth_dir.mkdir(parents=True, exist_ok=True)
+
+    ref_labels = get_ref_labels()
+    zones = ref_labels.values()
+
+    for z in zones:
+        (output_dir / z / 'raw').mkdir(parents=True, exist_ok=True)
+
+    ref_mesh = pv.read(data_dir / f'{side}_structure_-1_day{day_ref:02}.ply')
+    target_struct = {k: None for k in zones}
+
+    for d in range(day_min, day_max):
+        name = f'{side}_structure_-1_day{d:02}.ply'
+        decimate_name = f'{side}_full_{d:02}.vtk'
+
+        try:
+            # center, smooth and reduce nb of vertices of full structure
+            day_mesh = pv.read(data_dir / name)
+            day_mesh = add_labels(day_mesh, ref_labels)
+            day_mesh.save(raw_dir / decimate_name)
+            preproc, aligned_day = preprocess_full_structure(day_mesh, ref_mesh)
+            preproc.save(smooth_dir / decimate_name)
+
+            # extract sub regeions, center and smooth each
+            for z in zones:
+                struc_name = f'{side}_{z}_t{d:02}.vtk'
+                substruc_mesh = preprocess_substructure(
+                    aligned_day, z, ref_labels, align=(d > 1),
+                    target_mesh=target_struct[z])
+                substruc_mesh.save(output_dir / z / 'raw' / struc_name)
+                if d == 1:
+                    target_struct[z] = substruc_mesh
+
+        except FileNotFoundError:
+            continue
+
+
+if __name__ == '__main__':
+    from pathlib import Path
+
+    project_dir = Path('/user/nguigui/home/Documents/UCSB')
+    data_dir_ = project_dir / 'meshes_adele' / 'a_meshed'
+    out_dir = project_dir / 'meshes_nico'
 
     swap_list = [1, 2, 3, 4, 5, 6, 18, 19]
-    tmp_dir = data_dir / 'tmp'
+    tmp_dir = data_dir_ / 'tmp'
     tmp_dir.mkdir(exist_ok=True)
     for day in swap_list:
-        file_left = data_dir / f'left_structure_-1_day{day:02}.ply'
-        file_left_tmp = data_dir / 'tmp' / file_left.name
+        file_left = data_dir_ / f'left_structure_-1_day{day:02}.ply'
+        file_left_tmp = data_dir_ / 'tmp' / file_left.name
         file_left.rename(file_left_tmp)
-        file_right = data_dir / f'right_structure_-1_day{day:02}.ply'
-        file_right.rename(data_dir / f'left_structure_-1_day{day:02}.ply')
+        file_right = data_dir_ / f'right_structure_-1_day{day:02}.ply'
+        file_right.rename(data_dir_ / f'left_structure_-1_day{day:02}.ply')
         file_left_tmp.rename(file_right)
 
-    for side in ["left"]:  # , "right"]:
-        ref_mesh = pv.read(data_dir / f'{side}_structure_-1_day01.ply')
-        target_struct = {k: None for k in zones}
-
-        for day in range(1, 26):
-            name = f'{side}_structure_-1_day{day:02}.ply'
-            decimate_name = f'{side}_full_{day:02}.vtk'
-
-            try:
-                # center, smooth and reduce nb of vertices of full structure
-                day_mesh = pv.read(data_dir / name)
-                preproc, aligned_day = preprocess_full_structure(day_mesh, ref_mesh)
-                preproc.save(smooth_dir / decimate_name)
-
-                # extract sub regeions, center and smooth each
-                for z in zones:
-                    struc_name = f'{side}_{z}_t{day:02}.vtk'
-                    substruc_mesh = preprocess_substructure(
-                        aligned_day, z, ref_labels, align=(day > 1),
-                        target_mesh=target_struct[z])
-                    substruc_mesh.save(output_dir / z / 'raw' / struc_name)
-                    if day == 1:
-                        target_struct[z] = substruc_mesh
-
-            except FileNotFoundError:
-                continue
+    for side_ in ["left"]:  # , "right"]:
+        main(1, 26, 1, side_, data_dir_, out_dir)
 
     # compute fraction of gest time and add to covariates
     covariates = pd.read_csv(project_dir / '28Baby_Hormones.csv')
@@ -93,10 +115,11 @@ if __name__ == '__main__':
     covariates['times'] = covariates.gestWeek / 40
 
     # some subregions are not segmented on a few sessions
-    for z in zones:
-        covariates[z] = True
+    nice_zones = ["PRC", "PHC", "PostHipp", "CA2+3", "ERC"]
+    for zo in nice_zones:
+        covariates[zo] = True
 
     covariates.loc[covariates.sessionID == 'ses-13', 'PostHipp'] = False
     covariates.loc[covariates.sessionID == 'ses-14', 'PostHipp'] = False
-    covariates.loc[covariates.sessionID == 'ses-15', zones] = False
+    covariates.loc[covariates.sessionID == 'ses-15', nice_zones] = False
     covariates.to_csv(project_dir / 'covariates.csv', index=False)
