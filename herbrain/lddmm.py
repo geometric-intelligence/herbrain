@@ -4,6 +4,8 @@ import time
 from os.path import join
 from api.deformetrica import Deformetrica
 from in_out.array_readers_and_writers import read_2D_array, read_3D_array
+from launch.compute_parallel_transport import compute_pole_ladder
+from launch.compute_shooting import compute_shooting
 from support.kernels.torch_kernel import TorchKernel
 
 import strings
@@ -192,6 +194,81 @@ def spline_regression(
     return time.gmtime()
 
 
+def transport(
+        control_points, momenta, control_points_to_transport,
+        momenta_to_transport, output_dir,
+        kernel_type='torch', kernel_width=15, kernel_device='auto', n_rungs=10):
+
+    Deformetrica(output_dir, verbosity='INFO')
+
+    deformation_parameters = {
+        'deformation_kernel_type': kernel_type,
+        'deformation_kernel_width': kernel_width,
+        'deformation_kernel_device': kernel_device,
+        'concentration_of_time_points': n_rungs,
+        'number_of_time_points': n_rungs + 1,
+        'tmin': 0,
+        'tmax': 1,
+        'output_dir': output_dir}
+
+    _, _ = compute_pole_ladder(
+        initial_control_points=control_points,
+        initial_momenta=momenta,
+        initial_momenta_to_transport=momenta_to_transport,
+        initial_control_points_to_transport=control_points_to_transport,
+        **deformation_parameters)
+
+
+def shoot(source, control_points, momenta, output_dir, kernel_width=20.0,
+          regularisation=1.0, number_of_time_steps=11,
+          kernel_type='torch', kernel_device='auto', write_params=True,
+          deformation='geodesic', external_forces=None, use_rk2_for_flow=False):
+    """
+    Wrapper to deformetrica compute_shooting
+    :param external_forces:
+    :param deformation:
+    :param source:
+    :param control_points:
+    :param momenta:
+    :param output_dir:
+    :param kernel_width:
+    :param regularisation:
+    :param number_of_time_steps:
+    :param kernel_type:
+    :param kernel_device:
+    :param write_params:
+    :return:
+    """
+    deformation_parameters = {
+        'deformation_model': deformation,
+        'deformation_kernel_type': kernel_type,
+        'deformation_kernel_width': kernel_width,
+        'deformation_kernel_device': kernel_device,
+        'concentration_of_time_points': number_of_time_steps - 1,
+        'number_of_time_points': number_of_time_steps,
+        'use_rk2_for_flow': use_rk2_for_flow,
+        'output_dir': output_dir,
+        'write_adjoint_parameters': write_params}
+
+    template_specifications = {
+        'shape': {
+            'deformable_object_type': 'landmark',
+            'kernel_type': kernel_type, 'kernel_width': kernel_width,
+            'kernel_device': 'auto', 'noise_std': regularisation,
+            'filename': source,
+            'noise_variance_prior_scale_std': None,
+            'noise_variance_prior_normalized_dof': 0.01}}
+
+    Deformetrica(output_dir, verbosity='INFO')
+    compute_shooting(
+        template_specifications,
+        initial_control_points=control_points,
+        external_forces=external_forces,
+        initial_momenta=momenta, **deformation_parameters)
+
+    return time.gmtime()
+
+
 def momenta_to_vtk(cp, momenta, kernel_width=5., filter_cp=True, threshold=1.):
     kernel = TorchKernel(kernel_width=kernel_width)
     velocity = kernel.convolve(cp, cp, momenta)
@@ -220,36 +297,3 @@ def external_forces_to_vtk(cp, forces, output_dir, filter_cp=True, threshold=1.)
             poly_cp = pv.PolyData(cp)
         poly_cp['external_force'] = f
         poly_cp.save(filename)
-
-
-def register_sequence(pid, source_dir, target_dir):
-    tmp_dir = join('/tmp')
-    f_list = get_frame_list(pid, source_dir)
-    frame_d = [k for k in f_list if 'D' in k][0]
-    source = join(source_dir, pid, frame_d)
-    subprocess.call(['mkdir', join(target_dir, pid)])
-
-    for frame in f_list:
-        target_path, frame_num = set_names(pid, source_dir, frame)
-        if f'cp_{frame_num}.txt' in os.listdir(join(target_dir, pid)):
-            continue
-        output_name = join(tmp_dir, f'{pid}_registration_{frame_num}')
-
-        registration(source=source, target=target_path, output_dir=output_name,
-                     use_rk4_for_shoot=(target_path == atlas),
-                     use_rk2_for_shoot=(target_path != atlas),
-                     **config.registration_args)
-
-        to_move = [strings.cp_str, strings.momenta_str,
-                   strings.residual_str]
-        move_to = [f'cp_{frame_num}.txt', f'momenta_{frame_num}.txt',
-                   f'registration_error_{frame_num}.txt']
-
-        for src, dest in zip(to_move, move_to):
-            subprocess.call([
-                'mv',
-                join(output_name, src),
-                join(target_dir, pid, dest)])
-        subprocess.call(['rm', '-r', output_name])
-
-    return time.gmtime()

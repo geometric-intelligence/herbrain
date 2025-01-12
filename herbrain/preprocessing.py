@@ -62,7 +62,7 @@ def main(day_min, day_max, day_ref, side, data_dir, output_dir):
     ref_mesh = pv.read(data_dir / f'{side}_structure_-1_day{day_ref:02}.ply')
     target_struct = {k: None for k in zones}
 
-    for d in range(day_min, day_max):
+    for d in range(day_min, day_max + 1):
         name = f'{side}_structure_-1_day{d:02}.ply'
         decimate_name = f'{side}_full_{d:02}.vtk'
 
