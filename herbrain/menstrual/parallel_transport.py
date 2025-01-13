@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
 
+import pandas as pd
+
 import herbrain.lddmm as lddmm
 import preprocessing
 import strings
@@ -18,7 +20,7 @@ def get_day(side, struct, day):
 
 
 side_ = 'left'
-structure = 'PRC'
+structure = 'ERC'
 preprocessing.main(1, 60, 1, side_, data_dir, output_dir)
 
 # registration of day 1 - main geodesic
@@ -90,5 +92,16 @@ for d in range(31, 61):
         output_dir=output_name, **shoot_args)
 
     shoot_name = output_name / strings.shoot_str.format(n_rungs)
-    subprocess.call(['mv', shoot_name, target_dir / f'transported_shoot_S.vtk'])
+    subprocess.call(['mv', shoot_name, target_dir / f'transported_shoot_{d}.vtk'])
     subprocess.call(['rm', '-r', output_name])
+
+
+hormones = pd.read_csv(project_dir / 'hormones.csv', index_col=0)
+hormones.loc[hormones.index <= 30, 'cycle'] = 'free'
+hormones.loc[hormones.index > 30, 'cycle'] = 'birthcontrol'
+# fig, ax = plt.subplots(figsize=(8, 6))
+# hormones.groupby('cycle').plot(x='CycleDay', y='Prog', ax=ax)
+# plt.show()
+
+times = hormones.CycleDay
+times = (times - times.min()) / (times.max() - times.min())
