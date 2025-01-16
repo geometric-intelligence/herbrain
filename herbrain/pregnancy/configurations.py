@@ -211,3 +211,30 @@ configurations.append(dict(
         freeze_control_points=True,
     )
 ))
+
+# 8. PHC all wrt full gestation
+configurations.append(dict(
+    config_id="gestation",
+    structure="PHC",
+    tmin=1,
+    tmax=40,
+    day_ref=2,
+    variable='lh',
+    registration_args=dict(
+        kernel_width=4.,
+        regularisation=1,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))

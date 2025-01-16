@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 import herbrain.lddmm as lddmm
+from pregnancy.visualization.paraview import generate_visualization
 from strings import cp_str
 
 
@@ -56,7 +57,6 @@ def main(
 
 if __name__ == '__main__':
     from herbrain.pregnancy.configurations import configurations
-    from pregnancy.visualization.paraview import generate_visualization
     project_dir = Path('/user/nguigui/home/Documents/UCSB')
     covariate = pd.read_csv(project_dir / 'covariates.csv')
     out_dir = project_dir / 'meshes_nico'

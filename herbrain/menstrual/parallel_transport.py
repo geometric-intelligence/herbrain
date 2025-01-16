@@ -20,7 +20,7 @@ def get_day(side, struct, day):
 
 
 side_ = 'left'
-structure = 'ERC'
+structure = 'PHC'
 preprocessing.main(1, 60, 1, side_, data_dir, output_dir)
 
 # registration of day 1 - main geodesic
@@ -29,8 +29,8 @@ target = get_day(side_, structure, day=31)
 
 registration_dir = output_dir / structure / 'initial_registration'
 registration_args = dict(
-    kernel_width=4., regularisation=1., max_iter=2000,
-    freeze_control_points=False, attachment_kernel_width=1., metric='varifold',
+    kernel_width=6., regularisation=1., max_iter=2000,
+    freeze_control_points=False, attachment_kernel_width=2., metric='varifold',
     tol=1e-10, filter_cp=True, threshold=0.75,
     use_rk4_for_shoot=True, use_rk2_for_shoot=False)
 
