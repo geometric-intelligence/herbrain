@@ -49,6 +49,18 @@ def get_ref_labels():
     }
 
 
+def swap_left_right(days, data_dir):
+    tmp_dir = data_dir / 'tmp'
+    tmp_dir.mkdir(exist_ok=True)
+    for day in days:
+        file_left = data_dir / f'left_structure_-1_day{day:02}.ply'
+        file_left_tmp = tmp_dir / file_left.name
+        file_left.rename(file_left_tmp)
+        file_right = data_dir / f'right_structure_-1_day{day:02}.ply'
+        file_right.rename(data_dir / f'left_structure_-1_day{day:02}.ply')
+        file_left_tmp.rename(file_right)
+
+
 def main(day_min, day_max, day_ref, side, data_dir, output_dir):
     output_dir.mkdir(exist_ok=True)
     raw_dir = output_dir / 'full_structure' / 'raw'

@@ -53,14 +53,3 @@ def main(
         times=times.tolist(), t0=min(times),
         target_weights=target_weights, **all_spline_args)
     generate_visualization(registration_dir, regression_dir, data_set, times)
-
-
-if __name__ == '__main__':
-    from herbrain.pregnancy.configurations import configurations
-    project_dir = Path('/user/nguigui/home/Documents/UCSB')
-    covariate = pd.read_csv(project_dir / 'covariates.csv')
-    out_dir = project_dir / 'meshes_nico'
-    for config in configurations[-4:]:
-        main(covariate, out_dir, **config)
-    # main(covariate, out_dir, **configurations[0])
-    # main(covariate, out_dir, **configurations[-1])

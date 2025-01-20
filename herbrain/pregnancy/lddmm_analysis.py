@@ -4,6 +4,7 @@ from pathlib import Path
 from herbrain.pregnancy.configurations import configurations
 from herbrain.regression import main as regression
 from preprocessing import main as preprocess
+from preprocessing import swap_left_right
 
 project_dir = Path('/user/nguigui/home/Documents/UCSB')
 data_dir_ = project_dir / 'meshes_adele' / 'a_meshed'
@@ -11,15 +12,7 @@ out_dir = project_dir / 'pregnancy' / 'meshes_nico'
 
 # The following left and right segmentations are swapped
 swap_list = [1, 2, 3, 4, 5, 6, 18, 19]
-tmp_dir = data_dir_ / 'tmp'
-tmp_dir.mkdir(exist_ok=True)
-for day in swap_list:
-    file_left = data_dir_ / f'left_structure_-1_day{day:02}.ply'
-    file_left_tmp = tmp_dir / file_left.name
-    file_left.rename(file_left_tmp)
-    file_right = data_dir_ / f'right_structure_-1_day{day:02}.ply'
-    file_right.rename(data_dir_ / f'left_structure_-1_day{day:02}.ply')
-    file_left_tmp.rename(file_right)
+swap_left_right(swap_list, data_dir_)
 
 # preprocess: align, smooth and decimate + extract subregions
 for side_ in ["left"]:  # , "right"]:
@@ -38,7 +31,8 @@ for zo in nice_zones:
 covariates.loc[covariates.sessionID == 'ses-13', 'PostHipp'] = False
 covariates.loc[covariates.sessionID == 'ses-14', 'PostHipp'] = False
 covariates.loc[covariates.sessionID == 'ses-15', nice_zones] = False
+covariates.loc[covariates.sessionID == 'ses-27', nice_zones] = False
 covariates.to_csv(project_dir / 'covariates.csv', index=False)
 
-for config in configurations[-1]:
+for config in configurations[4:]:
     regression(covariates, out_dir, **config)

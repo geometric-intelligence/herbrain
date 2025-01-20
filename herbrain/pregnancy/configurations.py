@@ -9,6 +9,7 @@ configurations.append(dict(
     tmin=1,
     tmax=25,
     day_ref=3,
+    variable='times',
     registration_args=dict(
         kernel_width=4.,
         regularisation=1.,
@@ -35,6 +36,7 @@ configurations.append(dict(
     tmin=1.5,
     tmax=13,
     day_ref=4,
+    variable='times',
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -61,6 +63,7 @@ configurations.append(dict(
     tmin=12,
     tmax=25,
     day_ref=8,
+    variable='times',
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -79,31 +82,32 @@ configurations.append(dict(
     )
 ))
 
-# 4. 3rd trimester
-configurations.append(dict(
-    config_id="thirdTrim",
-    structure="PostHipp",
-    tmin=25,
-    tmax=40,
-    day_ref=12,
-    registration_args=dict(
-        kernel_width=4.,
-        regularisation=1,
-        max_iter=2000,
-        freeze_control_points=False,
-        metric='varifold',
-        attachment_kernel_width=4.,
-        tol=1e-10,
-        filter_cp=True,
-        threshold=0.75
-    ),
-    spline_args=dict(
-        initial_step_size=100,
-        regularisation=1.,
-        freeze_external_forces=True,
-        freeze_control_points=True,
-    )
-))
+# 4. 3rd trimester : shapes are not well enough semented
+# configurations.append(dict(
+#     config_id="thirdTrim",
+#     structure="PostHipp",
+#     tmin=25,
+#     tmax=40,
+#     day_ref=12,
+#     variable='times',
+#     registration_args=dict(
+#         kernel_width=4.,
+#         regularisation=1,
+#         max_iter=2000,
+#         freeze_control_points=False,
+#         metric='varifold',
+#         attachment_kernel_width=4.,
+#         tol=1e-10,
+#         filter_cp=True,
+#         threshold=0.75
+#     ),
+#     spline_args=dict(
+#         initial_step_size=100,
+#         regularisation=1.,
+#         freeze_external_forces=True,
+#         freeze_control_points=True,
+#     )
+# ))
 
 # 4. PostPartum
 configurations.append(dict(
@@ -112,6 +116,7 @@ configurations.append(dict(
     tmin=40,
     tmax=163,
     day_ref=19,
+    variable='times',
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -148,7 +153,7 @@ configurations.append(dict(
         attachment_kernel_width=1.,
         tol=1e-10,
         filter_cp=True,
-        threshold=0.75
+        threshold=0.25
     ),
     spline_args=dict(
         initial_step_size=100,
@@ -175,7 +180,7 @@ configurations.append(dict(
         attachment_kernel_width=1.,
         tol=1e-10,
         filter_cp=True,
-        threshold=0.75
+        threshold=0.25
     ),
     spline_args=dict(
         initial_step_size=100,
@@ -202,6 +207,34 @@ configurations.append(dict(
         attachment_kernel_width=1.,
         tol=1e-10,
         filter_cp=True,
+        threshold=0.25
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+        filter_cp=False,
+    )
+))
+
+# 8. PHC full gestation wrt time
+configurations.append(dict(
+    config_id="gestation",
+    structure="PHC",
+    tmin=1,
+    tmax=40,
+    day_ref=2,
+    variable='times',
+    registration_args=dict(
+        kernel_width=6.,
+        regularisation=1.,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
         threshold=0.75
     ),
     spline_args=dict(
@@ -212,17 +245,71 @@ configurations.append(dict(
     )
 ))
 
-# 8. PHC all wrt full gestation
+# 8. PHC full gestation wrt time
 configurations.append(dict(
     config_id="gestation",
     structure="PHC",
     tmin=1,
     tmax=40,
     day_ref=2,
-    variable='lh',
+    variable='times',
     registration_args=dict(
-        kernel_width=4.,
-        regularisation=1,
+        kernel_width=6.,
+        regularisation=1.,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 9. PHC full gestation wrt prog
+configurations.append(dict(
+    config_id="gestation_prog",
+    structure="PHC",
+    tmin=1,
+    tmax=40,
+    day_ref=2,
+    variable='prog',
+    registration_args=dict(
+        kernel_width=6.,
+        regularisation=1.,
+        max_iter=2000,
+        freeze_control_points=False,
+        metric='varifold',
+        attachment_kernel_width=1.,
+        tol=1e-10,
+        filter_cp=True,
+        threshold=0.75
+    ),
+    spline_args=dict(
+        initial_step_size=100,
+        regularisation=1.,
+        freeze_external_forces=True,
+        freeze_control_points=True,
+    )
+))
+
+# 8. PHC full gestation wrt estro
+configurations.append(dict(
+    config_id="gestation_estro",
+    structure="PHC",
+    tmin=1,
+    tmax=40,
+    day_ref=2,
+    variable='estro',
+    registration_args=dict(
+        kernel_width=6.,
+        regularisation=1.,
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
