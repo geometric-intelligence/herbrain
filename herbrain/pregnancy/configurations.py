@@ -5,11 +5,14 @@ configurations = []
 # 1. PostHipp from preconception to 2nd trimester
 configurations.append(dict(
     config_id="preTo2nd",
-    structure="PostHipp",
-    tmin=1,
-    tmax=25,
-    day_ref=3,
-    variable='times',
+    dataset=dict(
+        structure="PostHipp",
+        tmin=1,
+        tmax=25,
+        time_var='gestWeek',
+        day_ref=3,
+        variable='times'
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1.,
@@ -32,11 +35,14 @@ configurations.append(dict(
 # 2. preconception to 1st trimester
 configurations.append(dict(
     config_id="firstTrim",
-    structure="PostHipp",
-    tmin=1.5,
-    tmax=13,
-    day_ref=4,
-    variable='times',
+    dataset=dict(
+        structure="PostHipp",
+        tmin=1.5,
+        tmax=13,
+        time_var='gestWeek',
+        day_ref=4,
+        variable='times'
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -59,11 +65,14 @@ configurations.append(dict(
 # 3. 1st trimester to 2nd
 configurations.append(dict(
     config_id="secondTrim",
-    structure="PostHipp",
-    tmin=12,
-    tmax=25,
-    day_ref=8,
-    variable='times',
+    dataset=dict(
+        structure="PostHipp",
+        tmin=12,
+        tmax=25,
+        time_var='gestWeek',
+        day_ref=8,
+        variable='times'
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -88,6 +97,7 @@ configurations.append(dict(
 #     structure="PostHipp",
 #     tmin=25,
 #     tmax=40,
+#     time_var='gestWeek',
 #     day_ref=12,
 #     variable='times',
 #     registration_args=dict(
@@ -112,11 +122,14 @@ configurations.append(dict(
 # 4. PostPartum
 configurations.append(dict(
     config_id="PostPartum",
-    structure="PostHipp",
-    tmin=40,
-    tmax=163,
-    day_ref=19,
-    variable='times',
+    dataset=dict(
+        structure="PostHipp",
+        tmin=40,
+        tmax=163,
+        time_var='gestWeek',
+        day_ref=19,
+        variable='times'
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -139,11 +152,14 @@ configurations.append(dict(
 # 5. PostHipp all wrt prog
 configurations.append(dict(
     config_id="Prog",
-    structure="PostHipp",
-    tmin=-5,
-    tmax=163,
-    day_ref=1,
-    variable='prog',
+    dataset=dict(
+        structure="PostHipp",
+        tmin=-5,
+        tmax=163,
+        time_var='gestWeek',
+        day_ref=1,
+        variable='prog',
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -166,11 +182,14 @@ configurations.append(dict(
 # 6. PostHipp all wrt estro
 configurations.append(dict(
     config_id="Estro",
-    structure="PostHipp",
-    tmin=-5,
-    tmax=163,
-    day_ref=1,
-    variable='estro',
+    dataset=dict(
+        structure="PostHipp",
+        tmin=-5,
+        tmax=163,
+        day_ref=1,
+        time_var='gestWeek',
+        variable='estro'
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -193,11 +212,13 @@ configurations.append(dict(
 # 7. PostHipp all wrt lh
 configurations.append(dict(
     config_id="LH",
-    structure="PostHipp",
-    tmin=-5,
-    tmax=163,
-    day_ref=1,
-    variable='lh',
+    dataset=dict(structure="PostHipp",
+        tmin=-5,
+        tmax=163,
+        time_var='gestWeek',
+        day_ref=1,
+        variable='lh'
+    ),
     registration_args=dict(
         kernel_width=4.,
         regularisation=1,
@@ -221,38 +242,13 @@ configurations.append(dict(
 # 8. PHC full gestation wrt time
 configurations.append(dict(
     config_id="gestation",
-    structure="PHC",
-    tmin=1,
-    tmax=40,
-    day_ref=2,
-    variable='times',
-    registration_args=dict(
-        kernel_width=6.,
-        regularisation=1.,
-        max_iter=2000,
-        freeze_control_points=False,
-        metric='varifold',
-        attachment_kernel_width=1.,
-        tol=1e-10,
-        filter_cp=True,
-        threshold=0.75
+    dataset=dict(structure="PHC",
+        tmin=1,
+        tmax=40,
+        time_var='gestWeek',
+        day_ref=2,
+        variable='times'
     ),
-    spline_args=dict(
-        initial_step_size=100,
-        regularisation=1.,
-        freeze_external_forces=True,
-        freeze_control_points=True,
-    )
-))
-
-# 8. PHC full gestation wrt time
-configurations.append(dict(
-    config_id="gestation",
-    structure="PHC",
-    tmin=1,
-    tmax=40,
-    day_ref=2,
-    variable='times',
     registration_args=dict(
         kernel_width=6.,
         regularisation=1.,
@@ -275,11 +271,14 @@ configurations.append(dict(
 # 9. PHC full gestation wrt prog
 configurations.append(dict(
     config_id="gestation_prog",
-    structure="PHC",
-    tmin=1,
-    tmax=40,
-    day_ref=2,
-    variable='prog',
+    dataset=dict(
+        structure="PHC",
+        tmin=1,
+        tmax=40,
+        time_var='gestWeek',
+        day_ref=2,
+        variable='prog')
+    ,
     registration_args=dict(
         kernel_width=6.,
         regularisation=1.,
@@ -302,11 +301,14 @@ configurations.append(dict(
 # 8. PHC full gestation wrt estro
 configurations.append(dict(
     config_id="gestation_estro",
-    structure="PHC",
-    tmin=1,
-    tmax=40,
-    day_ref=2,
-    variable='estro',
+    dataset=dict(
+        structure="PHC",
+        tmin=1,
+        tmax=40,
+        time_var='gestWeek',
+        day_ref=2,
+        variable='estro'
+    ),
     registration_args=dict(
         kernel_width=6.,
         regularisation=1.,

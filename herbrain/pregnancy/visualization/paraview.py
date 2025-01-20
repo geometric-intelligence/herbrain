@@ -1,5 +1,6 @@
 import json
 import re
+from pathlib import Path
 
 import strings
 
@@ -38,7 +39,8 @@ def generate_visualization(registration_dir, regression_dir, data_set, times):
     with open(registration_dir.parent / f'visualisation_names.json', 'w') as fp:
         json.dump(filenames, fp)
 
-    with open('visualization/template.py', 'r') as file:
+    template_path = Path(__file__).parent / 'template.py'
+    with open(template_path, 'r') as file:
         content = file.read()
 
     pattern = re.compile('result_path_place_holder')

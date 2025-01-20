@@ -1,38 +1,16 @@
-import pandas as pd
-from pathlib import Path
-
 import herbrain.lddmm as lddmm
 from pregnancy.visualization.paraview import generate_visualization
 from strings import cp_str
 
 
-def get_data_set(
-        data_dir: Path, hemisphere: str, structure: str, covariates: pd.DataFrame,
-        tmin: int, tmax: int, day_ref: int, variable='times'):
-    data_list = covariates[covariates[structure]]  # remove excluded
-    data_list = data_list[
-        ((tmin < data_list['gestWeek']) & (data_list['gestWeek'] < tmax))
-        | (data_list['day'] == day_ref)]  # select phase + template at day ref
-    data_list = data_list.dropna(subset=variable)
-    data_path = data_dir / structure / 'raw'
-    dataset = [
-        {
-            'shape': data_path / f'{hemisphere}_{structure}_t{k:02}.vtk'
-         } for k in data_list['day']]
-    return dataset, data_list[variable]
-
-
 def main(
-        covariates, output_dir, config_id="0", structure="PostHipp", tmin=1, tmax=25,
-        day_ref=3, variable='times', registration_args=None, spline_args=None):
+        data_set, times, output_dir, config_id="0", structure="PostHipp",
+        registration_args=None, spline_args=None):
     if registration_args is None:
         registration_args = {}
     if spline_args is None:
         spline_args = {}
 
-    # Filter meshes between to tmin, tmax and ref day
-    data_set, times = get_data_set(
-        output_dir, 'left', structure, covariates, tmin, tmax, day_ref, variable)
     times = (times - times.min()) / (times.max() - times.min())
     target_weights = [1 / len(data_set)] * len(data_set)
 
