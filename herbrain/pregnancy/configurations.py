@@ -20,7 +20,7 @@ configurations.append(dict(
         freeze_control_points=False,
         attachment_kernel_width=1.,
         metric='varifold',
-        tol=1e-10,
+        tol=1e-16,
         filter_cp=True,
         threshold=0.75
     ),

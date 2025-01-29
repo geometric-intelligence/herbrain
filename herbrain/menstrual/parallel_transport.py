@@ -21,7 +21,7 @@ def get_day(side, struct, day):
 
 
 side_ = 'left'
-structure = 'PRC'
+structure = 'PostHipp'
 # preprocessing.main(1, 60, 1, side_, data_dir, output_dir)
 
 # registration of day 1 - main geodesic
@@ -56,14 +56,14 @@ control_points = registration_dir / strings.cp_str
 for d in range(31, 61):
     target = get_day(side_, structure, day=d)
     output_name = tmp_dir / structure / f'reg_{d}'
-    # lddmm.registration(
-    #     source, target, output_name, **registration_args)
+    lddmm.registration(
+        source, target, output_name, **registration_args)
 
-    # to_move = [strings.cp_str, strings.momenta_str, strings.residual_str]
-    # move_to = [f'cp_{d}.txt', f'momenta_{d}.txt', f'registration_error_{d}.txt']
+    to_move = [strings.cp_str, strings.momenta_str, strings.residual_str]
+    move_to = [f'cp_{d}.txt', f'momenta_{d}.txt', f'registration_error_{d}.txt']
 
-    # for s, t in zip(to_move, move_to):
-    #     subprocess.call(['mv', output_name / s, registration_seq_dir / t])
+    for s, t in zip(to_move, move_to):
+        subprocess.call(['mv', output_name / s, registration_seq_dir / t])
 
     output_name = (tmp_dir / f'{d}_transport_S')
     subprocess.call(['mkdir', output_name])
@@ -72,29 +72,29 @@ for d in range(31, 61):
     momenta_to_transport = (registration_seq_dir / f'momenta_{d}.txt').as_posix()
     control_points_to_transport = (registration_seq_dir / f'cp_{d}.txt').as_posix()
 
-    # subprocess.call(['mkdir', target_dir])
+    subprocess.call(['mkdir', target_dir])
 
-    # lddmm.transport(
-    #     control_points, momenta, control_points_to_transport, momenta_to_transport,
-    #     output_name, **transport_args)
+    lddmm.transport(
+        control_points, momenta, control_points_to_transport, momenta_to_transport,
+        output_name, **transport_args)
 
     to_move = ['final_cp.txt', 'transported_momenta.txt']
     transported_cp = target_dir / f'transported_cp_{d}.txt'
     transported_mom = target_dir / f'transported_momenta_{d}.txt'
     move_to = [transported_cp, transported_mom]
 
-    # for src, dest in zip(to_move, move_to):
-    #     subprocess.call(['mv', output_name / src, dest])
+    for src, dest in zip(to_move, move_to):
+        subprocess.call(['mv', output_name / src, dest])
 
     # Shoot transported momenta from atlas
-    # lddmm.shoot(
-    #     control_points=transported_cp.as_posix(),
-    #     momenta=transported_mom.as_posix(),
-    #     output_dir=output_name, **shoot_args)
+    lddmm.shoot(
+        control_points=transported_cp.as_posix(),
+        momenta=transported_mom.as_posix(),
+        output_dir=output_name, **shoot_args)
 
     shoot_name = output_name / strings.shoot_str.format(n_rungs)
-    # subprocess.call(['mv', shoot_name, target_dir / f'transported_shoot_{d}.vtk'])
-    # subprocess.call(['rm', '-r', output_name])
+    subprocess.call(['mv', shoot_name, target_dir / f'transported_shoot_{d}.vtk'])
+    subprocess.call(['rm', '-r', output_name])
 
 
 covariates = pd.read_csv(project_dir / 'hormones.csv', index_col=0)
@@ -120,15 +120,15 @@ variable = 'CycleDay'
 data_list = covariates[covariates[structure]]  # remove excluded
 data_list = data_list[data_list.cycle == 'birthcontrol']
 data_list = data_list.dropna(subset=variable)
-data_list = data_list.sort_values(by='CycleDay')
-times = data_list.CycleDay
+data_list = data_list.sort_values(by=variable)
+times = data_list[variable]
 times = (times - times.min()) / (times.max() - times.min())
 
 data_path = output_dir / structure / 'transport'
 dataset = [
     {'shape': data_path / f'transported_shoot_{k}.vtk'} for k in data_list.index]
 regression(
-    dataset, times, output_dir, 'menstrual', structure, registration_args, spline_args)
+    dataset, times, output_dir, 'time_bc', structure, registration_args, spline_args)
 
 
 data_list = covariates[covariates[structure]]  # remove excluded
@@ -140,6 +140,6 @@ times = (times - times.min()) / (times.max() - times.min())
 
 data_path = output_dir / structure / 'raw'
 dataset = [
-    {'shape': data_path / f'{side_}_{structure}_{k:02}.vtk'} for k in data_list.index]
+    {'shape': data_path / f'{side_}_{structure}_t{k:02}.vtk'} for k in data_list.index]
 regression(
-    dataset, times, output_dir, 'menstrual', structure, registration_args, spline_args)
+    dataset, times, output_dir, 'time_free', structure, registration_args, spline_args)

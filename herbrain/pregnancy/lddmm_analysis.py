@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
+import lddmm
 from herbrain.pregnancy.configurations import configurations
 from herbrain.regression import main as regression
 from preprocessing import main as preprocess
@@ -52,5 +53,12 @@ covariates.to_csv(project_dir / 'covariates.csv', index=False)
 
 for config in configurations[0:1]:
     data_set, times = get_data_set(out_dir, covariates, **config['dataset'])
+    structure = config['dataset']['structure']
+    config_id = config['config_id']
     del config['dataset']
-    regression(data_set, times, out_dir, **config)
+    # regression(data_set, times, out_dir, **config)
+    atlas_dir = out_dir / structure / config_id / 'atlas'
+    lddmm.deterministic_atlas(
+        data_set[0]['shape'], data_set,
+        structure, atlas_dir, **config['registration_args'])
+

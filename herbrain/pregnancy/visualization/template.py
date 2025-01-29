@@ -317,7 +317,7 @@ initial_control_points_regressionDisplay = Show(initial_control_points_regressio
                                                 renderView1, 'GeometryRepresentation')
 
 # trace defaults for the display properties.
-initial_control_points_regressionDisplay.Representation = 'Surface'
+initial_control_points_regressionDisplay.Representation = 'Point Gaussian'
 initial_control_points_regressionDisplay.ColorArrayName = ['POINTS', 'Momentum']
 initial_control_points_regressionDisplay.LookupTable = momentumLUT
 initial_control_points_regressionDisplay.SelectTCoordArray = 'None'
@@ -330,7 +330,7 @@ initial_control_points_regressionDisplay.ScaleFactor = 3.0369147
 initial_control_points_regressionDisplay.SelectScaleArray = 'Momentum'
 initial_control_points_regressionDisplay.GlyphType = 'Arrow'
 initial_control_points_regressionDisplay.GlyphTableIndexArray = 'Momentum'
-initial_control_points_regressionDisplay.GaussianRadius = 0.15184573499999998
+initial_control_points_regressionDisplay.GaussianRadius = 0.5
 initial_control_points_regressionDisplay.SetScaleArray = ['POINTS', 'Momentum']
 initial_control_points_regressionDisplay.ScaleTransferFunction = 'PiecewiseFunction'
 initial_control_points_regressionDisplay.OpacityArray = ['POINTS', 'Momentum']

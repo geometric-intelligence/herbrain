@@ -98,7 +98,7 @@ def registration(
 def spline_regression(
         source, target, output_dir, times, subject_id='patient', t0=0,
         max_iter=200, kernel_width=15.0, regularisation=1.0, number_of_time_steps=11,
-        initial_step_size=1e-4, kernel_type='torch', kernel_device='auto',
+        initial_step_size=1e-4, kernel_type='torch', kernel_device='cuda',
         initial_control_points=None, tol=1e-5, freeze_control_points=False,
         use_rk2_for_flow=False, dimension=3, freeze_external_forces=False,
         target_weights=None, geodesic_weight=0.1, metric='landmark',
@@ -197,7 +197,7 @@ def spline_regression(
 def transport(
         control_points, momenta, control_points_to_transport,
         momenta_to_transport, output_dir,
-        kernel_type='torch', kernel_width=15, kernel_device='auto', n_rungs=10):
+        kernel_type='torch', kernel_width=15, kernel_device='cuda', n_rungs=10):
 
     Deformetrica(output_dir, verbosity='INFO')
 
@@ -221,7 +221,7 @@ def transport(
 
 def shoot(source, control_points, momenta, output_dir, kernel_width=20.0,
           regularisation=1.0, number_of_time_steps=11,
-          kernel_type='torch', kernel_device='auto', write_params=True,
+          kernel_type='torch', kernel_device='cuda', write_params=True,
           deformation='geodesic', external_forces=None, use_rk2_for_flow=False):
     """
     Wrapper to deformetrica compute_shooting
@@ -254,7 +254,7 @@ def shoot(source, control_points, momenta, output_dir, kernel_width=20.0,
         'shape': {
             'deformable_object_type': 'landmark',
             'kernel_type': kernel_type, 'kernel_width': kernel_width,
-            'kernel_device': 'auto', 'noise_std': regularisation,
+            'kernel_device': kernel_device, 'noise_std': regularisation,
             'filename': source,
             'noise_variance_prior_scale_std': None,
             'noise_variance_prior_normalized_dof': 0.01}}
@@ -269,9 +269,70 @@ def shoot(source, control_points, momenta, output_dir, kernel_width=20.0,
     return time.gmtime()
 
 
+def deterministic_atlas(
+        source, targets, subject_id, output_dir, t0=0, max_iter=200,
+        kernel_width=15.0, regularisation=1.0, number_of_time_steps=11,
+        metric='landmark', kernel_type='torch',
+        kernel_device='auto', initial_control_points=None, tol=1e-5,
+        freeze_control_points=False, use_rk2_for_flow=False, dimension=3,
+        print_every=20, filter_cp=False, threshold=1., attachment_kernel_width=4.):
+    template = {
+        'shape': {
+            'deformable_object_type': 'SurfaceMesh', 'kernel_type': kernel_type,
+            'kernel_width': attachment_kernel_width, 'kernel_device': kernel_device,
+            'noise_std': regularisation, 'filename': source,
+            'noise_variance_prior_scale_std': None,
+            'noise_variance_prior_normalized_dof': 0.01,
+            'attachment_type': metric}}
+
+    data_set = {'dataset_filenames': [[k] for k in targets],
+                'visit_ages': None, #[[1.]] * len(targets),
+                'subject_ids': [subject_id] * len(targets)}
+
+    model = {
+        'deformation_kernel_type': kernel_type,
+        'deformation_kernel_width': kernel_width,
+        'deformation_kernel_device': kernel_device,
+        'number_of_time_points': number_of_time_steps,
+        'concentration_of_time_points': number_of_time_steps - 1,
+        'use_rk2_for_flow': use_rk2_for_flow, 'freeze_template': False,
+        'freeze_control_points': freeze_control_points,
+        'freeze_momenta': False, 'freeze_noise_variance': False,
+        'use_sobolev_gradient': True,
+        'sobolev_kernel_width_ratio': 1,
+        'initial_control_points': initial_control_points,
+        'initial_cp_spacing': None, 'initial_momenta': None, 'dense_mode': False,
+        'number_of_processes': 1, 'dimension': dimension,
+        'random_seed': None, 't0': t0, 'tmin': t0, 'tmax': 1.}
+
+    optimization_parameters = {
+        'max_iterations': max_iter,
+        'freeze_template': False, 'freeze_control_points': freeze_control_points,
+        'freeze_momenta': False, 'use_sobolev_gradient': True,
+        'sobolev_kernel_width_ratio': 1, 'max_line_search_iterations': 50,
+        'initial_control_points': initial_control_points,
+        'initial_cp_spacing': None, 'initial_momenta': None,
+        'dense_mode': False, 'number_of_threads': 1, 'print_every_n_iters': print_every,
+        'downsampling_factor': 1, 'dimension': dimension,
+        'optimization_method_type': 'ScipyLBFGS', 'convergence_tolerance': tol}
+
+    deformetrica = Deformetrica(output_dir, verbosity='DEBUG')
+    deformetrica.estimate_deterministic_atlas(
+        template_specifications=template, dataset_specifications=data_set,
+        model_options=model, estimator_options=optimization_parameters)
+    path_cp = join(output_dir, strings.cp_str)
+    cp = read_2D_array(path_cp)
+
+    # path_momenta = join(output_dir, strings.momenta_str)
+    # momenta = read_3D_array(path_momenta)
+    # poly_cp = momenta_to_vtk(cp, momenta, kernel_width, filter_cp, threshold)
+    # poly_cp.save(join(output_dir, 'initial_control_points.vtk'))
+    return time.gmtime()
+
+
 def momenta_to_vtk(cp, momenta, kernel_width=5., filter_cp=True, threshold=1.):
     kernel = TorchKernel(kernel_width=kernel_width)
-    velocity = kernel.convolve(cp, cp, momenta)
+    velocity = kernel.convolve(cp, cp, momenta).cpu()
 
     if filter_cp:
         vel_thresholded = np.linalg.norm(velocity, axis=-1) > threshold
