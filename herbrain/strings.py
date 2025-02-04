@@ -3,6 +3,7 @@ registration_str = 'DeterministicAtlas__flow__shape__subject_ventricle__tp_{}.vt
 template_str = 'DeterministicAtlas__EstimatedParameters__Template_shape.vtk'
 momenta_str = 'DeterministicAtlas__EstimatedParameters__Momenta.txt'
 residual_str = 'DeterministicAtlas__EstimatedParameters__Residuals.txt'
+residual_str_spline = 'SplineRegression__EstimatedParameters__Residuals.txt'
 mom_str_spline = 'SplineRegression__EstimatedParameters__Momenta.txt'
 cp_str_spline = 'SplineRegression__EstimatedParameters__ControlPoints.txt'
 ext_forces_str = 'SplineRegression__EstimatedParameters__ExternalForces.txt'

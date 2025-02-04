@@ -1,6 +1,7 @@
 import numpy as np
 import pyvista as pv
 import time
+import torch
 from os.path import join
 from api.deformetrica import Deformetrica
 from in_out.array_readers_and_writers import read_2D_array, read_3D_array
@@ -8,7 +9,7 @@ from launch.compute_parallel_transport import compute_pole_ladder
 from launch.compute_shooting import compute_shooting
 from support.kernels.torch_kernel import TorchKernel
 
-import strings
+import herbrain.strings as strings
 
 
 def registration(
@@ -275,7 +276,8 @@ def deterministic_atlas(
         metric='landmark', kernel_type='torch',
         kernel_device='auto', initial_control_points=None, tol=1e-5,
         freeze_control_points=False, use_rk2_for_flow=False, dimension=3,
-        print_every=20, filter_cp=False, threshold=1., attachment_kernel_width=4.):
+        print_every=20, filter_cp=False, threshold=1., attachment_kernel_width=4.,
+        initial_step_size=1e-4):
     template = {
         'shape': {
             'deformable_object_type': 'SurfaceMesh', 'kernel_type': kernel_type,
@@ -314,7 +316,8 @@ def deterministic_atlas(
         'initial_cp_spacing': None, 'initial_momenta': None,
         'dense_mode': False, 'number_of_threads': 1, 'print_every_n_iters': print_every,
         'downsampling_factor': 1, 'dimension': dimension,
-        'optimization_method_type': 'ScipyLBFGS', 'convergence_tolerance': tol}
+        'optimization_method_type': 'ScipyLBFGS', 'convergence_tolerance': tol,
+        'initial_step_size': initial_step_size}
 
     deformetrica = Deformetrica(output_dir, verbosity='DEBUG')
     deformetrica.estimate_deterministic_atlas(
@@ -351,10 +354,19 @@ def external_forces_to_vtk(cp, forces, output_dir, filter_cp=True, threshold=1.)
     for i, f in enumerate(forces[:-1]):
         filename = join(output_dir, f'cp_with_external_forces_{i}.vtk')
         if filter_cp:
-            cp_filtered = cp[mask, :]
-            f = f[mask]
+            cp_filtered = cp[mask[i], :]
+            f = f[mask[i]]
             poly_cp = pv.PolyData(cp_filtered)
         else:
             poly_cp = pv.PolyData(cp)
         poly_cp['external_force'] = f
         poly_cp.save(filename)
+
+
+def deformation_norm(atlas_dir, kernel_width):
+    momenta = torch.from_numpy(read_3D_array(atlas_dir / strings.momenta_str))
+    cp = torch.from_numpy(read_2D_array(atlas_dir / strings.cp_str))
+    kernel = TorchKernel(kernel_width=kernel_width)
+    kernel_matrix = kernel.get_kernel_matrix(cp, cp)
+    ssd = (torch.einsum('...ij,...kj->...ik', momenta, momenta) * kernel_matrix).sum()
+    return ssd

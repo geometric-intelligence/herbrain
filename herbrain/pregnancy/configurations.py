@@ -18,7 +18,7 @@ configurations.append(dict(
         regularisation=1.,
         max_iter=2000,
         freeze_control_points=False,
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         metric='varifold',
         tol=1e-16,
         filter_cp=True,
@@ -32,7 +32,7 @@ configurations.append(dict(
     )
 ))
 
-# 2. preconception to 1st trimester
+# 2. 1st trimester
 configurations.append(dict(
     config_id="firstTrim",
     dataset=dict(
@@ -40,16 +40,16 @@ configurations.append(dict(
         tmin=1.5,
         tmax=13,
         time_var='gestWeek',
-        day_ref=4,
+        day_ref=3,
         variable='times'
     ),
     registration_args=dict(
         kernel_width=4.,
-        regularisation=1,
+        regularisation=1.,
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=4.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -78,7 +78,8 @@ configurations.append(dict(
         regularisation=1,
         max_iter=2000,
         freeze_control_points=False,
-        metric='varifold', attachment_kernel_width=4.,
+        metric='varifold', 
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -128,7 +129,7 @@ configurations.append(dict(
         tmax=163,
         time_var='gestWeek',
         day_ref=19,
-        variable='times'
+        variable='times'  # used as covariate for the regression
     ),
     registration_args=dict(
         kernel_width=4.,
@@ -136,7 +137,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=4.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -166,7 +167,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.25
@@ -196,7 +197,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.25
@@ -225,7 +226,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.25
@@ -255,15 +256,15 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
     ),
     spline_args=dict(
         initial_step_size=100,
-        regularisation=1.,
-        freeze_external_forces=True,
+        regularisation=1., device='cpu',
+        freeze_external_forces=False,
         freeze_control_points=True,
     )
 ))
@@ -285,7 +286,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
@@ -315,7 +316,7 @@ configurations.append(dict(
         max_iter=2000,
         freeze_control_points=False,
         metric='varifold',
-        attachment_kernel_width=1.,
+        attachment_kernel_width=2.,
         tol=1e-10,
         filter_cp=True,
         threshold=0.75
