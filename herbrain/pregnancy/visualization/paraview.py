@@ -2,7 +2,7 @@ import json
 import re
 from pathlib import Path
 
-import strings
+import herbrain.strings
 
 
 def generate_visualization(registration_dir, regression_dir, data_set, times):
@@ -46,4 +46,29 @@ def generate_visualization(registration_dir, regression_dir, data_set, times):
     pattern = re.compile('result_path_place_holder')
     updated_content = pattern.sub(registration_dir.parent.as_posix(), content)
     with open(registration_dir.parent / 'viz.py', 'w') as file:
+        file.write(updated_content)
+
+
+def update_visualization(project_dir, structure, config):
+    dir_structure_config = project_dir/ 'meshes_nico' / structure / config
+    with open(dir_structure_config / 'visualisation_names.json', 'r') as f:
+        names = json.load(f)
+
+    old_base = "/user/nguigui/home/Documents/UCSB/pregnancy"
+
+    new_names = names.copy()
+    for k, v in names.items():
+        new_names[k]['FileNames'] = [
+            path.replace(old_base, project_dir.as_posix()) for
+            path in names[k]['FileNames']]
+
+    with open(dir_structure_config / 'visualisation_names.json', 'w') as f:
+        json.dump(names, f)
+
+    with open(dir_structure_config / 'viz.py', 'r') as file:
+        content = file.read()
+
+    pattern = re.compile(old_base)
+    updated_content = pattern.sub(project_dir.as_posix(), content)
+    with open(dir_structure_config / 'viz.py', 'w') as file:
         file.write(updated_content)
