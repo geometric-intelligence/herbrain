@@ -22,7 +22,7 @@ def get_day(side, struct, day):
 
 side_ = 'left'
 structure = 'PostHipp'
-# preprocessing.main(1, 60, 1, side_, data_dir, output_dir)
+# preprocessing.maidepressanan(1, 60, 1, side_, data_dir, output_dir)
 
 # registration of day 1 - main geodesic
 atlas = get_day(side_, structure, day=1)
