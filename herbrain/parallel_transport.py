@@ -6,7 +6,7 @@ import herbrain.strings as strings
 
 
 def main(
-        source, target, atlas, name, output_dir: pathlib.Path, registration_args,
+        source, target, atlas, name, output_dir, registration_args,
         transport_args, shoot_args, main_reg_dir=None):
     # estimation of time deformation
     time_reg_dir = output_dir / name / f'time_reg_{name}'
@@ -45,3 +45,4 @@ def main(
 
     shoot_name = transport_dir / strings.shoot_str.format(transport_args['n_rungs'])
     subprocess.call(['cp', shoot_name, transport_dir / f'transported_shoot_{name}.vtk'])
+    return transported_mom
