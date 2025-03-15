@@ -31,7 +31,7 @@ def main(
 
     transport_dir = output_dir / name / 'transport'
     transport_dir.mkdir(parents=True, exist_ok=True)
-    lddmm.transport(
+    cp, mom = lddmm.transport(
         control_points, momenta, control_points_to_transport, momenta_to_transport,
         transport_dir, **transport_args)
 
@@ -45,4 +45,4 @@ def main(
 
     shoot_name = transport_dir / strings.shoot_str.format(transport_args['n_rungs'])
     subprocess.call(['cp', shoot_name, transport_dir / f'transported_shoot_{name}.vtk'])
-    return transported_mom
+    return cp, mom
