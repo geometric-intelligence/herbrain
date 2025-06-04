@@ -30,7 +30,7 @@ from polpo.preprocessing.learning import DictsToXY, NestedDictsToXY
 from polpo.sklearn.compose import PostTransformingEstimator
 
 import herbrain.pregnancy.page_content as page_content
-import herbrain.pregnancy.pregnancy_explorer as pregnancy_explorer
+from herbrain.pregnancy.pregnancy_explorer import PregnancyExplorer
 
 from .data import (
     HormonesCsvLoader,
@@ -142,7 +142,7 @@ def my_app(cfg, data, gpt):
     X, y = dicts_to_xy([hormones_for_pred, registered_meshes])
     hormones_mesh_model.fit(X, y)
 
-    pregnancy_explorer = pregnancy_explorer.explorer(
+    pregnancy_explorer = PregnancyExplorer(
         mri_data, 
         hormones_df, 
         data_type, 
