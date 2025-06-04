@@ -405,7 +405,7 @@ def ai_hormone_prediction(mesh_explorer, gpt=False):
     ]
 
 
-def pregnancy_page(mesh_explorer, mri_explorer, image_seq_explorer):
+def pregnancy_page(mesh_explorer, mri_explorer, image_seq_explorer, gpt=False):
     """Creates the pregnancy page. 
     
     A button will indicate whether the user wants to predict by gestation week or hormones. If the user
@@ -414,6 +414,87 @@ def pregnancy_page(mesh_explorer, mri_explorer, image_seq_explorer):
     
     If the user selects hormones, this page will only display the mesh explorer, with sliders for 
     hormones."""
+    banner = [
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Img(
+                        src=get_asset_url("pregnancy_logo.png"),
+                        style={"width": "70px", "height": "auto"},
+                    ),
+                    width=1,
+                ),
+                dbc.Col(
+                    html.P(
+                        "Digital Twin of the Pregnant Brain",
+                        style={"fontSize": S.title_fontsize},
+                    ),
+                    width=10,
+                ),
+            ],
+            align="center",
+        ),
+    ]
+
+    overview_text = dbc.Row(
+        [
+            html.P(
+                [
+                    "The hippocampus is a brain region that is particularly sensitive to hormones. In pregnancy the hippocampus volume is known to decrease, but we find that the shape of the hippocampus changes as well. We have trained an AI to predict the shape of the hippocampus based on hormone levels or gestation week.",
+                    html.Br(),
+                ],
+                style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
+            ),
+        ],
+    )
+
+
+    gpt_component = []
+    if gpt:
+        if set_openai_api_key():
+            gpt_component = [gpt_chat_component()]
+
+    contents_container = dbc.Container(
+        [
+            *banner,
+            html.Hr(),
+            overview_title(),
+            html.Div(style={"height": S.space_between_title_and_content}),
+            overview_text,
+            html.Div(style={"height": S.space_between_sections}),
+            html.Hr(),
+            instructions_title(),
+            html.Div(style={"height": S.space_between_title_and_content}),
+            dbc.Row(
+                [
+                    html.P(
+                        [
+                            "Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation. Beige color indicates pre-pregnancy shape, blue indicates shrinking compared to pre-pregnancy, and red indicates growth. ",
+                            html.Br(),
+                        ],
+                        style={
+                            "fontSize": S.text_fontsize,
+                            "fontFamily": S.text_fontfamily,
+                        },
+                    ),
+                ],
+            ),
+        ]
+        + mesh_explorer.to_dash()
+        + [html.Div(style={"height": S.space_between_sections}), html.Hr()]
+        + gpt_component,
+        fluid=True,
+    )
+
+    return [
+        dbc.Row(
+            [
+                dbc.Col(sm=1),
+                dbc.Col(contents_container, sm=10),
+                dbc.Col(sm=1),
+            ]
+        )
+    ]
 
 
 def app_layout(sidebar_elems, page_register):
