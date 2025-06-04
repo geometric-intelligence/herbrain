@@ -10,11 +10,22 @@ from polpo.dash.components import (
     SidebarHeader,
     Slider,
 )
+import polpo.preprocessing.dict as ppdict
+import dash_bootstrap_components as dbc
 from polpo.dash.variables import VarDef
+from polpo.preprocessing import ListSqueeze
 from polpo.plot.mesh import MeshesPlotter, MeshPlotter, StaticMeshPlotter
+from .data import (
+    # HormonesCsvLoader,
+    # MaternalRegisteredMeshesLoader,
+    # MultipleMaternalMeshesLoader,
+    NibImage2Mesh,
+    # PilotMriImageLoader,
+    # TemplateImageLoader,
+)
 
 
-def explorer(mri_data, hormones_df,):
+def explorer(mri_data, hormones_df, data_type, template_image, n_structs, week_mesh_model, hormones_mesh_model, hormones_ordering):
     session_id = VarDef("sessionID", name="Session Number", min_value=1, max_value=26)
     mri_vars = [session_id] + [
         VarDef(id_, name=name)
@@ -71,7 +82,7 @@ def explorer(mri_data, hormones_df,):
     template_mesh = NibImage2Mesh()(template_image)
 
     postproc_pred = None
-    if data == "multiple":
+    if data_type == "multiple":
         postproc_pred = ppdict.DictMap(step=ListSqueeze()) + ppdict.DictToValuesList()
 
     hormone_label_style = {"fontSize": 30, "display": "block"}
@@ -103,3 +114,13 @@ def explorer(mri_data, hormones_df,):
         button_label=" Click Here to Toggle Between Gestational Week vs Hormone Value Prediction",
         postproc_pred=postproc_pred,
     )
+
+    return [
+        dbc.Row(
+            [
+                dbc.Col(mri_explorer, width=6),
+                dbc.Col(mesh_explorer, width=6),
+            ],
+            align="center",
+        )
+    ]

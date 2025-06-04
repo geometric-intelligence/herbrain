@@ -45,6 +45,7 @@ from .page_content import pregnancy_page, menstrual_page, homepage
 
 
 def my_app(cfg, data, gpt):
+    data_type = data
     style = cfg.style
     update_style(style)
 
@@ -69,7 +70,7 @@ def my_app(cfg, data, gpt):
     hormones_for_pred = ppd.ColumnsToDict(hormones_ordering)(hormones_df)
     hormones_gest_week = ppd.ColumnToDict("gestWeek")(hormones_df)
 
-    if data == "multiple":
+    if data_type == "multiple":
         dicts_to_xy = NestedDictsToXY()
     else:
         dicts_to_xy = DictsToXY()
@@ -85,7 +86,7 @@ def my_app(cfg, data, gpt):
             [0.0, 0.0, 0.0, 1.0],
         ]
     )
-    if data == "multiple":
+    if data_type == "multiple":
         structs = [
             "BrStem",
             "L_Thal",
@@ -116,7 +117,7 @@ def my_app(cfg, data, gpt):
             data_dir=maternal_data_dir, max_iterations=500
         )()
 
-    n_pipes = n_structs if data == "multiple" else None
+    n_pipes = n_structs if data_type == "multiple" else None
     week_mesh_model = MeshPCR(
         model=None, affine_transform=affine_transform, n_pipes=n_pipes
     )
@@ -125,7 +126,7 @@ def my_app(cfg, data, gpt):
         model=None, affine_transform=affine_transform, n_pipes=n_pipes
     )
 
-    Colorizer = DictMeshColorizer if data == "multiple" else MeshColorizer
+    Colorizer = DictMeshColorizer if data_type == "multiple" else MeshColorizer
 
     week_colorizer = Colorizer(x_ref=np.asarray(0.5), delta_lim=np.asarray(15.0))
     week_mesh_model = PostTransformingEstimator(week_mesh_model, week_colorizer)
@@ -141,7 +142,16 @@ def my_app(cfg, data, gpt):
     X, y = dicts_to_xy([hormones_for_pred, registered_meshes])
     hormones_mesh_model.fit(X, y)
 
-    pregnancy_explorer = pregnancy_explorer.explore(mri_data, hormones_df)
+    pregnancy_explorer = pregnancy_explorer.explorer(
+        mri_data, 
+        hormones_df, 
+        data_type, 
+        template_image,
+        n_structs,
+        week_mesh_model,
+        hormones_mesh_model,
+        hormones_ordering,
+    )
 
     sidebar_elems = [
         # home
@@ -166,7 +176,7 @@ def my_app(cfg, data, gpt):
             ),
             page=FunctionComponent(
                 pregnancy_page,
-                explorer=pregnancy_explorer,
+                pregnancy_explorer=pregnancy_explorer,
                 gpt=gpt,
             ),
         ),
