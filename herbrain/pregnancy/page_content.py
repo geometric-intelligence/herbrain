@@ -497,6 +497,19 @@ def pregnancy_page(mesh_mri_image_seq_explorer, gpt=False):
     ]
 
 
+def menstrual_page():
+    """Not Implemented."""
+    return [
+        dbc.Row(
+            [
+                dbc.Col(sm=1),
+                dbc.Col([], sm=10),
+                dbc.Col(sm=1),
+            ]
+        )
+    ]
+
+
 def app_layout(sidebar_elems, page_register):
     # the styles for the main content position it to the right of the sidebar and
     # add some padding.

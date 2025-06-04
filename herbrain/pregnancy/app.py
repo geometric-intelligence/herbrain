@@ -40,7 +40,7 @@ from .data import (
     TemplateImageLoader,
 )
 from .models import MeshPCR
-from .page_content import ai_hormone_prediction, homepage, mri_page
+from .page_content import pregnancy_page, menstrual_page, homepage
 
 
 def my_app(cfg, data, gpt):
@@ -234,7 +234,7 @@ def my_app(cfg, data, gpt):
         SidebarElem(
             active=True,
             tab_header=SidebarHeader(
-                href="/", text="Home", image_url="home_emoji.jpeg"
+                href="/", text="Home", image_url="wbhi_logo.png"
             ),
             page=FunctionComponent(homepage),
         ),
@@ -243,25 +243,27 @@ def my_app(cfg, data, gpt):
             active=True,
             tab_header=SidebarHeader(
                 href="/page-1",
-                text="Explore MRI Data",
-                image_url="brain_emoji.jpeg",
+                text="Digital Twin: Pregnancy",
+                image_url="pregnancy_logo.pnt",
                 image_width=40,
             ),
-            page=FunctionComponent(mri_page, mri_explorer=mri_explorer),
+            page=FunctionComponent(
+                pregnancy_page,
+                mesh_explorer=mesh_explorer,
+                gpt=gpt,
+            ),
         ),
         # mesh explorer
         SidebarElem(
             active=True,
             tab_header=SidebarHeader(
                 href="/page-2",
-                text="AI: Hormones to Hippocampus Shape",
-                image_url="robot_emoji.jpeg",
+                text="Digital Twin: Menstrual Cycle",
+                image_url="menstrual_logo.png",
                 image_width=40,
             ),
             page=FunctionComponent(
-                ai_hormone_prediction,
-                mesh_explorer=mesh_explorer,
-                gpt=gpt,
+                menstrual_page
             ),
         ),
     ]
