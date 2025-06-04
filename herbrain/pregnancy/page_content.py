@@ -437,10 +437,27 @@ def pregnancy_page(mesh_mri_image_seq_explorer, gpt=False):
         [
             html.P(
                 [
-                    "The hippocampus is a brain region that is particularly sensitive to hormones. In pregnancy the hippocampus volume is known to decrease, but we find that the shape of the hippocampus changes as well. We have trained an AI to predict the shape of the hippocampus based on hormone levels or gestation week.",
+                    "Overview: The hippocampus is a brain region that is particularly sensitive to hormones. In pregnancy the hippocampus volume is known to decrease, but we find that the shape of the hippocampus changes as well. We have trained an AI to predict the shape of the hippocampus based on hormone levels or gestation week.",
                     html.Br(),
                 ],
                 style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
+            ),
+        ],
+    )
+
+    instructions_text = dbc.Row(
+        [
+            html.P(
+                [
+                    (
+                        "Instructions: Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation. "
+                        "Beige color indicates pre-pregnancy shape, blue indicates shrinking compared to pre-pregnancy, and red indicates growth."
+                    )
+                ],
+                style={
+                    "fontSize": S.text_fontsize,
+                    "fontFamily": S.text_fontfamily,
+                },
             ),
         ],
     )
@@ -455,27 +472,11 @@ def pregnancy_page(mesh_mri_image_seq_explorer, gpt=False):
         [
             *banner,
             html.Hr(),
-            background_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
             overview_text,
+            html.Div(style={"height": S.space_between_title_and_content}),
+            instructions_text,
             html.Div(style={"height": S.space_between_sections}),
             html.Hr(),
-            digital_twin_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            dbc.Row(
-                [
-                    html.P(
-                        [
-                            "Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation. Beige color indicates pre-pregnancy shape, blue indicates shrinking compared to pre-pregnancy, and red indicates growth. ",
-                            html.Br(),
-                        ],
-                        style={
-                            "fontSize": S.text_fontsize,
-                            "fontFamily": S.text_fontfamily,
-                        },
-                    ),
-                ],
-            ),
         ]
         + mesh_mri_image_seq_explorer.to_dash()
         + [html.Div(style={"height": S.space_between_sections}), html.Hr()]
