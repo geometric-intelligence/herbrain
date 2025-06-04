@@ -143,8 +143,8 @@ class PregnancyExplorer:
         return [
             dbc.Row(
                 [
-                    dbc.Col(self.mri_explorer, width=6),
-                    dbc.Col(self.mesh_explorer, width=6),
+                    dbc.Col(self.mri_explorer.to_dash(), width=6),
+                    dbc.Col(self.mesh_explorer.to_dash(), width=6),
                 ],
                 align="center",
             )
