@@ -234,7 +234,10 @@ def my_app(cfg, data, gpt):
         SidebarElem(
             active=True,
             tab_header=SidebarHeader(
-                href="/", text="Home", image_url="wbhi_logo.png"
+                href="/", 
+                text="Homepage", 
+                image_url="homepage_logo.png",
+                image_width=40,
             ),
             page=FunctionComponent(homepage),
         ),
