@@ -185,7 +185,7 @@ def my_app(cfg, data, gpt):
             active=True,
             tab_header=SidebarHeader(
                 href="/page-2",
-                text="Digital Twin: Menstrual Cycle",
+                text="Digital Twin: Menstruation",
                 image_url="menstrual_logo.png",
                 image_width=40,
             ),
