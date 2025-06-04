@@ -244,12 +244,12 @@ def my_app(cfg, data, gpt):
             tab_header=SidebarHeader(
                 href="/page-1",
                 text="Digital Twin: Pregnancy",
-                image_url="pregnancy_logo.pnt",
+                image_url="pregnancy_logo.png",
                 image_width=40,
             ),
             page=FunctionComponent(
                 pregnancy_page,
-                mesh_explorer=mesh_explorer,
+                mesh_mri_image_seq_explorer=mesh_explorer,
                 gpt=gpt,
             ),
         ),
