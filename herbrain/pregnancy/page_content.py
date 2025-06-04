@@ -402,7 +402,7 @@ def homepage():
 #     ]
 
 
-def pregnancy_page(mesh_mri_image_seq_explorer, gpt=False):
+def pregnancy_page(pregnancy_explorer, gpt=False):
     """Creates the pregnancy page. 
     
     A button will indicate whether the user wants to predict by gestation week or hormones. If the user
@@ -478,7 +478,7 @@ def pregnancy_page(mesh_mri_image_seq_explorer, gpt=False):
             html.Div(style={"height": S.space_between_sections}),
             html.Hr(),
         ]
-        + mesh_mri_image_seq_explorer.to_dash()
+        + pregnancy_explorer.to_dash()
         + [html.Div(style={"height": S.space_between_sections}), html.Hr()]
         + gpt_component,
         fluid=True,
