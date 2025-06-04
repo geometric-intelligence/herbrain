@@ -405,6 +405,17 @@ def ai_hormone_prediction(mesh_explorer, gpt=False):
     ]
 
 
+def pregnancy_page(mesh_explorer, mri_explorer, image_seq_explorer):
+    """Creates the pregnancy page. 
+    
+    A button will indicate whether the user wants to predict by gestation week or hormones. If the user
+    indicates gestation week, this page will display the image seq on the far left, the mri in the middle, 
+    and the mri on the right. All of these will be controller by one gestation week slider.
+    
+    If the user selects hormones, this page will only display the mesh explorer, with sliders for 
+    hormones."""
+
+
 def app_layout(sidebar_elems, page_register):
     # the styles for the main content position it to the right of the sidebar and
     # add some padding.
