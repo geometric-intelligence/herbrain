@@ -142,7 +142,16 @@ def my_app(cfg, data, gpt):
     X, y = dicts_to_xy([hormones_for_pred, registered_meshes])
     hormones_mesh_model.fit(X, y)
 
+
+    app = Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        suppress_callback_exceptions=True,
+        assets_folder=cfg.app.assets_folder,
+    )
+
     pregnancy_explorer = PregnancyExplorer(
+        app,
         mri_data, 
         hormones_df, 
         data_type, 
@@ -195,13 +204,6 @@ def my_app(cfg, data, gpt):
         ),
     ]
 
-    app = Dash(
-        __name__,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
-        suppress_callback_exceptions=True,
-        assets_folder=cfg.app.assets_folder,
-    )
-
     page_register = PageRegister()
 
     app.layout = page_content.app_layout(sidebar_elems, page_register)
@@ -213,5 +215,5 @@ def my_app(cfg, data, gpt):
         debug=server_cfg.debug,
         use_reloader=server_cfg.use_reloader,
         host=server_cfg.host,
-        port=server_cfg.port,
+        port=server_cfg.port, #8888
     )
