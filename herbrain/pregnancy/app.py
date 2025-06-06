@@ -151,7 +151,7 @@ def my_app(cfg, data, gpt):
     )
 
     pregnancy_explorer = PregnancyExplorer(
-        app,
+        cfg,
         mri_data, 
         hormones_df, 
         data_type, 

@@ -29,7 +29,20 @@ from polpo.preprocessing.mri import (
 
 
 class PilotMriImageLoader(Pipeline):
-    """Load, sort, truncate, and parse MRI images."""
+    """Load, sort, truncate, and parse MRI images.
+    
+    Parameters:
+    ----------
+    debug : bool, optional
+        If True, uses a smaller subset of images for debugging.
+    data_dir : str, optional
+        Directory where MRI images are stored. If None, defaults to HERBRAIN_DATA_DIR.
+        
+    Returns:
+    -------
+    Pipeline
+        A pipeline that loads, sorts, truncates, and parses MRI images.
+    """
 
     def __init__(self, debug=False, data_dir=None):
         if debug:

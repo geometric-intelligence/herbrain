@@ -10,6 +10,8 @@ from polpo.dash.components import (
     SidebarElem,
     SidebarHeader,
     Slider,
+    MriGraphRow,
+    BaseComponentGroup
 )
 from polpo.models import (
     MriSlicesLookup,
@@ -32,7 +34,7 @@ from .data import (
     # PilotMriImageLoader,
     # TemplateImageLoader,
 )
-from polpo.style import STYLE as S
+from polpo.dash.style import STYLE as S
 from dash import Dash, Input, Output, State, callback, dcc, html
 import numpy as np
 import plotly.graph_objs as go
@@ -40,9 +42,10 @@ import plotly.graph_objs as go
     
 
 
-class PregnancyExplorer1:
+class PregnancyExplorer:
     def __init__(
         self,
+        cfg,
         mri_data,
         hormones_df,
         data_type,
@@ -57,7 +60,7 @@ class PregnancyExplorer1:
         self.gest_week = VarDef(
             "gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
         )
-        self.estro = VarDef(
+        self.estro = VarDef( # makes it easier to have all this info contained in a var, rather than having to type these things every time they are used
             "estro",
             name="Estrogen",
             unit="pg/ml",
@@ -96,6 +99,8 @@ class PregnancyExplorer1:
         self.mri_explorer = self._mri_explorer()
         self.gest_week_mesh_explorer = self._gest_week_mesh_explorer()
         # self.hormones_mesh_explorer = self._hormones_mesh_explorer()
+
+        self.animation_explorer = AnimationExplorer(cfg.app.assets_folder)
     
     def _mri_explorer(self):
         self.session_id = VarDef("sessionID", name="Session Number", min_value=1, max_value=26)
@@ -135,13 +140,13 @@ class PregnancyExplorer1:
             self.mri_data, self.hormones_df, self.mri_sliders, session_info, id_prefix="mri-"
         )
 
-    def _gest_week_mesh_explorer(self,):
+    def _gest_week_mesh_explorer(self):
         return MultiModelsMeshExplorer(
-            graph=Graph(
+            graph=Graph( # dash graph object
                 id_="mesh-plot",
                 plotter=MeshesPlotter(
                     plotters=[MeshPlotter() for _ in range(self.n_structs)],
-                    overlay_plotter=StaticMeshPlotter(
+                    overlay_plotter=StaticMeshPlotter( # this is for the overall brain
                         mesh=self.template_mesh, visible=self.template_visibility
                     ),
                     bounds=None,  # TODO: check need
@@ -150,8 +155,8 @@ class PregnancyExplorer1:
             ),
             models=(self.week_mesh_model, self.hormones_mesh_model),
             inputs=(
-                Slider(self.gest_week),
-                ComponentGroup(
+                Slider(self.gest_week), # not yet a dash slider. will turn into a dash slider when we call .to_dash(). it is just an array of containers or something
+                ComponentGroup( # this has a to_dash() too. everything under components has a to_dash()
                     ordering=self.hormones_ordering,
                     components=[
                         Slider(var, step, label_style=self.hormone_label_style)
@@ -220,10 +225,12 @@ class PregnancyExplorer1:
     #         postproc_pred=self.postproc_pred,
     #     )
 
+
     def to_dash(self):
         return [
             dbc.Row(
                 [
+                    dbc.Col(self.animation_explorer.to_dash(), width=6),
                     dbc.Col(self.mri_explorer.to_dash(), width=6),
                     dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
                 ],
@@ -238,8 +245,7 @@ class PregnancyExplorer1:
         ]
     
 
-
-class MriExplorer():
+class MriExplorer(BaseComponentGroup): # different from one in polpo because it will intake gest week slider and output one mri slice.
     # data
     # plots
     # sliders
@@ -252,20 +258,20 @@ class MriExplorer():
         self,
         mri_data,
         hormones_df,
-        slider,
+        sliders,
         session_info,
         graph_row=None,
         id_prefix="",
     ):
         if graph_row is None:
-            graph_row = MriGraphRow(index_ordering=list(range(len(sliders) - 1)))
+            graph_row = MriGraphRow(index_ordering=list(range(len(sliders) - 1))) # specifically designed assuming we get 3 mris
 
         # TODO: used to train the model and to update the controller
         self.mri_data = mri_data
         self.hormones_df = hormones_df
 
         # NB: an input view
-        self.slider = slider
+        self.sliders = sliders
         # NB: an output view of the brain data
         self.graph_row = graph_row
         # NB: a model of the brain data
@@ -283,12 +289,12 @@ class MriExplorer():
         super().__init__([sliders, graph_row, session_info], id_prefix)
 
     def _create_callbacks(self):
-        create_view_model_update(self.sliders, self.graph_row, self.mri_model)
+        create_view_model_update(self.sliders, self.graph_row, self.mri_model) # input can be a slider object (polpo) or a componentgroup (aka, something the user changes)
         create_view_model_update(
             self.sliders[0], self.session_info, self.session_info_model
         )
 
-    def to_dash(self):
+    def to_dash(self): # this is where you create the layout of the page
         if hasattr(self.sliders, "update_lims"):
             self.sliders.update_lims(self.mri_data)
 
@@ -345,224 +351,272 @@ class MriExplorer():
         self._create_callbacks()
 
         return [plots, sliders_and_session]
+
+
+from polpo.dash.components import Image, SharedInputModelsBasedExplorer, Slider
+from polpo.dash.style import update_style
+from polpo.dash.variables import VarDef
+from polpo.models import ListLookup   
+import os
+import sys
+from polpo.preprocessing import Sorter
+from polpo.preprocessing.path import FileFinder
+from dash import Dash, get_asset_url
+
+class AnimationExplorer():
+    def __init__(self, assets_folder_path):
+        self.assets_folder_path = assets_folder_path
+        self.images = self._load_pregnancy_images(assets_folder_path)
+
+
+    def _load_pregnancy_images(self, assets_folder):
+        # assumes assets at app folder level
+        file_path = os.path.dirname(sys.modules[__package__].__file__)
+        # removes ./
+        short_assets_folder = "/".join(assets_folder.split("/")[1:])
+
+        assets_folder_abs = os.path.join(file_path, short_assets_folder)
+
+        images = (
+            FileFinder(data_dir=os.path.join(assets_folder_abs, "pregnancy_frames")) + Sorter()
+        )()
+
+        n_path_assets = len(assets_folder_abs)
+        return [get_asset_url(image[n_path_assets + 1 :]) for image in images]
+
+
+    def _create_layout(self, assets_folder):
+        # TODO: do version with DictLookup
+        models = [ListLookup(self.images)] #here, input will be weeks, and output needs to be an image.
+
+        digits = VarDef(id_="digitsID", name="Digits", min_value=0, max_value=9)
+        inputs = Slider(digits)
+
+        image_style = {"width": "50%"}
+        outputs = [
+            Image(id_=f"image-expl-{index}", style=image_style)
+            for index in range(len(models))
+        ]
+
+        image_seq_explorer = SharedInputModelsBasedExplorer(models, inputs, outputs)
+        return dbc.Container(image_seq_explorer.to_dash())
+
+
+# class PregnancyExplorer1():
+#     def __init__(
+#         self,
+#         app,
+#         mri_data,
+#         hormones_df,
+#         data_type,
+#         template_image,
+#         n_structs,
+#         week_mesh_model,
+#         hormones_mesh_model,
+#         hormones_ordering,
+#     ):
+#         self.app = app
+#         # self.gest_week = VarDef(
+#         #     "gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
+#         # )
+#         # self.estro = VarDef(
+#         #     "estro",
+#         #     name="Estrogen",
+#         #     unit="pg/ml",
+#         #     min_value=4100,
+#         #     max_value=12400,
+#         # )
+#         # self.prog = VarDef(
+#         #     "prog",
+#         #     name="Progesterone",
+#         #     unit="ng/ml",
+#         #     min_value=54,
+#         #     max_value=103,
+#         # )
+#         # self.lh = VarDef(
+#         #     "lh",
+#         #     name="LH",
+#         #     unit="ng/ml",
+#         #     min_value=0.59,
+#         #     max_value=1.45,
+#         # )
+#         # self.template_mesh = NibImage2Mesh()(template_image)
+
+#         # self.gest_week_slider = Slider(self.gest_week)
+#         # self.hormone_slider = ComponentGroup(
+#         #     ordering=self.hormones_ordering,
+#         #     components=[
+#         #         Slider(var, step, label_style=self.hormone_label_style)
+#         #         for var, step in [
+#         #             (self.estro, 500),
+#         #             (self.prog, 3),
+#         #             (self.lh, 0.05),
+#         #         ]
+#         #     ],
+#         # ),
+
     
+#     def create_callback(self, input, output, mesh_model, mri_model, pic_model):
+#         """Callback for updating the pregnancy explorer based on input changes.
 
+#         input is gestation week, output is MRI slice, and a mesh graph.
+#         """
+#         @self.app.callback(
+#             [
+#                 Output("mesh-plot", "figure"),
+#                 Output("mri-plot", "figure"), #side
+#                 Output("gest_week_slider_container", component_property="style"),
+#                 Output("hormone_slider_container", component_property="style"),
+#             ],
+#             Input("gest-week-slider", "drag_value"),
+#             Input("estrogen-slider", "drag_value"),
+#             Input("progesterone-slider", "drag_value"),
+#             Input("LH-slider", "drag_value"),
+#             State("mesh-plot", "figure"),
+#             State("mesh-plot", "relayoutData"),
+#             Input("button", "n_mesh_clicks"),
+#             Input("mri-button", "n_mri_clicks"),
+#         )
+#         def update(
+#             gest_week, hormones_df, estrogen, progesterone, LH, current_figure, relayoutData, n_mesh_clicks=0, n_mri_clicks=0
+#         ):
+#             """Update the mesh plot based on the hormone levels."""
+#             if (n_mesh_clicks % 2) == 0:
+#                 gest_week_slider_style = {"display": "none"}
+#                 hormone_week_slider_style = {"display": "block"}
 
-class PregnancyExplorer():
-    def __init__(
-        self,
-        app,
-        mri_data,
-        hormones_df,
-        data_type,
-        template_image,
-        n_structs,
-        week_mesh_model,
-        hormones_mesh_model,
-        hormones_ordering,
-    ):
-        self.app = app
-        # self.gest_week = VarDef(
-        #     "gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
-        # )
-        # self.estro = VarDef(
-        #     "estro",
-        #     name="Estrogen",
-        #     unit="pg/ml",
-        #     min_value=4100,
-        #     max_value=12400,
-        # )
-        # self.prog = VarDef(
-        #     "prog",
-        #     name="Progesterone",
-        #     unit="ng/ml",
-        #     min_value=54,
-        #     max_value=103,
-        # )
-        # self.lh = VarDef(
-        #     "lh",
-        #     name="LH",
-        #     unit="ng/ml",
-        #     min_value=0.59,
-        #     max_value=1.45,
-        # )
-        # self.template_mesh = NibImage2Mesh()(template_image)
+#             else:
+#                 gest_week_slider_style = {"display": "block"}
+#                 hormone_week_slider_style = {"display": "none"}
 
-        # self.gest_week_slider = Slider(self.gest_week)
-        # self.hormone_slider = ComponentGroup(
-        #     ordering=self.hormones_ordering,
-        #     components=[
-        #         Slider(var, step, label_style=self.hormone_label_style)
-        #         for var, step in [
-        #             (self.estro, 500),
-        #             (self.prog, 3),
-        #             (self.lh, 0.05),
-        #         ]
-        #     ],
-        # ),
+#                 print("hiding hormone sliders")
 
-    
-    def create_callback(self, input, output, mesh_model, mri_model, pic_model):
-        """Callback for updating the pregnancy explorer based on input changes.
+#                 progesterone = interpolate_or_return(
+#                     hormones_df, gest_week, x_label="gestWeek", y_label="prog"
+#                 )
+#                 estrogen = interpolate_or_return(
+#                     hormones_df, gest_week, x_label="gestWeek", y_label="estro"
+#                 )
+#                 LH = interpolate_or_return(
+#                     hormones_df, gest_week, x_label="gestWeek", y_label="lh"
+#                 )
+#                 print("progesterone", progesterone)
+#                 print("estrogen", estrogen)
+#                 print("LH", LH)
+#                 print("gest_week", gest_week)
 
-        input is gestation week, output is MRI slice, and a mesh graph.
-        """
-        @self.app.callback(
-            [
-                Output("mesh-plot", "figure"),
-                Output("mri-plot", "figure"), #side
-                Output("gest_week_slider_container", component_property="style"),
-                Output("hormone_slider_container", component_property="style"),
-            ],
-            Input("gest-week-slider", "drag_value"),
-            Input("estrogen-slider", "drag_value"),
-            Input("progesterone-slider", "drag_value"),
-            Input("LH-slider", "drag_value"),
-            State("mesh-plot", "figure"),
-            State("mesh-plot", "relayoutData"),
-            Input("button", "n_mesh_clicks"),
-            Input("mri-button", "n_mri_clicks"),
-        )
-        def update(
-            gest_week, hormones_df, estrogen, progesterone, LH, current_figure, relayoutData, n_mesh_clicks=0, n_mri_clicks=0
-        ):
-            """Update the mesh plot based on the hormone levels."""
-            if (n_mesh_clicks % 2) == 0:
-                gest_week_slider_style = {"display": "none"}
-                hormone_week_slider_style = {"display": "block"}
+#             # Cycle through sagittal, axial, and coronal plane views with each MRI button click
+#             plane_views = ["sagittal", "axial", "coronal"] # side, top, front
+#             if n_mri_clicks is not None:
+#                 current_plane = plane_views[n_mri_clicks % len(plane_views)]
+#             else:
+#                 current_plane = plane_views[0]
+#             print(f"Current MRI plane view: {current_plane}")
 
-            else:
-                gest_week_slider_style = {"display": "block"}
-                hormone_week_slider_style = {"display": "none"}
+#             X_multiple = np.array([[estrogen, progesterone, LH]])
 
-                print("hiding hormone sliders")
+#             mesh_plot = mesh_model.predict(
+#                 X_multiple,
+#                 lr_hormones,
+#                 pca_hormones,
+#                 y_mean_hormones,
+#                 n_vertices_hormones,
+#                 mesh_neighbors_hormones,
+#                 space,
+#                 vertex_colors,
+#                 current_figure=current_figure,
+#                 relayoutData=relayoutData,
+#             )
 
-                progesterone = interpolate_or_return(
-                    hormones_df, gest_week, x_label="gestWeek", y_label="prog"
-                )
-                estrogen = interpolate_or_return(
-                    hormones_df, gest_week, x_label="gestWeek", y_label="estro"
-                )
-                LH = interpolate_or_return(
-                    hormones_df, gest_week, x_label="gestWeek", y_label="lh"
-                )
-                print("progesterone", progesterone)
-                print("estrogen", estrogen)
-                print("LH", LH)
-                print("gest_week", gest_week)
+#             mri_plot = self.return_mri_plot(
+#                 gest_week,
+#                 current_plane,
+#                 self.mri_data,
+#             )
 
-            # Cycle through sagittal, axial, and coronal plane views with each MRI button click
-            plane_views = ["sagittal", "axial", "coronal"] # side, top, front
-            if n_mri_clicks is not None:
-                current_plane = plane_views[n_mri_clicks % len(plane_views)]
-            else:
-                current_plane = plane_views[0]
-            print(f"Current MRI plane view: {current_plane}")
+#             pic_view = self.return_animation_plot(
+#                 gest_week
+#             )
 
-            X_multiple = np.array([[estrogen, progesterone, LH]])
-
-            mesh_plot = mesh_model.predict(
-                X_multiple,
-                lr_hormones,
-                pca_hormones,
-                y_mean_hormones,
-                n_vertices_hormones,
-                mesh_neighbors_hormones,
-                space,
-                vertex_colors,
-                current_figure=current_figure,
-                relayoutData=relayoutData,
-            )
-
-            mri_plot = self.return_mri_plot(
-                gest_week,
-                current_plane,
-                self.mri_data,
-            )
-
-            pic_view = self.return_animation_plot(
-                gest_week
-            )
-
-            return mesh_plot, mri_plot, gest_week_slider_style, hormone_week_slider_style
+#             return mesh_plot, mri_plot, gest_week_slider_style, hormone_week_slider_style
         
 
-    def return_no_data_fig():
-        fig = go.Figure()
-        fig.add_annotation(
-            text="No Data Available",
-            x=0.5,
-            y=0.5,
-            showarrow=False,
-            font=dict(size=24, color="white"),
-            xref="paper",
-            yref="paper",
-            xanchor="center",
-            yanchor="middle",
-        )
-        fig.update_layout(
-            plot_bgcolor="black",
-            paper_bgcolor="black",
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            margin=dict(l=0, r=0, t=0, b=0),
-        )
-        return fig
+#     def return_no_data_fig():
+#         fig = go.Figure()
+#         fig.add_annotation(
+#             text="No Data Available",
+#             x=0.5,
+#             y=0.5,
+#             showarrow=False,
+#             font=dict(size=24, color="white"),
+#             xref="paper",
+#             yref="paper",
+#             xanchor="center",
+#             yanchor="middle",
+#         )
+#         fig.update_layout(
+#             plot_bgcolor="black",
+#             paper_bgcolor="black",
+#             xaxis=dict(visible=False),
+#             yaxis=dict(visible=False),
+#             margin=dict(l=0, r=0, t=0, b=0),
+#         )
+#         return fig
         
 
-    def return_mri_plot(self, gest_week, current_plane, mri_data):
-        """ Return the MRI plot for the specified gestational week and plane view.
+#     def return_mri_plot(self, gest_week, current_plane, mri_data):
+#         """ Return the MRI plot for the specified gestational week and plane view.
 
-        Paramters:
-        gest_week (int): The gestational week to plot.
-        current_plane (str): The MRI plane view to plot (sagittal, axial, coronal).
-        mri_data (array): The MRI data array.
+#         Paramters:
+#         gest_week (int): The gestational week to plot.
+#         current_plane (str): The MRI plane view to plot (sagittal, axial, coronal).
+#         mri_data (array): The MRI data array.
 
-        Returns:
-        figure (dict): The MRI plot figure dictionary.
-        """
+#         Returns:
+#         figure (dict): The MRI plot figure dictionary.
+#         """
+
+
+
+#     # def create_mesh_explorer(self):
+#     #     return MultiModelsMeshExplorer(
+#     #         graph=Graph(
+#     #             id_="mesh-plot",
+#     #             plotter=MeshesPlotter(
+#     #                 plotters=[MeshPlotter() for _ in range(self.n_structs)],
+#     #                 overlay_plotter=StaticMeshPlotter(
+#     #                     mesh=self.template_mesh, visible=self.template_visibility
+#     #                 ),
+#     #                 bounds=None,  # TODO: check need
+#     #                 overlay_bounds=None,  # TODO: check need
+#     #             ),
+#     #         ),
+#     #         models=(self.week_mesh_model, self.hormones_mesh_model),
+#     #         inputs=(
+#     #             self.gest_week_slider,
+#     #             self.hormone_slider 
+#     #         ),
+#     #         checkbox_labels=((-1, "Show Full Brain", self.template_visibility),),
+#     #         button_label=" Click Here to Toggle Between Gestational Week vs Hormone Value Prediction",
+#     #         postproc_pred=self.postproc_pred,
+#     #     )
+
+#     # def create_model(gest_week):
+#     #     # Placeholder for model creation logic
+#     #     # This would typically involve loading a pre-trained model or training a new one
+#     #     pass
+
+
+#     # def create_graph_row():
         
 
 
-    # def create_mesh_explorer(self):
-    #     return MultiModelsMeshExplorer(
-    #         graph=Graph(
-    #             id_="mesh-plot",
-    #             plotter=MeshesPlotter(
-    #                 plotters=[MeshPlotter() for _ in range(self.n_structs)],
-    #                 overlay_plotter=StaticMeshPlotter(
-    #                     mesh=self.template_mesh, visible=self.template_visibility
-    #                 ),
-    #                 bounds=None,  # TODO: check need
-    #                 overlay_bounds=None,  # TODO: check need
-    #             ),
-    #         ),
-    #         models=(self.week_mesh_model, self.hormones_mesh_model),
-    #         inputs=(
-    #             self.gest_week_slider,
-    #             self.hormone_slider 
-    #         ),
-    #         checkbox_labels=((-1, "Show Full Brain", self.template_visibility),),
-    #         button_label=" Click Here to Toggle Between Gestational Week vs Hormone Value Prediction",
-    #         postproc_pred=self.postproc_pred,
-    #     )
-
-    # def create_model(gest_week):
-    #     # Placeholder for model creation logic
-    #     # This would typically involve loading a pre-trained model or training a new one
-    #     pass
-
-
-    # def create_graph_row():
+#     # def create_callback(self):
+#     #     create_view_model_update(self.sliders, self.graph_row, self.pregnancy_model)
         
+#     def to_dash(self):
 
-
-    # def create_callback(self):
-    #     create_view_model_update(self.sliders, self.graph_row, self.pregnancy_model)
-        
-    def to_dash(self):
-
-        self.create_callback()
+#         self.create_callback()
 
 
             
