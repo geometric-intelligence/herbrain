@@ -96,11 +96,13 @@ class PregnancyExplorer:
         self.mri_data = mri_data
         self.hormones_df = hormones_df
 
+        self.gest_week_slider = Slider(self.gest_week)
+
         self.mri_explorer = self._mri_explorer()
         self.gest_week_mesh_explorer = self._gest_week_mesh_explorer()
         # self.hormones_mesh_explorer = self._hormones_mesh_explorer()
 
-        self.animation_explorer = AnimationExplorer(cfg.app.assets_folder)
+        self.animation_explorer = AnimationExplorer(cfg.app.assets_folder, self.gest_week_slider)
     
     def _mri_explorer(self):
         self.session_id = VarDef("sessionID", name="Session Number", min_value=1, max_value=26)
@@ -173,7 +175,7 @@ class PregnancyExplorer:
             postproc_pred=self.postproc_pred,
         )
 
-        # return MultiModelsMeshExplorer(
+        # return MeshExplorer(
         #     graph=Graph(
         #         id_="mesh-plot",
         #         plotter=MeshesPlotter(
@@ -185,45 +187,13 @@ class PregnancyExplorer:
         #             overlay_bounds=None,  # TODO: check need
         #         ),
         #     ),
-        #     models=[self.week_mesh_model],
+        #     model=self.week_mesh_model,
         #     inputs=(
         #         Slider(self.gest_week),
         #     ),
         #     checkbox_labels=((-1, "Show Full Brain", self.template_visibility),),
         #     postproc_pred=self.postproc_pred,
         # )
-    
-
-    # def _hormones_mesh_explorer(self):
-    #     return MultiModelsMeshExplorer(
-    #         graph=Graph(
-    #             id_="mesh-plot",
-    #             plotter=MeshesPlotter(
-    #                 plotters=[MeshPlotter() for _ in range(self.n_structs)],
-    #                 overlay_plotter=StaticMeshPlotter(
-    #                     mesh=self.template_mesh, visible=self.template_visibility
-    #                 ),
-    #                 bounds=None,  # TODO: check need
-    #                 overlay_bounds=None,  # TODO: check need
-    #             ),
-    #         ),
-    #         models=[self.hormones_mesh_model],
-    #         inputs=(
-    #             ComponentGroup(
-    #                 ordering=self.hormones_ordering,
-    #                 components=[
-    #                     Slider(var, step, label_style=self.hormone_label_style)
-    #                     for var, step in [
-    #                         (self.estro, 500),
-    #                         (self.prog, 3),
-    #                         (self.lh, 0.05),
-    #                     ]
-    #                 ],
-    #             ),
-    #         ),
-    #         checkbox_labels=((-1, "Show Full Brain", self.template_visibility),),
-    #         postproc_pred=self.postproc_pred,
-    #     )
 
 
     def to_dash(self):
@@ -236,12 +206,12 @@ class PregnancyExplorer:
                 ],
                 align="center",
             ),
-            # dbc.Row(
-            #     [
-            #         dbc.Col(self.hormones_mesh_explorer.to_dash(), width=6),
-            #     ],
-            #     align="center",
-            # ),
+            dbc.Row(
+                [
+                    dbc.Col(self.gest_week_slider.to_dash(), width=6),
+                ],
+                align="center",
+            ),
         ]
     
 
@@ -364,10 +334,10 @@ from polpo.preprocessing.path import FileFinder
 from dash import Dash, get_asset_url
 
 class AnimationExplorer():
-    def __init__(self, assets_folder_path, weeks):
+    def __init__(self, assets_folder_path, week_slider):
         self.assets_folder_path = assets_folder_path
-        self.image_paths = self._load_pregnancy_images(assets_folder_path)
-        self.weeks = weeks # should be a VarDef
+        self.image_paths = self._load_pregnancy_images()
+        self.week_slider = week_slider # should be a VarDef
 
     def _load_pregnancy_images(self):
         """ Load pregnancy images from the specified assets folder.
@@ -380,7 +350,7 @@ class AnimationExplorer():
         # assumes assets at app folder level
         file_path = os.path.dirname(sys.modules[__package__].__file__)
         # removes ./
-        short_assets_folder = "/".join(assets_folder_path.split("/")[1:])
+        short_assets_folder = "/".join(self.assets_folder_path.split("/")[1:])
 
         assets_folder_abs = os.path.join(file_path, short_assets_folder)
 
@@ -392,11 +362,11 @@ class AnimationExplorer():
         return [get_asset_url(image[n_path_assets + 1 :]) for image in images]
 
 
-    def _create_layout(self):
+    def to_dash(self):
         # TODO: do version with DictLookup
-        models = [ListLookup(self.images)] #here, input will be weeks, and output needs to be an image.
+        models = [ListLookup(self.image_paths)] #here, input will be weeks, and output needs to be an image.
 
-        inputs = Slider(self.weeks)
+        inputs = self.week_slider
 
         image_style = {"width": "50%"}
         outputs = [
