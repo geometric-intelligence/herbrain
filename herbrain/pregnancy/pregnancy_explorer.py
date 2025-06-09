@@ -164,12 +164,11 @@ class PregnancyExplorer:
         return [
             dbc.Row(
                 [
-                    dbc.Col(self.animation_explorer.to_dash(), width=3, className="p-0 m-0"),
-                    dbc.Col(self.mri_explorer.to_dash(), width=4, className="p-0 m-0"),
-                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=5, className="p-0 m-0"),
+                    dbc.Col(self.animation_explorer.to_dash(), width=2),
+                    dbc.Col(self.mri_explorer.to_dash(), width=4),
+                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
                 ],
                 align="center",
-                className="g-0",  # Bootstrap 5: removes gutter between columns
             ),
             # dbc.Row(
             #     [
@@ -248,7 +247,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
 
         outputs = Graph(
                 id_="mri-view",
-                plotter=SlicePlotter(title="Selected MRI", x_label=None, y_label=None),
+                plotter=SlicePlotter(title="Selected MRI", just_image=True),
             )
 
         shown_inputs = ComponentGroup(
@@ -332,18 +331,20 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
     def to_dash(self):
         # Create a simple layout if none is provided
         if self.shown_inputs is None:
-            inputs_col = dbc.Col([], width=12)
+            inputs_col = dbc.Col([], width=6)
         else:
-            inputs_col = dbc.Col(self.shown_inputs.to_dash(), width=12)
+            inputs_col = dbc.Col(self.shown_inputs.to_dash(), width=6)
 
         if self.layout is None:
             return dbc.Container([
                 dbc.Col(
                     [
-                        dbc.Row(self.outputs.to_dash(), width=12, className="d-flex justify-content-center"),
-                        dbc.Row(inputs_col.children, width=12, className="d-flex justify-content-center"),
+                        dbc.Row(
+                            dbc.Col(self.outputs.to_dash(), width=6)
+                            ),
+                        # dbc.Row(inputs_col.children, width=6),
+                        dbc.Row(inputs_col),
                     ],
-                    className="justify-content-center align-items-center"
                 )
             ])
         
@@ -401,20 +402,44 @@ class SingleInputOutputModelsBasedExplorer(BaseComponentGroup):
 
 class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but for now putting here so that i can remove the x and y ticks.
     def __init__(
-        self, cmap="gray", title="Slice Visualization", x_label="X", y_label="Y"
+        self, cmap="gray", title="Slice Visualization", x_label="X", y_label="Y", just_image=False
     ):
         self.cmap = cmap
         self.title = title
         self.x_label = x_label
         self.y_label = y_label
 
-        self.layout = go.Layout(
-            title=self.title,
-            title_x=0.5,
-            xaxis=dict(title=self.x_label),
-            yaxis=dict(title=self.y_label),
-            uirevision="constant",
-        )
+        if not just_image:
+            self.layout = go.Layout(
+                title=self.title,
+                title_x=0.5,
+                xaxis=dict(title=self.x_label),
+                yaxis=dict(title=self.y_label),
+                uirevision="constant",
+            )
+        else:
+            self.layout = go.Layout(
+                title=None,  # No title
+                title_x=0.5,  # (optional, has no effect if title=None)
+                xaxis=dict(
+                    title=None,         # No x axis label
+                    showticklabels=False,  # No tick numbers
+                    ticks='',              # No ticks
+                    showgrid=False,        # No grid lines
+                    zeroline=False,        # No zero line
+                    showline=False,        # No axis line
+                ),
+                yaxis=dict(
+                    title=None,         # No y axis label
+                    showticklabels=False,  # No tick numbers
+                    ticks='',              # No ticks
+                    showgrid=False,        # No grid lines
+                    zeroline=False,        # No zero line
+                    showline=False,        # No axis line
+                ),
+                uirevision="constant",
+            )
+            
 
     def transform_data(self, data):
         return [go.Heatmap(z=data.T, colorscale=self.cmap, showscale=False)]
@@ -439,26 +464,6 @@ class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but fo
         print(f"self.x_label: {self.x_label}, self.y_label: {self.y_label}")
 
         
-        # The update_layout call is correct, but Plotly's update_layout with xaxis/yaxis replaces the entire axis dict,
-        # so if you set xaxis=dict(title=None), it will override any previous x_label/y_label set in the layout.
-        # To hide ticks and grid but preserve axis titles, you should update only the relevant properties:
-        fig.update_layout(
-            xaxis=dict(
-                showticklabels=False,  # Hides tick labels (numbers)
-                ticks='',              # Hides the ticks themselves
-                showgrid=False,        # Hides grid lines
-                zeroline=False,        # Hides the zero line
-                showline=False,        # Hides the axis line
-            ),
-            yaxis=dict(
-                showticklabels=False,
-                ticks='',
-                showgrid=False,
-                zeroline=False,
-                showline=False,
-            )
-        )
-
         return fig
     
 

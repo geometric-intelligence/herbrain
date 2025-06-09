@@ -70,10 +70,10 @@ class MeshLayout(Layout):
                     html.Div(input3.to_dash()),
                 ),
             ],
-            align="center",
+            align="right",
             style={
-                "marginLeft": S.margin_side,
-                "marginRight": S.margin_side,
+                # "marginLeft": S.margin_side,
+                # "marginRight": S.margin_side,
                 "marginTop": "50px",
             },
         )
