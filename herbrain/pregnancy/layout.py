@@ -80,7 +80,7 @@ class MeshLayout(Layout):
                 )
             ],
             style={
-                "marginTop": "50px",
+                # "marginTop": "50px",
                 "height": "100%",
                 "display": "flex",
                 "flexDirection": "column",
@@ -122,6 +122,12 @@ class MriLayout(Layout):
                     style={"display": "flex", "flexDirection": "column", "justifyContent": "center", "alignItems": "center"},
                 )
             ],
-            style={"marginTop": "50px", "height": "100%", "display": "flex", "flexDirection": "column", "justifyContent": "center"},
+            style={
+                # "marginTop": "50px", 
+                "height": "100%", 
+                "display": "flex", 
+                "flexDirection": "column", 
+                "justifyContent": "center"
+                },
             fluid=True,
         )

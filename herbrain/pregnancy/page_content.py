@@ -475,8 +475,8 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
             overview_text,
             html.Div(style={"height": S.space_between_title_and_content}),
             instructions_text,
-            html.Div(style={"height": S.space_between_sections}),
-            html.Hr(),
+            # html.Div(style={"height": S.space_between_sections}),
+            # html.Hr(),
         ]
         + pregnancy_explorer.to_dash()
         + [html.Div(style={"height": S.space_between_sections}), html.Hr()]

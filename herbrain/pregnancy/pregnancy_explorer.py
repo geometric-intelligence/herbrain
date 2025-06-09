@@ -172,8 +172,8 @@ class PregnancyExplorer:
                     # Here is a version with explicit style to help prevent overlap:
 
                     dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "20px"}),
-                    dbc.Col(self.mri_explorer.to_dash(), width=4, style={"overflow": "auto", "padding": "20px"}),
-                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6, style={"overflow": "auto", "padding": "20px"}),
+                    dbc.Col(self.mri_explorer.to_dash(), width=5, style={"overflow": "auto", "padding": "20px"}),
+                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=5, style={"overflow": "auto", "padding": "20px"}),
                 ],
                 align="center",
             ),
