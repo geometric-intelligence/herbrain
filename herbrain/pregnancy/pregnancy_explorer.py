@@ -75,7 +75,7 @@ class PregnancyExplorer:
         # Variable definitions
         
         self.gest_week_var = VarDef(
-            id_="gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
+            id_="gestWeek", name="Gestational Week", min_value=0, max_value=40, default_value=15 # max value was 36
         )
         self.estro = VarDef( # makes it easier to have all this info contained in a var, rather than having to type these things every time they are used
             id_="estro",

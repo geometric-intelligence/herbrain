@@ -169,7 +169,7 @@ def my_app(cfg, data, gpt):
             tab_header=SidebarHeader(
                 href="/", 
                 text="Homepage", 
-                image_url="homepage_logo.png",
+                image_url="gi-logo.png",
                 image_width=40,
             ),
             page=FunctionComponent(homepage),

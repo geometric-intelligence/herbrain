@@ -437,7 +437,7 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
         [
             html.P(
                 [
-                    "Overview: The hippocampus is a brain region that is particularly sensitive to hormones. In pregnancy the hippocampus volume is known to decrease, but we find that the shape of the hippocampus changes as well. We have trained an AI to predict the shape of the hippocampus based on hormone levels or gestation week.",
+                    "Overview: The hippocampus is a brain region that is particularly sensitive to sex hormones. In pregnancy, hormones experience extreme fluctuations, and the hippocampus volume is known to decrease. However, we find that the shape of the hippocampus changes as well. We have trained an AI to predict shape changes of the hippocampus based on hormone levels or gestation week. Blue areas indicate growth and red areas indicate shrinkage compared to pre-pregnancy shape. Beige color indicates pre-pregnancy shape.",
                     html.Br(),
                 ],
                 style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
@@ -450,10 +450,8 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
             html.P(
                 [
                     (
-                        "Instructions: Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation."
-                        " Beige color indicates pre-pregnancy shape, blue indicates shrinking compared to pre-pregnancy, and red indicates growth."
-                        " Adjusting the gestation week of the mesh prediction will generate a new mesh prediction and prompt the MRI view to show the closest corresponding MRI data."
-                        " Use the MRI slice sliders and buttons to adjust the MRI view."
+                        "Instructions: Change the gestational week slider or hormone sliders, and the AI model will predict brain shape changes for these inputs."
+                        " The MRI view will update to show the closest corresponding MRI data."
                     )
                 ],
                 style={
