@@ -15,7 +15,7 @@ from polpo.dash.components import (
     RadioButton,
     Component,
 )
-from polpo.dash.layout import MultiRowLayout
+from polpo.dash.layout import MultiRowLayout, TwoRowLayout
 from polpo.models import (
     MriSlicesLookup,
     PdDfLookup,
@@ -283,8 +283,8 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
 
         shown_inputs = ComponentGroup(
             components=[
+                self.radio_button,      # view_index
                 self.mri_slice_slider,  # slice_index
-                self.radio_button       # view_index
             ],
             title="Shown MRI controls"
         )
@@ -333,17 +333,15 @@ class AnimationExplorer():
 
     def to_dash(self):
         # TODO: do version with DictLookup
-        models = [ClosestImageLookup(self.image_paths)] #here, input will be weeks, and output needs to be an image.
+        model = ClosestImageLookup(self.image_paths) #here, input will be weeks, and output needs to be an image.
 
-        inputs = self.week_slider
+        input = self.week_slider
 
         image_style = {"width": "50%"}
-        outputs = [
-            Image(id_=f"week_{index:02}", style=image_style)
-            for index in range(len(models))
-        ]
+        
+        output = Image(id_=f"pregnancy-image", style=image_style)
 
-        image_seq_explorer = SharedInputModelsBasedExplorer(models, inputs, outputs)
+        image_seq_explorer = SingleInputOutputModelsBasedExplorer(model, input, output, shown_input=None)
         return dbc.Container(image_seq_explorer.to_dash())
 
 
@@ -397,25 +395,28 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
         self.inputs = inputs
         self.outputs = outputs
         self.postproc_pred = postproc_pred
-        if shown_inputs is not None:
-            self.shown_inputs = shown_inputs
-        else:
-            self.shown_inputs = inputs
+            
+        self.shown_inputs = shown_inputs
         self.layout = layout or MultiRowLayout()  # Use MultiRowLayout as default
 
         super().__init__([outputs, inputs], id_prefix=id_prefix)
 
     def to_dash(self):
         # Create a simple layout if none is provided
+        if self.shown_inputs is None:
+            inputs_col = dbc.Col([], width=8)
+        else:
+            inputs_col = dbc.Col(self.shown_inputs.to_dash(), width=8)
+
         if self.layout is None:
             return dbc.Container([
                 dbc.Row([
                     dbc.Col(self.outputs.to_dash(), width=8),
-                    dbc.Col(self.shown_inputs.to_dash(), width=8),
+                    inputs_col
                 ])
             ])
         
-        out = self.layout.to_dash([self.outputs, self.inputs])
+        out = self.layout.to_dash([self.outputs, self.shown_inputs])
 
         # Create callbacks for each input-model pair
         for model in self.models:
@@ -429,35 +430,39 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
         return out
     
 
-class SharedInputModelsBasedExplorer(BaseComponentGroup):
+class SingleInputOutputModelsBasedExplorer(BaseComponentGroup):
     def __init__(
-        self, models, inputs, outputs, shown_inputs=None, id_prefix="", postproc_pred=None, layout=None
+        self, model, input, output, shown_input=None, id_prefix="", postproc_pred=None, layout=None
     ):
         if layout is None:
-            layout = MultiRowLayout()
+            layout = TwoRowLayout()
 
-        self.models = models
-        self.inputs = inputs
-        self.outputs = outputs
+        self.model = model
+        self.input = input
+        self.output = output
         self.postproc_pred = postproc_pred
         self.layout = layout
-        if shown_inputs is None:
-            self.shown_inputs = inputs
-        else:
-            self.shown_inputs = shown_inputs
+        self.shown_input = shown_input
 
-        super().__init__([outputs, inputs], id_prefix=id_prefix)
+        super().__init__([output, input], id_prefix=id_prefix)
 
     def to_dash(self):
-        out = self.layout.to_dash([self.shown_inputs, self.outputs])
+        if self.shown_input is None:
+            out = dbc.Row([
+                    dbc.Col(self.output.to_dash(), width=8),
+            ])
+        else:
+            out = dbc.Row([
+                    dbc.Col(self.output.to_dash(), width=8),
+                    dbc.Col(self.shown_input.to_dash(), width=8),
+            ])
 
-        for output_, model in zip(self.outputs, self.models):
-            create_view_model_update(
-                output_view=output_,
-                input_view=self.inputs,
-                model=model,
-                postproc_pred=self.postproc_pred,
-            )
+        create_view_model_update(
+            output_view=self.output,
+            input_view=self.input,
+            model=self.model,
+            postproc_pred=self.postproc_pred,
+        )
 
         return out
     
@@ -508,12 +513,18 @@ class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but fo
         # To hide ticks and grid but preserve axis titles, you should update only the relevant properties:
         fig.update_layout(
             xaxis=dict(
-                showticklabels=False,  # Hides tick labels
+                showticklabels=False,  # Hides tick labels (numbers)
                 ticks='',              # Hides the ticks themselves
+                showgrid=False,        # Hides grid lines
+                zeroline=False,        # Hides the zero line
+                showline=False,        # Hides the axis line
             ),
             yaxis=dict(
                 showticklabels=False,
                 ticks='',
+                showgrid=False,
+                zeroline=False,
+                showline=False,
             )
         )
 
