@@ -164,9 +164,15 @@ class PregnancyExplorer:
         return [
             dbc.Row(
                 [
-                    dbc.Col(self.animation_explorer.to_dash(), width=2),
-                    dbc.Col(self.mri_explorer.to_dash(), width=4),
-                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
+                    # The columns are overlapping because the sum of the widths (2 + 4 + 6 = 12) matches the default Bootstrap grid (12 columns),
+                    # but if the content inside the columns is too wide, or if there is not enough padding/margin, they may visually overlap.
+                    # To prevent overlap, ensure that the content inside each column is responsive and does not exceed its column width.
+                    # You can also add style or className to enforce overflow handling or add padding.
+                    # Here is a version with explicit style to help prevent overlap:
+
+                    dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "10px"}),
+                    dbc.Col(self.mri_explorer.to_dash(), width=4, style={"overflow": "auto", "padding": "10px"}),
+                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6, style={"overflow": "auto", "padding": "10px"}),
                 ],
                 align="center",
             ),
