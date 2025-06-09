@@ -60,8 +60,8 @@ class MeshLayout(Layout):
                 dbc.Col(
                     [
                         html.Div(mesh_graph.to_dash(), style={"marginBottom": "40px"}),
-                        html.Div(toggle_button.to_dash(), style={"marginBottom": "30px"}),
-                        html.Div(template_viz_button.to_dash(), style={"marginBottom": "30px"}),
+                        html.Div(toggle_button.to_dash(), style={"marginBottom": "10px"}),
+                        html.Div(template_viz_button.to_dash(), style={"marginBottom": "10px"}),
                         html.Div(
                             gest_slider.to_dash(),
                             style={"marginBottom": "30px", "width": "80%"},
@@ -74,7 +74,7 @@ class MeshLayout(Layout):
                         "justifyContent": "center",
                         "alignItems": "center",
                         "minHeight": "900px",  # Increased minimum height for more vertical space
-                        "paddingTop": "30px",
+                        "paddingTop": "0px",
                         "paddingBottom": "30px",
                     },
                 )
@@ -119,7 +119,12 @@ class MriLayout(Layout):
                         ),
                     ],
                     width=12,
-                    style={"display": "flex", "flexDirection": "column", "justifyContent": "center", "alignItems": "center"},
+                    style={
+                        "display": "flex", 
+                        "flexDirection": "column", 
+                        "justifyContent": "center", 
+                        "alignItems": "center"
+                        },
                 )
             ],
             style={
