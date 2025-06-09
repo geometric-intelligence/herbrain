@@ -129,11 +129,10 @@ def create_message_bubble(message, is_user=True):
         State("prog-slider", "value"),  # Progesterone slider
         State("lh-slider", "value"),  # LH slider
         State("mesh-plot", "figure"),
-        State("mri-plot", "figure"),  # MRI plot figure (adele added. remove if bugging.)
     ],  # Current mesh figure
     prevent_initial_call=True,
 )
-def update_chat(n_clicks, question, chat_history, gest_week, estro, prog, lh, figure, mri_figure):
+def update_chat(n_clicks, question, chat_history, gest_week, estro, prog, lh, figure):
     """Update the chat history when a new message is sent."""
     if not question:
         return chat_history, ""
@@ -166,14 +165,6 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
         else:
             img_base64 = None
 
-        # Ensure the MRI figure is a plotly figure object if provided
-        if mri_figure:
-            mri_temp_figure = go.Figure(mri_figure)
-            mri_img_bytes = pio.to_image(mri_img_base64, format="png")
-            mri_img_base64 = base64.b64encode(mri_img_bytes).decode("utf-8")
-        else:
-            mri_img_base64 = None
-
 
         # Prepare messages for the API call
         messages = [
@@ -198,7 +189,7 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
                 "content": "You can also refer to the hormone levels and gestation week provided in the context."},
             {
                 "role": "system",
-                "content": "The mri image shows the brain during pregnancy at the gestation week indicated in the context. On the larger scale of the whole brain, it is difficult to see the changes that are happening as a result of pregnancy."
+                "content": "The user can also see an mri of the brain, which shows the brain during pregnancy at the gestation week indicated in the context. On the larger scale of the whole brain, it is difficult to see the changes that are happening as a result of pregnancy."
             },
             {
                 "role": "system",
@@ -243,23 +234,7 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
             )
         else:
             messages.append({"role": "user", "content": question})
-
-        # Add the MRI image if available
-        if mri_img_base64:
-            messages.append(
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": "Here is the MRI image:"},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:image/png;base64,{mri_img_base64}"},
-                        },
-                    ],
-                }
-            )
-        else:
-            messages.append({"role": "user", "content": "Here is the MRI image:"})
+        
 
         # Create the chat completion
         response = client.chat.completions.create(
