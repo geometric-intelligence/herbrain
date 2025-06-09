@@ -29,6 +29,7 @@ import dash_bootstrap_components as dbc
 from polpo.dash.variables import VarDef
 from polpo.preprocessing import ListSqueeze
 from polpo.plot.mesh import MeshesPlotter, MeshPlotter, StaticMeshPlotter
+from polpo.plot.plotly import SlicePlotter
 from .data import (
     # HormonesCsvLoader,
     # MaternalRegisteredMeshesLoader,
@@ -265,17 +266,27 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
             title="MRI Controls"
         )
 
-        # Create a single output for the MRI view
-        outputs = Image(
-            id_="mri-view",
-            style={"width": "100%", "height": "auto"},
-        )
+        # Create a single output for the MRI view with size constraints
+        # outputs = Image(
+        #     id_="mri-view",
+        #     style={
+        #         "width": "100%",
+        #         "height": "auto",
+        #         "maxWidth": "800px",  # Limit maximum width
+        #         "maxHeight": "800px"  # Limit maximum height
+        #     },
+        # )
+        outputs = Graph(
+                id_="mri-view",
+                plotter=SlicePlotter(title="Selected MRI", x_label=None, y_label=None),
+            )
 
         # Create the explorer with the model, inputs, and output
         mri_explorer = SharedOutputModelsBasedExplorer(
             models=models,
             inputs=inputs,
             outputs=outputs,
+            shown_inputs=[self.mri_slice_slider, self.radio_button],
         )
 
         return dbc.Container(mri_explorer.to_dash())
@@ -369,14 +380,19 @@ class RadioButton(Component): # the one in polpo had a bug
         return [Output(self.id_, component_property, allow_duplicate=allow_duplicate)]
 
 
+
 class SharedOutputModelsBasedExplorer(BaseComponentGroup):
     def __init__(
-        self, models, inputs, outputs, id_prefix="", postproc_pred=None, layout=None
+        self, models, inputs, outputs, shown_inputs=None, id_prefix="", postproc_pred=None, layout=None
     ):
         self.models = models
         self.inputs = inputs
         self.outputs = outputs
         self.postproc_pred = postproc_pred
+        if shown_inputs is not None:
+            self.shown_inputs = shown_inputs
+        else:
+            self.shown_inputs = inputs
         self.layout = layout or MultiRowLayout()  # Use MultiRowLayout as default
 
         super().__init__([outputs, inputs], id_prefix=id_prefix)
@@ -387,7 +403,7 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
             return dbc.Container([
                 dbc.Row([
                     dbc.Col(self.outputs.to_dash(), width=8),
-                    dbc.Col(self.inputs.to_dash(), width=4),
+                    dbc.Col(self.shown_inputs.to_dash(), width=4),
                 ])
             ])
         

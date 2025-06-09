@@ -69,6 +69,18 @@ class MriModel(Model):
         else:
             raise ValueError("Input X must be a tuple/list of (gest_week, view_index, slice_index)")
         
+        if view_index in [0, 1, 2]:
+            # view_index is already an integer, use it directly
+            pass
+        elif view_index == "sagittal":
+            view_index = 0
+        elif view_index == "coronal":
+            view_index = 1
+        elif view_index == "axial":
+            view_index = 2
+        else:
+            raise ValueError(f"view_index: {view_index}, must be 'sagittal', 'coronal', or 'axial'")
+        
         gest_week_id = "gestWeek"  # This is the column name in hormones_df for gestational week
         # Use hormones_df to compute the session number associated with the gestational week.
         # We assume hormones_df is indexed by session or has a column for gestational week.
@@ -97,6 +109,7 @@ class MriModel(Model):
         # The slicer expects a list of slice indices for each axis, so we build that:
         # Only the selected axis gets the slice_index, others get a default (e.g. center)
         shape = datum.shape
+        print(f"Datum shape: {shape}, view_index: {view_index}, slice_index: {slice_index}")
         slice_indices = []
         for i in range(3):
             if i == view_index:
@@ -106,8 +119,10 @@ class MriModel(Model):
                 slice_indices.append(shape[i] // 2)
         # The slicer returns all three views, but we only want the selected one
         slices = self.slicer.slice(datum, slice_indices)
+        print(f"len(slices): {len(slices)}, slice_indices: {slice_indices}")
         # If slicer returns a list, pick the one corresponding to view_index
         if isinstance(slices, list):
+            print(f"Returning slice for view_index {view_index}: {slices[view_index]}")
             return slices[view_index]
         else:
             return slices
