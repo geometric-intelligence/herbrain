@@ -3,6 +3,8 @@ from polpo.preprocessing import Map
 from polpo.preprocessing.mesh.transform import AffineTransformation
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LinearRegression
+from polpo.models import Model
+from polpo.plot.mri import MriSlicer
 
 
 def MeshPCR(model=None, affine_transform=None, n_components=4, n_pipes=None):
@@ -33,3 +35,57 @@ def MeshPCR(model=None, affine_transform=None, n_components=4, n_pipes=None):
         )
 
     return ObjectRegressor(model=model, objs2y=objs2y)
+
+
+class MriModel(Model):
+    def __init__(self, data, index_tar=1, slicer=None):
+        """
+        data: list or array of MRI volumes (e.g. 3D numpy arrays)
+        index_tar: offset for gestational week slider (usually 1)
+        slicer: instance of MriSlicer (optional)
+        """
+        if slicer is None:
+            slicer = MriSlicer()
+        self.data = data
+        self.index_tar = index_tar
+        self.slicer = slicer
+
+    @classmethod
+    def from_index_ordering(cls, data, index_tar=1, index_ordering=(0, 1, 2)):
+        slicer = MriSlicer(index_ordering=index_ordering)
+        return cls(data, index_tar, slicer)
+
+    def predict(self, X):
+        """
+        X: tuple or list of (gest_week, view_index, slice_index)
+           - gest_week: int, gestational week (from slider)
+           - view_index: int, which view to return (from radiobutton: 0=sagittal, 1=coronal, 2=axial)
+           - slice_index: int, which slice along the selected axis
+        Returns: 2D numpy array, the selected MRI slice
+        """
+        if len(X) == 3:
+            gest_week, view_index, slice_index = X
+        else:
+            raise ValueError("Input X must be a tuple/list of (gest_week, view_index, slice_index)")
+
+        # Get the MRI volume for the selected gestational week
+        datum = self.data[gest_week - self.index_tar]
+
+        # Use the slicer to extract the correct slice
+        # The slicer expects a list of slice indices for each axis, so we build that:
+        # Only the selected axis gets the slice_index, others get a default (e.g. center)
+        shape = datum.shape
+        slice_indices = []
+        for i in range(3):
+            if i == view_index:
+                slice_indices.append(slice_index)
+            else:
+                # Use the center slice for non-selected axes
+                slice_indices.append(shape[i] // 2)
+        # The slicer returns all three views, but we only want the selected one
+        slices = self.slicer.slice(datum, slice_indices)
+        # If slicer returns a list, pick the one corresponding to view_index
+        if isinstance(slices, list):
+            return slices[view_index]
+        else:
+            return slices
