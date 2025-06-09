@@ -437,7 +437,7 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
         [
             html.P(
                 [
-                    "Overview: The hippocampus is a brain region that is particularly sensitive to sex hormones. In pregnancy, hormones experience extreme fluctuations, and the hippocampus volume is known to decrease. However, we find that the shape of the hippocampus changes as well. We have trained an AI to predict shape changes of the hippocampus based on hormone levels or gestation week. Blue areas indicate growth and red areas indicate shrinkage compared to pre-pregnancy shape. Beige color indicates pre-pregnancy shape.",
+                    "Overview: The subcortical structures of the brain are sensitive to sex hormone changes. In pregnancy, hormones experience extreme fluctuations, and subcortical structure volumes are known to decrease. However, we find that the shape of these structures change as well. We have trained an AI to predict shape changes of the subcortical structures based on hormone levels or gestation week. Blue areas indicate growth and red areas indicate shrinkage compared to pre-pregnancy shape. Beige color indicates pre-pregnancy shape.",
                     html.Br(),
                 ],
                 style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
@@ -450,7 +450,7 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
             html.P(
                 [
                     (
-                        "Instructions: Change the gestational week slider or hormone sliders, and the AI model will predict brain shape changes for these inputs."
+                        "Instructions: Change the gestational week slider or hormone sliders, and the AI model will predict subcortical structure shape changes for these inputs."
                         " The MRI view will update to show the closest corresponding MRI data."
                     )
                 ],
