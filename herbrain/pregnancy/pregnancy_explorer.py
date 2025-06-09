@@ -122,13 +122,10 @@ class PregnancyExplorer:
             radio_button_init = 0, # "sagittal", # default view
             id_prefix="",
         )
-        self.gest_week_mesh_explorer = self._gest_week_mesh_explorer()
-        # self.hormones_mesh_explorer = self._hormones_mesh_explorer()
 
         self.animation_explorer = AnimationExplorer(cfg.app.assets_folder, self.gest_week_slider)
 
-    def _gest_week_mesh_explorer(self):
-        return MultiModelsMeshExplorer(
+        self.gest_week_mesh_explorer = MultiModelsMeshExplorer(
             graph=Graph( # dash graph object
                 id_="mesh-plot",
                 plotter=MeshesPlotter(
@@ -160,33 +157,13 @@ class PregnancyExplorer:
             postproc_pred=self.postproc_pred,
         )
 
-        # return MeshExplorer(
-        #     graph=Graph(
-        #         id_="mesh-plot",
-        #         plotter=MeshesPlotter(
-        #             plotters=[MeshPlotter() for _ in range(self.n_structs)],
-        #             overlay_plotter=StaticMeshPlotter(
-        #                 mesh=self.template_mesh, visible=self.template_visibility
-        #             ),
-        #             bounds=None,  # TODO: check need
-        #             overlay_bounds=None,  # TODO: check need
-        #         ),
-        #     ),
-        #     model=self.week_mesh_model,
-        #     inputs=(
-        #         Slider(self.gest_week),
-        #     ),
-        #     checkbox_labels=((-1, "Show Full Brain", self.template_visibility),),
-        #     postproc_pred=self.postproc_pred,
-        # )
-
 
     def to_dash(self):
         return [
             dbc.Row(
                 [
-                    dbc.Col(self.animation_explorer.to_dash(), width=6),
-                    dbc.Col(self.mri_explorer.to_dash(), width=6),
+                    dbc.Col(self.animation_explorer.to_dash(), width=2),
+                    dbc.Col(self.mri_explorer.to_dash(), width=4),
                     dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
                 ],
                 align="center",
@@ -337,7 +314,7 @@ class AnimationExplorer():
 
         input = self.week_slider
 
-        image_style = {"width": "50%"}
+        image_style = {"width": "100%"}
         
         output = Image(id_=f"pregnancy-image", style=image_style)
 
