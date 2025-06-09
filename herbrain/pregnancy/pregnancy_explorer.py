@@ -15,6 +15,7 @@ from polpo.dash.components import (
     RadioButton,
     Component,
 )
+from polpo.dash.layout import MultiRowLayout
 from polpo.models import (
     MriSlicesLookup,
     PdDfLookup,
@@ -71,24 +72,24 @@ class PregnancyExplorer:
         # Variable definitions
         
         self.gest_week_var = VarDef(
-            "gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
+            id_="gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
         )
         self.estro = VarDef( # makes it easier to have all this info contained in a var, rather than having to type these things every time they are used
-            "estro",
+            id_="estro",
             name="Estrogen",
             unit="pg/ml",
             min_value=4100,
             max_value=12400,
         )
         self.prog = VarDef(
-            "prog",
+            id_="prog",
             name="Progesterone",
             unit="ng/ml",
             min_value=54,
             max_value=103,
         )
         self.lh = VarDef(
-            "lh",
+            id_="lh",
             name="LH",
             unit="ng/ml",
             min_value=0.59,
@@ -213,28 +214,26 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         graph_object = Graph(id_="mri-plot")
         self.radio_button_init = radio_button_init
         self.radio_button = RadioButton(id_="mri-view-toggle",
-                                       options=[(0,"sagittal"), (1, "coronal"), (2, "axial")],
+                                       options=[("sagittal", "sagittal"), ("coronal", "coronal"), ("axial", "axial")],
                                        default_value=radio_button_init)
         
-
-        # TODO: else, return a view of the mri that is correlated with the radio button.
         self.mri_data = mri_data
 
         # Get the dimensions for each view
         sample_volume = mri_data[0]  # Use first volume to get dimensions
-        self.view_dims = [
-            sample_volume.shape[0],  # sagittal
-            sample_volume.shape[1],  # coronal
-            sample_volume.shape[2]   # axial
-        ]
+        self.view_dims = {
+            "sagittal": sample_volume.shape[0],
+            "coronal": sample_volume.shape[1],
+            "axial": sample_volume.shape[2]
+        }
 
         # Create a VarDef for each view's slice range
         self.mri_slice = VarDef(
             id_="mri_slice",
             name="Slide to change MRI slice",
             min_value=0,
-            max_value=max(self.view_dims) - 1,  # Use max dimension across all views
-            default_value=max(self.view_dims) // 2
+            max_value=max(self.view_dims.values()) - 1,  # Use max dimension across all views
+            default_value=max(self.view_dims.values()) // 2
         )
 
         self.mri_slice_slider = Slider(
@@ -243,27 +242,11 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
             label_style={"fontSize": 20, "display": "block"}
         )
         
-        # NB: an output view of the brain data
         self.graph_object = graph_object
-        # NB: a model of the brain data
         self.mri_model = MriModel(data=mri_data)
-
-        # NB: a view of the hormones data
-        self.session_info = ComponentGroup(
-            components=[gest_week_var],
-            title="Session information",
-        )
-        # NB: a model of the hormones data
-        self.session_info_model = PdDfLookup(
-            df=hormones_df,
-            output_keys=[elem.var_def.id for elem in self.session_info],
-            tar=1,
-        )
-
         self.gest_week_slider = gest_week_slider
 
-
-        super().__init__([gest_week_slider, self.mri_slice_slider, self.radio_button, graph_object, self.session_info], id_prefix)
+        super().__init__([gest_week_slider, self.mri_slice_slider, self.radio_button, graph_object], id_prefix)
 
     def to_dash(self): # this is where you create the layout of the page
         if hasattr(self.gest_week_slider, "update_lims"):
@@ -273,18 +256,20 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         models = [self.mri_model]
 
         # Set up inputs in the correct order: (gest_week, view_index, slice_index)
-        inputs = [
-            self.gest_week_slider,  # gest_week
-            self.radio_button,      # view_index
-            self.mri_slice_slider   # slice_index
-        ]
+        inputs = ComponentGroup(
+            components=[
+                self.gest_week_slider,  # gest_week
+                self.radio_button,      # view_index
+                self.mri_slice_slider   # slice_index
+            ],
+            title="MRI Controls"
+        )
 
         # Create a single output for the MRI view
         outputs = Image(
             id_="mri-view",
             style={"width": "100%", "height": "auto"},
         )
-        
 
         # Create the explorer with the model, inputs, and output
         mri_explorer = SharedOutputModelsBasedExplorer(
@@ -367,19 +352,17 @@ class RadioButton(Component): # the one in polpo had a bug
     def to_dash(self):
         """Convert the component into a Dash UI element."""
         return [
-            dbc.FormGroup(
-                [
-                    dcc.RadioItems(
-                        id=self.id_,
-                        options=[
-                            {"label": label, "value": value}
-                            for value, label in self.options
-                        ],
-                        value=self.default_value,
-                        inline=self.inline,
-                    )
-                ]
-            )
+            dbc.Form([
+                dcc.RadioItems(
+                    id=self.id_,
+                    options=[
+                        {"label": label, "value": value}
+                        for value, label in self.options
+                    ],
+                    value=self.default_value,
+                    inline=self.inline,
+                )
+            ])
         ]
 
     def as_input(self):
@@ -393,22 +376,31 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
     def __init__(
         self, models, inputs, outputs, id_prefix="", postproc_pred=None, layout=None
     ):
-
         self.models = models
         self.inputs = inputs
         self.outputs = outputs
         self.postproc_pred = postproc_pred
-        self.layout = layout
+        self.layout = layout or MultiRowLayout()  # Use MultiRowLayout as default
 
         super().__init__([outputs, inputs], id_prefix=id_prefix)
 
     def to_dash(self):
-        out = self.layout.to_dash([self.inputs, self.outputs])
+        # Create a simple layout if none is provided
+        if self.layout is None:
+            return dbc.Container([
+                dbc.Row([
+                    dbc.Col(self.outputs.to_dash(), width=8),
+                    dbc.Col(self.inputs.to_dash(), width=4),
+                ])
+            ])
+        
+        out = self.layout.to_dash([self.outputs, self.inputs])
 
-        for input_, model in zip(self.inputs, self.models):
+        # Create callbacks for each input-model pair
+        for model in self.models:
             create_view_model_update(
                 output_view=self.outputs,
-                input_view=input_,
+                input_view=self.inputs,
                 model=model,
                 postproc_pred=self.postproc_pred,
             )
