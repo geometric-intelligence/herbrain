@@ -38,6 +38,7 @@ from .data import (
     # PilotMriImageLoader,
     # TemplateImageLoader,
 )
+from .layout import MeshLayout
 from .models import MriModel, ClosestImageLookup
 from polpo.dash.style import STYLE as S
 from dash import Dash, Input, Output, State, callback, dcc, html
@@ -155,6 +156,7 @@ class PregnancyExplorer:
             checkbox_labels=((-1, "Show Full Brain", self.template_visibility),),
             button_label=" Click Here to Toggle Between Gestational Week vs Hormone Value Prediction",
             postproc_pred=self.postproc_pred,
+            layout=MeshLayout(),
         )
 
 
@@ -162,11 +164,12 @@ class PregnancyExplorer:
         return [
             dbc.Row(
                 [
-                    dbc.Col(self.animation_explorer.to_dash(), width=2),
-                    dbc.Col(self.mri_explorer.to_dash(), width=4),
-                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
+                    dbc.Col(self.animation_explorer.to_dash(), width=3, className="p-0 m-0"),
+                    dbc.Col(self.mri_explorer.to_dash(), width=4, className="p-0 m-0"),
+                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=5, className="p-0 m-0"),
                 ],
                 align="center",
+                className="g-0",  # Bootstrap 5: removes gutter between columns
             ),
             # dbc.Row(
             #     [
@@ -243,16 +246,6 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
             title="MRI Controls"
         )
 
-        # Create a single output for the MRI view with size constraints
-        # outputs = Image(
-        #     id_="mri-view",
-        #     style={
-        #         "width": "100%",
-        #         "height": "auto",
-        #         "maxWidth": "800px",  # Limit maximum width
-        #         "maxHeight": "800px"  # Limit maximum height
-        #     },
-        # )
         outputs = Graph(
                 id_="mri-view",
                 plotter=SlicePlotter(title="Selected MRI", x_label=None, y_label=None),
@@ -272,6 +265,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
             inputs=inputs,
             outputs=outputs,
             shown_inputs=shown_inputs,
+            layout=None,
         )
 
         return dbc.Container(mri_explorer.to_dash())
@@ -313,54 +307,11 @@ class AnimationExplorer():
         model = ClosestImageLookup(self.image_paths) #here, input will be weeks, and output needs to be an image.
 
         input = self.week_slider
-
-        image_style = {"width": "100%"}
         
-        output = Image(id_=f"pregnancy-image", style=image_style)
+        output = Image(id_=f"pregnancy-image", style={"width": "100%", "height": "auto", "maxWidth": "1000px"})
 
         image_seq_explorer = SingleInputOutputModelsBasedExplorer(model, input, output, shown_input=None)
         return dbc.Container(image_seq_explorer.to_dash())
-
-
-class RadioButton(Component): # the one in polpo had a bug
-    """Radio button group.
-
-    Parameters
-    ----------
-    id_ : str
-        The unique ID for the radio button group.
-    options : list of tuple
-        A list of (value, label) tuples for the options.
-    default_value : str
-        The default selected value.
-    inline : bool
-        Whether to display options inline (horizontally).
-    """
-
-    def __init__(self, id_, options, default_value=None, inline=True):
-        super().__init__(id_prefix=id_) # initialize Component with id_prefix
-        self.options = options
-        self.default_value = default_value or options[0][0]
-        self.inline = inline
-        self.id_ = id_  # store the id for later use
-
-    def to_dash(self):
-        """Convert the component into a Dash UI element."""
-        return dcc.RadioItems(
-                id=self.id_,
-                options=[
-                    {"label": label, "value": value}
-                    for value, label in self.options
-                ],
-                value=self.default_value,
-                inline=self.inline,
-            )
-
-    def as_input(self):
-        return [Input(self.id_, "value")]
-
-    def as_output(self, component_property="value", allow_duplicate=False):
-        return [Output(self.id_, component_property, allow_duplicate=allow_duplicate)]
 
 
 
@@ -381,16 +332,19 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
     def to_dash(self):
         # Create a simple layout if none is provided
         if self.shown_inputs is None:
-            inputs_col = dbc.Col([], width=8)
+            inputs_col = dbc.Col([], width=12)
         else:
-            inputs_col = dbc.Col(self.shown_inputs.to_dash(), width=8)
+            inputs_col = dbc.Col(self.shown_inputs.to_dash(), width=12)
 
         if self.layout is None:
             return dbc.Container([
-                dbc.Row([
-                    dbc.Col(self.outputs.to_dash(), width=8),
-                    inputs_col
-                ])
+                dbc.Col(
+                    [
+                        dbc.Row(self.outputs.to_dash(), width=12, className="d-flex justify-content-center"),
+                        dbc.Row(inputs_col.children, width=12, className="d-flex justify-content-center"),
+                    ],
+                    className="justify-content-center align-items-center"
+                )
             ])
         
         out = self.layout.to_dash([self.outputs, self.shown_inputs])
@@ -426,12 +380,12 @@ class SingleInputOutputModelsBasedExplorer(BaseComponentGroup):
     def to_dash(self):
         if self.shown_input is None:
             out = dbc.Row([
-                    dbc.Col(self.output.to_dash(), width=8),
+                    dbc.Col(self.output.to_dash(), width=12),
             ])
         else:
             out = dbc.Row([
-                    dbc.Col(self.output.to_dash(), width=8),
-                    dbc.Col(self.shown_input.to_dash(), width=8),
+                    dbc.Col(self.output.to_dash(), width=12),
+                    dbc.Col(self.shown_input.to_dash(), width=12),
             ])
 
         create_view_model_update(
@@ -506,3 +460,45 @@ class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but fo
         )
 
         return fig
+    
+
+class RadioButton(Component): # the one in polpo had a bug
+    """Radio button group.
+
+    Parameters
+    ----------
+    id_ : str
+        The unique ID for the radio button group.
+    options : list of tuple
+        A list of (value, label) tuples for the options.
+    default_value : str
+        The default selected value.
+    inline : bool
+        Whether to display options inline (horizontally).
+    """
+
+    def __init__(self, id_, options, default_value=None, inline=True):
+        super().__init__(id_prefix=id_) # initialize Component with id_prefix
+        self.options = options
+        self.default_value = default_value or options[0][0]
+        self.inline = inline
+        self.id_ = id_  # store the id for later use
+
+    def to_dash(self):
+        """Convert the component into a Dash UI element."""
+        return dcc.RadioItems(
+                id=self.id_,
+                options=[
+                    {"label": label, "value": value}
+                    for value, label in self.options
+                ],
+                value=self.default_value,
+                inline=self.inline,
+            )
+
+    def as_input(self):
+        return [Input(self.id_, "value")]
+
+    def as_output(self, component_property="value", allow_duplicate=False):
+        return [Output(self.id_, component_property, allow_duplicate=allow_duplicate)]
+

@@ -3,7 +3,7 @@ import abc
 import dash_bootstrap_components as dbc
 from dash import html
 
-from .style import STYLE as S
+from polpo.dash.style import STYLE as S
 
 
 class Layout(abc.ABC):
@@ -43,3 +43,37 @@ class ThreeColumnLayout(Layout):
                 },
             ),
         ]
+    
+
+class MeshLayout(Layout):
+    """Create a layout for the mesh explorer.
+    
+    The mesh explorer has a single column, with the output at the top, and then three
+    inputs below."""
+    def to_dash(self, comps):
+        inputs, output = comps
+
+        input1, input2, input3 = inputs
+
+        return dbc.Col(
+            [
+                dbc.Row(
+                    html.Div(output.to_dash()),
+                ),
+                dbc.Row(
+                    html.Div(input1.to_dash()),
+                ),
+                dbc.Row(
+                    html.Div(input2.to_dash()),
+                ),
+                dbc.Row(
+                    html.Div(input3.to_dash()),
+                ),
+            ],
+            align="center",
+            style={
+                "marginLeft": S.margin_side,
+                "marginRight": S.margin_side,
+                "marginTop": "50px",
+            },
+        )
