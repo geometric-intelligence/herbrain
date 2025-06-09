@@ -38,7 +38,7 @@ def MeshPCR(model=None, affine_transform=None, n_components=4, n_pipes=None):
 
 
 class MriModel(Model):
-    def __init__(self, data, index_tar=1, slicer=None):
+    def __init__(self, data, hormones_df, index_tar=1, slicer=None):
         """
         data: list or array of MRI volumes (e.g. 3D numpy arrays)
         index_tar: offset for gestational week slider (usually 1)
@@ -49,6 +49,7 @@ class MriModel(Model):
         self.data = data
         self.index_tar = index_tar
         self.slicer = slicer
+        self.hormones_df = hormones_df  # Store hormones data if needed for future use
 
     @classmethod
     def from_index_ordering(cls, data, index_tar=1, index_ordering=(0, 1, 2)):
@@ -67,9 +68,30 @@ class MriModel(Model):
             gest_week, view_index, slice_index = X
         else:
             raise ValueError("Input X must be a tuple/list of (gest_week, view_index, slice_index)")
+        
+        gest_week_id = "gestWeek"  # This is the column name in hormones_df for gestational week
+        # Use hormones_df to compute the session number associated with the gestational week.
+        # We assume hormones_df is indexed by session or has a column for gestational week.
+        # Try to find the session number corresponding to the given gest_week.
+        # If hormones_df is a DataFrame with a 'gest_week' column, find the session index.
+        session_number = None
+        if hasattr(self.hormones_df, "loc") and gest_week_id in self.hormones_df.columns:
+            # Find the first row where gest_week matches
+            matches = self.hormones_df[self.hormones_df[gest_week_id] == gest_week]
+            if not matches.empty:
+                # Use the index of the first match as the session number
+                session_number = matches.index[0]
+            else:
+                # If not found, return the closest match
+                # Find the closest gestational week in the DataFrame
+                all_gest_weeks = self.hormones_df[gest_week_id]
+                closest_idx = (all_gest_weeks - gest_week).abs().idxmin()
+                session_number = closest_idx
 
+        if session_number is not None and session_number >= len(self.data): # address the debug mode.
+            session_number = len(self.data) - 1
         # Get the MRI volume for the selected gestational week
-        datum = self.data[gest_week - self.index_tar]
+        datum = self.data[session_number - self.index_tar] # this needs to be session number, not gest week.
 
         # Use the slicer to extract the correct slice
         # The slicer expects a list of slice indices for each axis, so we build that:

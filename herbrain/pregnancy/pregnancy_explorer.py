@@ -185,7 +185,7 @@ class PregnancyExplorer:
             dbc.Row(
                 [
                     dbc.Col(self.animation_explorer.to_dash(), width=6),
-                    # dbc.Col(self.mri_explorer.to_dash(), width=6),
+                    dbc.Col(self.mri_explorer.to_dash(), width=6),
                     dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
                 ],
                 align="center",
@@ -214,7 +214,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         graph_object = Graph(id_="mri-plot")
         self.radio_button_init = radio_button_init
         self.radio_button = RadioButton(id_="mri-view-toggle",
-                                       options=[("sagittal", "sagittal"), ("coronal", "coronal"), ("axial", "axial")],
+                                       options=[(0, "sagittal"), (1, "coronal"), (2, "axial")],
                                        default_value=radio_button_init)
         
         self.mri_data = mri_data
@@ -243,7 +243,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         )
         
         self.graph_object = graph_object
-        self.mri_model = MriModel(data=mri_data, index_tar=1, slicer=None)
+        self.mri_model = MriModel(data=mri_data, hormones_df=hormones_df, index_tar=1, slicer=None)
         self.gest_week_slider = gest_week_slider
 
         super().__init__([gest_week_slider, self.mri_slice_slider, self.radio_button, graph_object], id_prefix)
