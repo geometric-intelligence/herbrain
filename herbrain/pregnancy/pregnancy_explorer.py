@@ -14,6 +14,7 @@ from polpo.dash.components import (
     BaseComponentGroup,
     RadioButton,
     Component,
+    VarDefComponent,
 )
 from polpo.dash.layout import MultiRowLayout, TwoRowLayout
 from polpo.models import (
@@ -497,19 +498,22 @@ class RadioButton(Component): # the one in polpo had a bug
 
     def to_dash(self):
         """Convert the component into a Dash UI element."""
-        return html.Div([
-            html.Label("MRI View"),  # Visible label
-            dcc.RadioItems(
-                id=self.id_,
-                options=[
-                    {"label": label, "value": value}
-                    for value, label in self.options
-                ],
-                value=self.default_value,
-                inline=self.inline,
-                style={'margin': '20px 0'}
-            )
-        ])
+        return html.Div(
+            [
+                html.Span("MRI View", style={"marginRight": "16px", "fontWeight": "bold"}),
+                dcc.RadioItems(
+                    id=self.id_,
+                    options=[
+                        {"label": label, "value": value}
+                        for value, label in self.options
+                    ],
+                    value=self.default_value,
+                    inline=self.inline,
+                    style={'margin': '20px 0'}
+                ),
+            ],
+            style={"display": "flex", "alignItems": "center"}
+        )
 
     def as_input(self):
         return [Input(self.id_, "value")]
@@ -517,3 +521,82 @@ class RadioButton(Component): # the one in polpo had a bug
     def as_output(self, component_property="value", allow_duplicate=False):
         return [Output(self.id_, component_property, allow_duplicate=allow_duplicate)]
 
+
+# class Slider(VarDefComponent):
+#     """Slider."""
+
+#     def __init__(self, var_def, step=1, id_prefix="", label_style=None):
+#         super().__init__(var_def=var_def, id_prefix=id_prefix, id_suffix="-slider")
+#         # TODO: think more about this design
+
+#         self.step = step
+
+#         # TODO: can default be set for the general app instead?
+#         default_label_style = {
+#             "fontSize": S.text_fontsize,
+#             "fontFamily": S.text_fontfamily,
+#         }
+#         self.label_style = (label_style or {}).update(default_label_style)
+
+#     def __repr__(self):
+#         return f"Slider({self.id})"
+
+#     def to_dash(self):
+#         # TODO: allow to config from config file, e.g. label_style
+#         label = dbc.Label(
+#             self.var_def.label,
+#             style=self.label_style,
+#         )
+
+#         # ensure default value is on the slider
+#         min_value, max_value = self.var_def.min_value, self.var_def.max_value
+#         step = self.step
+#         value = min(max_value, self.var_def.default_value)
+#         value = max(min_value, value)
+#         n_steps = round((value - min_value) / step)
+#         value = min_value + step * n_steps
+
+#         # slider = dcc.Slider(
+#         #     id=self.id,
+#         #     min=min_value,
+#         #     max=max_value,
+#         #     step=step,
+#         #     value=value,
+#         #     marks={
+#         #         self.var_def.min_value: {"label": "min"},
+#         #         self.var_def.max_value: {"label": "max"},
+#         #     },
+#         #     tooltip={
+#         #         "placement": "bottom",
+#         #         "always_visible": True,
+#         #         "style": {"fontSize": "25px", "fontFamily": S.text_fontfamily},
+#         #     },
+#         # )
+#         slider = html.Div(
+#             [
+#                 html.Span(self.var_def.label, style={"marginRight": "16px", "fontWeight": "bold"}),
+#                 dcc.Slider(
+#                 id=self.id,
+#                 min=min_value,
+#                 max=max_value,
+#                 step=step,
+#                 value=value,
+#                 marks={
+#                     self.var_def.min_value: {"label": "min"},
+#                     self.var_def.max_value: {"label": "max"},
+#                 },
+#                 tooltip={
+#                     "placement": "bottom",
+#                     "always_visible": True,
+#                     "style": {"fontSize": "25px", "fontFamily": S.text_fontfamily},
+#                 },
+#             )
+#             ],
+#             style={"display": "flex", "alignItems": "center"}
+#         )
+
+#         # return [label, slider]
+#         return slider
+
+#     def as_input(self):
+#         return [Input(self.id, "drag_value")]

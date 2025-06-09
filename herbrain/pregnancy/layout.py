@@ -51,18 +51,21 @@ class MeshLayout(Layout):
     The mesh explorer has a single column, with the output at the top, and then three
     inputs below."""
     def to_dash(self, comps):
-        inputs, output = comps
+        inputs, mesh_graph = comps
 
-        input1, input2, input3 = inputs
+        toggle_button, template_viz_button, gest_slider = inputs
 
         return dbc.Container(
             [
                 dbc.Col(
                     [
-                        html.Div(output.to_dash(), style={"marginBottom": "40px"}),
-                        html.Div(input1.to_dash(), style={"marginBottom": "30px"}),
-                        html.Div(input2.to_dash(), style={"marginBottom": "30px"}),
-                        html.Div(input3.to_dash(), style={"marginBottom": "30px"}),
+                        html.Div(mesh_graph.to_dash(), style={"marginBottom": "40px"}),
+                        html.Div(toggle_button.to_dash(), style={"marginBottom": "30px"}),
+                        html.Div(template_viz_button.to_dash(), style={"marginBottom": "30px"}),
+                        html.Div(
+                            gest_slider.to_dash(),
+                            style={"marginBottom": "30px", "width": "80%"},
+                        ),
                     ],
                     width=12,
                     style={
@@ -93,17 +96,27 @@ class MriLayout(Layout):
     The MRI explorer has a single column, with the output at the top, and then three
     inputs below."""
     def to_dash(self, comps):
-        inputs, output = comps
+        inputs, mri = comps
 
-        input1, input2 = inputs
+        radio_button, slider = inputs
 
         return dbc.Container(
             [
                 dbc.Col(
                     [
-                        html.Div(output.to_dash()),
-                        html.Div(input1.to_dash()),
-                        html.Div(input2.to_dash()),
+                        html.Div(mri.to_dash()),
+                        html.Div(radio_button.to_dash()),
+                        html.Div(
+                            slider.to_dash(),
+                            style={
+                                "width": "100%",
+                                "border": "1px solid #e0e0e0",
+                                "borderRadius": "8px",
+                                "padding": "20px",
+                                # "backgroundColor": "#fafbfc",
+                                "marginBottom": "30px",
+                            },
+                        ),
                     ],
                     width=12,
                     style={"display": "flex", "flexDirection": "column", "justifyContent": "center", "alignItems": "center"},
