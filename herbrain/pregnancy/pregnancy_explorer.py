@@ -37,7 +37,7 @@ from .data import (
     # PilotMriImageLoader,
     # TemplateImageLoader,
 )
-from .models import MriModel
+from .models import MriModel, ClosestImageLookup
 from polpo.dash.style import STYLE as S
 from dash import Dash, Input, Output, State, callback, dcc, html
 import numpy as np
@@ -185,17 +185,17 @@ class PregnancyExplorer:
             dbc.Row(
                 [
                     dbc.Col(self.animation_explorer.to_dash(), width=6),
-                    dbc.Col(self.mri_explorer.to_dash(), width=6),
+                    # dbc.Col(self.mri_explorer.to_dash(), width=6),
                     dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6),
                 ],
                 align="center",
             ),
-            dbc.Row(
-                [
-                    dbc.Col(self.gest_week_slider.to_dash(), width=6),
-                ],
-                align="center",
-            ),
+            # dbc.Row(
+            #     [
+            #         dbc.Col(self.gest_week_slider.to_dash(), width=6),
+            #     ],
+            #     align="center",
+            # ),
         ]
     
 
@@ -232,8 +232,8 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
             id_="mri_slice",
             name="Slide to change MRI slice",
             min_value=0,
-            max_value=max(self.view_dims.values()) - 1,  # Use max dimension across all views
-            default_value=max(self.view_dims.values()) // 2
+            max_value=min(self.view_dims.values()) - 1,  # Use min dimension across all views
+            default_value=min(self.view_dims.values()) // 2
         )
 
         self.mri_slice_slider = Slider(
@@ -243,7 +243,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         )
         
         self.graph_object = graph_object
-        self.mri_model = MriModel(data=mri_data)
+        self.mri_model = MriModel(data=mri_data, index_tar=1, slicer=None)
         self.gest_week_slider = gest_week_slider
 
         super().__init__([gest_week_slider, self.mri_slice_slider, self.radio_button, graph_object], id_prefix)
@@ -314,7 +314,7 @@ class AnimationExplorer():
 
     def to_dash(self):
         # TODO: do version with DictLookup
-        models = [ListLookup(self.image_paths)] #here, input will be weeks, and output needs to be an image.
+        models = [ClosestImageLookup(self.image_paths)] #here, input will be weeks, and output needs to be an image.
 
         inputs = self.week_slider
 

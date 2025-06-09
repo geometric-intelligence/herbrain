@@ -89,3 +89,34 @@ class MriModel(Model):
             return slices[view_index]
         else:
             return slices
+        
+
+class ClosestImageLookup(Model):
+    def __init__(self, data, tar=0):
+        super().__init__()
+        self.data = data
+        self.tar = tar
+        # Precompute week indices from image paths
+        self.week_indices = []
+        for path in self.data:
+            # Extract the week index from the path, assuming format contains "week_{index:02}"
+            import re
+            match = re.search(r"week_(\d{2})", path)
+            if match:
+                self.week_indices.append(int(match.group(1)))
+            else:
+                self.week_indices.append(None)  # or raise an error if strict
+
+    def predict(self, X):
+        # Expects X to be a tuple/list with the week number as the first element
+        week = X[0]
+        # Find the closest week index
+        min_diff = float("inf")
+        closest_idx = 0
+        for i, w in enumerate(self.week_indices):
+            if w is not None:
+                diff = abs(w - week)
+                if diff < min_diff:
+                    min_diff = diff
+                    closest_idx = i
+        return self.data[closest_idx]
