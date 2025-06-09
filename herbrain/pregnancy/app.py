@@ -215,5 +215,5 @@ def my_app(cfg, data, gpt):
         debug=server_cfg.debug,
         use_reloader=server_cfg.use_reloader,
         host=server_cfg.host,
-        port=server_cfg.port, #8888
+        port=8888, #8888 server_cfg.port
     )

@@ -281,12 +281,20 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
                 plotter=SlicePlotter(title="Selected MRI", x_label=None, y_label=None),
             )
 
+        shown_inputs = ComponentGroup(
+            components=[
+                self.mri_slice_slider,  # slice_index
+                self.radio_button       # view_index
+            ],
+            title="Shown MRI controls"
+        )
+
         # Create the explorer with the model, inputs, and output
         mri_explorer = SharedOutputModelsBasedExplorer(
             models=models,
             inputs=inputs,
             outputs=outputs,
-            shown_inputs=[self.mri_slice_slider, self.radio_button],
+            shown_inputs=shown_inputs,
         )
 
         return dbc.Container(mri_explorer.to_dash())
@@ -403,7 +411,7 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
             return dbc.Container([
                 dbc.Row([
                     dbc.Col(self.outputs.to_dash(), width=8),
-                    dbc.Col(self.shown_inputs.to_dash(), width=4),
+                    dbc.Col(self.shown_inputs.to_dash(), width=8),
                 ])
             ])
         
@@ -413,6 +421,39 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
         for model in self.models:
             create_view_model_update(
                 output_view=self.outputs,
+                input_view=self.inputs,
+                model=model,
+                postproc_pred=self.postproc_pred,
+            )
+
+        return out
+    
+
+class SharedInputModelsBasedExplorer(BaseComponentGroup):
+    def __init__(
+        self, models, inputs, outputs, shown_inputs=None, id_prefix="", postproc_pred=None, layout=None
+    ):
+        if layout is None:
+            layout = MultiRowLayout()
+
+        self.models = models
+        self.inputs = inputs
+        self.outputs = outputs
+        self.postproc_pred = postproc_pred
+        self.layout = layout
+        if shown_inputs is None:
+            self.shown_inputs = inputs
+        else:
+            self.shown_inputs = shown_inputs
+
+        super().__init__([outputs, inputs], id_prefix=id_prefix)
+
+    def to_dash(self):
+        out = self.layout.to_dash([self.shown_inputs, self.outputs])
+
+        for output_, model in zip(self.outputs, self.models):
+            create_view_model_update(
+                output_view=output_,
                 input_view=self.inputs,
                 model=model,
                 postproc_pred=self.postproc_pred,
