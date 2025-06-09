@@ -450,8 +450,10 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
             html.P(
                 [
                     (
-                        "Instructions: Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation. "
-                        "Beige color indicates pre-pregnancy shape, blue indicates shrinking compared to pre-pregnancy, and red indicates growth."
+                        "Instructions: Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation."
+                        " Beige color indicates pre-pregnancy shape, blue indicates shrinking compared to pre-pregnancy, and red indicates growth."
+                        " Adjusting the gestation week of the mesh prediction will generate a new mesh prediction and prompt the MRI view to show the closest corresponding MRI data."
+                        " Use the MRI slice sliders and buttons to adjust the MRI view."
                     )
                 ],
                 style={
