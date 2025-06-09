@@ -179,7 +179,7 @@ def my_app(cfg, data, gpt):
             active=True,
             tab_header=SidebarHeader(
                 href="/page-1",
-                text="Digital Twin: Pregnancy",
+                text="Pregnancy",
                 image_url="pregnancy_logo.png",
                 image_width=40,
             ),
@@ -194,7 +194,7 @@ def my_app(cfg, data, gpt):
             active=True,
             tab_header=SidebarHeader(
                 href="/page-2",
-                text="Digital Twin: Menstruation",
+                text="Menstruation",
                 image_url="menstrual_logo.png",
                 image_width=40,
             ),
