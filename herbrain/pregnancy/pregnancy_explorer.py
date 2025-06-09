@@ -348,22 +348,19 @@ class RadioButton(Component): # the one in polpo had a bug
         self.options = options
         self.default_value = default_value or options[0][0]
         self.inline = inline
+        self.id_ = id_  # store the id for later use
 
     def to_dash(self):
         """Convert the component into a Dash UI element."""
-        return [
-            dbc.Form([
-                dcc.RadioItems(
-                    id=self.id_,
-                    options=[
-                        {"label": label, "value": value}
-                        for value, label in self.options
-                    ],
-                    value=self.default_value,
-                    inline=self.inline,
-                )
-            ])
-        ]
+        return dcc.RadioItems(
+                id=self.id_,
+                options=[
+                    {"label": label, "value": value}
+                    for value, label in self.options
+                ],
+                value=self.default_value,
+                inline=self.inline,
+            )
 
     def as_input(self):
         return [Input(self.id_, "value")]
