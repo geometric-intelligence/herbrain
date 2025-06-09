@@ -215,7 +215,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         graph_object = Graph(id_="mri-plot")
         self.radio_button_init = radio_button_init
         self.radio_button = RadioButton(id_="mri-view-toggle",
-                                       options=[(0, "sagittal"), (1, "coronal"), (2, "axial")],
+                                       options=[(0, "Sagittal"), (1, "Coronal"), (2, "Axial")],
                                        default_value=radio_button_init)
         
         self.mri_data = mri_data
