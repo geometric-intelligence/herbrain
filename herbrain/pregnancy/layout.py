@@ -109,7 +109,7 @@ class MriLayout(Layout):
                         html.Div(
                             slider.to_dash(),
                             style={
-                                "width": "100%",
+                                "width": "80%",
                                 "border": "1px solid #e0e0e0",
                                 "borderRadius": "8px",
                                 "padding": "20px",

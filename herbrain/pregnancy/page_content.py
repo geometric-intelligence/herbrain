@@ -481,7 +481,7 @@ def pregnancy_page(pregnancy_explorer, gpt=False):
             # html.Hr(),
         ]
         + pregnancy_explorer.to_dash()
-        + [html.Div(style={"height": S.space_between_sections}), html.Hr()]
+        + [html.Div(style={"height": 0}), html.Hr()]
         + gpt_component,
         fluid=True,
     )
