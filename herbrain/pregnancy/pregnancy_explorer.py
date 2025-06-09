@@ -119,7 +119,7 @@ class PregnancyExplorer:
             self.gest_week_var,
             self.mri_data,
             self.hormones_df, # this tells the gest week-session correspondance.
-            radio_button_init = "sagittal", # default view
+            radio_button_init = 0, # "sagittal", # default view
             id_prefix="",
         )
         self.gest_week_mesh_explorer = self._gest_week_mesh_explorer()
