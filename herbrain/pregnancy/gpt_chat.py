@@ -129,10 +129,11 @@ def create_message_bubble(message, is_user=True):
         State("prog-slider", "value"),  # Progesterone slider
         State("lh-slider", "value"),  # LH slider
         State("mesh-plot", "figure"),
+        State("mri-plot", "figure"),  # MRI plot figure (adele added. remove if bugging.)
     ],  # Current mesh figure
     prevent_initial_call=True,
 )
-def update_chat(n_clicks, question, chat_history, gest_week, estro, prog, lh, figure):
+def update_chat(n_clicks, question, chat_history, gest_week, estro, prog, lh, figure, mri_figure):
     """Update the chat history when a new message is sent."""
     if not question:
         return chat_history, ""
@@ -165,6 +166,15 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
         else:
             img_base64 = None
 
+        # Ensure the MRI figure is a plotly figure object if provided
+        if mri_figure:
+            mri_temp_figure = go.Figure(mri_figure)
+            mri_img_bytes = pio.to_image(mri_img_base64, format="png")
+            mri_img_base64 = base64.b64encode(mri_img_bytes).decode("utf-8")
+        else:
+            mri_img_base64 = None
+
+
         # Prepare messages for the API call
         messages = [
             {
@@ -180,6 +190,41 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
                 "content": "Just above your chat box, you see the rendered 3D hippocampus of a brain of a pregnant woman—this is the image provided in your context. Be prepared to answer questions based on what you observe in this brain image.",
             },
             {"role": "system", "content": context},
+            {
+                "role": "system",
+                "content": "You can refer to the 3D mesh visualization of the brain and the MRI image provided in the chat or by the messages appended below.",
+            },
+            {"role": "system",
+                "content": "You can also refer to the hormone levels and gestation week provided in the context."},
+            {
+                "role": "system",
+                "content": "The mri image shows the brain during pregnancy at the gestation week indicated in the context. On the larger scale of the whole brain, it is difficult to see the changes that are happening as a result of pregnancy."
+            },
+            {
+                "role": "system",
+                "content": "The 3D mesh visualization shown in the appended message shows the hippocampus of the brain during pregnancy. This is a more localized view of the brain, and it is easier to see the changes that are happening as a result of pregnancy. Red indicates areas that are shrinking as a result of pregnancy, and blue shows areas that are getting bigger as a result of pregnancy. Beige areas have not changed from the pre-pregnancy state.",
+            },
+            {
+                "role": "system",
+                "content": "When answering questions, try to explain what is happening in the figures appended below. Try to explain that some areas are shrinking and some areas are growing, and that is a result of changing gestation week. Feel free to include any other observations you make."
+            },
+            {
+                "role": "system",
+                "content": "If you are unsure about the answer, please say that you don't know.",
+            },
+            {
+                "role": "system",
+                "content": "Your job is to be a scientific assistant. Assume that this app is sent to someone with no knowledge of neuroscience, who does not know how to read scientific plots. You are here to help them understand the data and results presented in the app.",
+            },
+            {
+                "role": "system",
+                "content": "You are a helpful assistant explaining brain changes during pregnancy. Focus on the relationship between hormones and brain structure.",
+            },
+            {
+                "role": "system",
+                "content": "The structures you see in the 3D mesh visualization are subcortical structures. Specifically, they are the accumbens nucleus, Amygdala, Caudate nucleus, Hippocampus, Globus pallidus (Pallidum), Putamen, Thalamus.",
+            },
+
         ]
 
         # Add the image if available
@@ -198,6 +243,23 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
             )
         else:
             messages.append({"role": "user", "content": question})
+
+        # Add the MRI image if available
+        if mri_img_base64:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Here is the MRI image:"},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/png;base64,{mri_img_base64}"},
+                        },
+                    ],
+                }
+            )
+        else:
+            messages.append({"role": "user", "content": "Here is the MRI image:"})
 
         # Create the chat completion
         response = client.chat.completions.create(
