@@ -55,25 +55,60 @@ class MeshLayout(Layout):
 
         input1, input2, input3 = inputs
 
-        return dbc.Col(
+        return dbc.Container(
             [
-                dbc.Row(
-                    html.Div(output.to_dash()),
-                ),
-                dbc.Row(
-                    html.Div(input1.to_dash()),
-                ),
-                dbc.Row(
-                    html.Div(input2.to_dash()),
-                ),
-                dbc.Row(
-                    html.Div(input3.to_dash()),
-                ),
+                dbc.Col(
+                    [
+                        html.Div(output.to_dash(), style={"marginBottom": "40px"}),
+                        html.Div(input1.to_dash(), style={"marginBottom": "30px"}),
+                        html.Div(input2.to_dash(), style={"marginBottom": "30px"}),
+                        html.Div(input3.to_dash(), style={"marginBottom": "30px"}),
+                    ],
+                    width=12,
+                    style={
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "justifyContent": "center",
+                        "alignItems": "center",
+                        "minHeight": "900px",  # Increased minimum height for more vertical space
+                        "paddingTop": "30px",
+                        "paddingBottom": "30px",
+                    },
+                )
             ],
-            align="right",
             style={
-                # "marginLeft": S.margin_side,
-                # "marginRight": S.margin_side,
                 "marginTop": "50px",
+                "height": "100%",
+                "display": "flex",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "minHeight": "900px",  # Increased minimum height for more vertical space
             },
+            fluid=True,
+        )
+
+class MriLayout(Layout):
+    """Create a layout for the MRI explorer.
+    
+    The MRI explorer has a single column, with the output at the top, and then three
+    inputs below."""
+    def to_dash(self, comps):
+        inputs, output = comps
+
+        input1, input2 = inputs
+
+        return dbc.Container(
+            [
+                dbc.Col(
+                    [
+                        html.Div(output.to_dash()),
+                        html.Div(input1.to_dash()),
+                        html.Div(input2.to_dash()),
+                    ],
+                    width=12,
+                    style={"display": "flex", "flexDirection": "column", "justifyContent": "center", "alignItems": "center"},
+                )
+            ],
+            style={"marginTop": "50px", "height": "100%", "display": "flex", "flexDirection": "column", "justifyContent": "center"},
+            fluid=True,
         )

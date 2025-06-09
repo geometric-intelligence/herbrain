@@ -38,7 +38,7 @@ from .data import (
     # PilotMriImageLoader,
     # TemplateImageLoader,
 )
-from .layout import MeshLayout
+from .layout import MeshLayout, MriLayout
 from .models import MriModel, ClosestImageLookup
 from polpo.dash.style import STYLE as S
 from dash import Dash, Input, Output, State, callback, dcc, html
@@ -170,9 +170,9 @@ class PregnancyExplorer:
                     # You can also add style or className to enforce overflow handling or add padding.
                     # Here is a version with explicit style to help prevent overlap:
 
-                    dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "10px"}),
-                    dbc.Col(self.mri_explorer.to_dash(), width=4, style={"overflow": "auto", "padding": "10px"}),
-                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6, style={"overflow": "auto", "padding": "10px"}),
+                    dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "20px"}),
+                    dbc.Col(self.mri_explorer.to_dash(), width=4, style={"overflow": "auto", "padding": "20px"}),
+                    dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=6, style={"overflow": "auto", "padding": "20px"}),
                 ],
                 align="center",
             ),
@@ -216,7 +216,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         # Create a VarDef for each view's slice range
         self.mri_slice = VarDef(
             id_="mri_slice",
-            name="Slide to change MRI slice",
+            name="MRI Slice",
             min_value=0,
             max_value=min(self.view_dims.values()) - 1,  # Use min dimension across all views
             default_value=min(self.view_dims.values()) // 2
@@ -270,7 +270,7 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
             inputs=inputs,
             outputs=outputs,
             shown_inputs=shown_inputs,
-            layout=None,
+            layout=MriLayout(),
         )
 
         return dbc.Container(mri_explorer.to_dash())
@@ -354,7 +354,7 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
                 )
             ])
         
-        out = self.layout.to_dash([self.outputs, self.shown_inputs])
+        out = self.layout.to_dash([self.shown_inputs, self.outputs,])
 
         # Create callbacks for each input-model pair
         for model in self.models:
@@ -497,7 +497,9 @@ class RadioButton(Component): # the one in polpo had a bug
 
     def to_dash(self):
         """Convert the component into a Dash UI element."""
-        return dcc.RadioItems(
+        return html.Div([
+            html.Label("MRI View"),  # Visible label
+            dcc.RadioItems(
                 id=self.id_,
                 options=[
                     {"label": label, "value": value}
@@ -505,7 +507,9 @@ class RadioButton(Component): # the one in polpo had a bug
                 ],
                 value=self.default_value,
                 inline=self.inline,
+                style={'margin': '20px 0'}
             )
+        ])
 
     def as_input(self):
         return [Input(self.id_, "value")]
