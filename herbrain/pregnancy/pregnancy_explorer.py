@@ -29,7 +29,7 @@ import dash_bootstrap_components as dbc
 from polpo.dash.variables import VarDef
 from polpo.preprocessing import ListSqueeze
 from polpo.plot.mesh import MeshesPlotter, MeshPlotter, StaticMeshPlotter
-from polpo.plot.plotly import SlicePlotter
+from polpo.plot.plotly import GoPlotter #SlicePlotter
 from .data import (
     # HormonesCsvLoader,
     # MaternalRegisteredMeshesLoader,
@@ -419,3 +419,61 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
             )
 
         return out
+    
+
+
+class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but for now putting here so that i can remove the x and y ticks.
+    def __init__(
+        self, cmap="gray", title="Slice Visualization", x_label="X", y_label="Y"
+    ):
+        self.cmap = cmap
+        self.title = title
+        self.x_label = x_label
+        self.y_label = y_label
+
+        self.layout = go.Layout(
+            title=self.title,
+            title_x=0.5,
+            xaxis=dict(title=self.x_label),
+            yaxis=dict(title=self.y_label),
+            uirevision="constant",
+        )
+
+    def transform_data(self, data):
+        return [go.Heatmap(z=data.T, colorscale=self.cmap, showscale=False)]
+
+    def plot(self, data=None):
+        # Create heatmap trace for the current slice
+        if data is None:
+            return go.Figure(
+                layout=self.layout,
+            )
+
+        fig = go.Figure(data=self.transform_data(data), layout=self.layout)
+
+        width = int(len(data[:, 0]) * 1.5)
+        height = int(len(data[0]) * 1.5)
+
+        fig.update_layout(
+            width=width,
+            height=height,
+        )
+
+        print(f"self.x_label: {self.x_label}, self.y_label: {self.y_label}")
+
+        
+        # The update_layout call is correct, but Plotly's update_layout with xaxis/yaxis replaces the entire axis dict,
+        # so if you set xaxis=dict(title=None), it will override any previous x_label/y_label set in the layout.
+        # To hide ticks and grid but preserve axis titles, you should update only the relevant properties:
+        fig.update_layout(
+            xaxis=dict(
+                showticklabels=False,  # Hides tick labels
+                ticks='',              # Hides the ticks themselves
+            ),
+            yaxis=dict(
+                showticklabels=False,
+                ticks='',
+            )
+        )
+
+        return fig
