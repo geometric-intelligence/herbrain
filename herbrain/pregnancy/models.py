@@ -39,10 +39,15 @@ def MeshPCR(model=None, affine_transform=None, n_components=4, n_pipes=None):
 
 class MriModel(Model):
     def __init__(self, data, hormones_df, index_tar=1, slicer=None):
-        """
-        data: list or array of MRI volumes (e.g. 3D numpy arrays)
-        index_tar: offset for gestational week slider (usually 1)
-        slicer: instance of MriSlicer (optional)
+        """Model for predicting MRI slices based on gestational week and view index.
+
+        Parameters:
+        ----------
+        data: list or array-like, MRI data for different gestational weeks (TODO: CHECK TYPE)
+        hormones_df: pandas DataFrame, contains gestational week information
+        index_tar: int, 
+            The number at which the target MRI data starts in the list (default is 1, meaning the first MRI corresponds to gestational week 1)
+        slicer: MriSlicer, optional, used to slice the MRI data (default is None, which creates a new MriSlicer)
         """
         if slicer is None:
             slicer = MriSlicer()
@@ -130,6 +135,12 @@ class MriModel(Model):
 
 class ClosestImageLookup(Model):
     def __init__(self, data, tar=0):
+        """Model that predicts the closest image based on week number.
+        Parameters:
+        ----------
+        data: list or array-like, paths to images for different weeks
+        tar: int, 'target index' for the image (default is 0, which is the first image)
+        """
         super().__init__()
         self.data = data
         self.tar = tar

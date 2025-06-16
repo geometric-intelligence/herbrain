@@ -72,6 +72,29 @@ class PregnancyExplorer:
         hormones_mesh_model,
         hormones_ordering,
     ):
+        """PregnancyExplorer class. 
+        
+        Parameters
+        ----------
+        cfg : Config
+            Configuration object containing application settings.
+        mri_data : list of np.ndarray (TODO: check type)
+            List of MRI data arrays for different gestational weeks.
+        hormones_df : pd.DataFrame
+            DataFrame containing hormone levels corresponding to gestational weeks.
+        data_type : str
+            Type of data to be processed, e.g., "single" or "multiple".
+        template_image : np.ndarray
+            Template image, which appears overlaying the subcortical structures when ``show whole brain'' button is clicked.
+        n_structs : int
+            Number of structures to be visualized in the mesh explorer.
+        week_mesh_model : PostTransformingEstimator from Polpo
+            Model for the mesh corresponding to gestational weeks.
+        hormones_mesh_model : PostTransformingEstimator from Polpo
+            Model for the mesh corresponding to hormone values.
+        hormones_ordering : list of str
+            List defining the order of hormones for visualization.
+        """
         # Variable definitions
         
         self.gest_week_var = VarDef(
@@ -162,27 +185,22 @@ class PregnancyExplorer:
 
 
     def to_dash(self):
+        """Convert the PregnancyExplorer to a Dash layout.
+        
+        Returns
+        -------
+        Dash layout
+            A Dash layout containing the MRI explorer, animation explorer, and mesh explorer.
+        """
         return [
             dbc.Row(
                 [
-                    # The columns are overlapping because the sum of the widths (2 + 4 + 6 = 12) matches the default Bootstrap grid (12 columns),
-                    # but if the content inside the columns is too wide, or if there is not enough padding/margin, they may visually overlap.
-                    # To prevent overlap, ensure that the content inside each column is responsive and does not exceed its column width.
-                    # You can also add style or className to enforce overflow handling or add padding.
-                    # Here is a version with explicit style to help prevent overlap:
-
                     dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "20px"}),
                     dbc.Col(self.mri_explorer.to_dash(), width=5, style={"overflow": "auto", "padding": "20px"}),
                     dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=5, style={"overflow": "auto", "padding": "20px"}),
                 ],
                 align="center",
             ),
-            # dbc.Row(
-            #     [
-            #         dbc.Col(self.gest_week_slider.to_dash(), width=6),
-            #     ],
-            #     align="center",
-            # ),
         ]
     
 
@@ -198,6 +216,23 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         radio_button_init = "sagittal", # default view
         id_prefix="",
     ):
+        """ MriExplorer class for visualizing MRI slices.
+
+        Parameters
+        ----------
+        gest_week_slider : Polpo Slider
+            Polpo Slider object for selecting the gestational week (not yet a dash slider).
+        gest_week_var : Polpo VarDef
+            Variable definition for gestational week.
+        mri_data : list of np.ndarray
+            List of MRI data arrays for different gestational weeks.
+        hormones_df : pd.DataFrame
+            DataFrame containing hormone levels corresponding to gestational weeks.
+        radio_button_init : str
+            Initial radio button value for selecting the MRI view (default is "sagittal").
+        id_prefix : str
+            Prefix for the component IDs.
+        """
         graph_object = Graph(id_="mri-plot")
         self.radio_button_init = radio_button_init
         self.radio_button = RadioButton(id_="mri-view-toggle",
@@ -236,6 +271,13 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
         super().__init__([gest_week_slider, self.mri_slice_slider, self.radio_button, graph_object], id_prefix)
 
     def to_dash(self): # this is where you create the layout of the page
+        """Convert the MriExplorer to a Dash layout.
+
+        Returns
+        -------
+        Dash layout
+            A Dash layout containing the MRI explorer with controls for gestational week, view selection, and slice selection.
+        """
         if hasattr(self.gest_week_slider, "update_lims"):
             self.gest_week_slider.update_lims(self.mri_data)
 
@@ -281,12 +323,21 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
 
 class AnimationExplorer():
     def __init__(self, assets_folder_path, week_slider):
+        """AnimationExplorer class for visualizing pregnancy images.
+
+        Parameters
+        ----------
+        assets_folder_path : str
+            Path to the folder containing pregnancy images.
+        week_slider : Polpo Slider
+            Polpo object. Precursor for the gestational week slider.
+        """
         self.assets_folder_path = assets_folder_path
         self.image_paths = self._load_pregnancy_images()
         self.week_slider = week_slider # should be a VarDef
 
     def _load_pregnancy_images(self):
-        """ Load pregnancy images from the specified assets folder.
+        """Load pregnancy images from the specified assets folder.
         
         Returns
         -------
@@ -309,7 +360,6 @@ class AnimationExplorer():
 
 
     def to_dash(self):
-        # TODO: do version with DictLookup
         model = ClosestImageLookup(self.image_paths) #here, input will be weeks, and output needs to be an image.
 
         input = self.week_slider
@@ -325,6 +375,25 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
     def __init__(
         self, models, inputs, outputs, shown_inputs=None, id_prefix="", postproc_pred=None, layout=None
     ):
+        """SharedOutputModelsBasedExplorer class for managing multiple models with shared output.
+
+        Parameters
+        ----------
+        models : list of Polpo models
+            List of Polpo models to be used for predictions.
+        inputs : Polpo ComponentGroup
+            Polpo ComponentGroup containing input components.
+        outputs : Polpo Graph
+            Polpo Graph object for displaying the output.
+        shown_inputs : Polpo ComponentGroup, optional
+            Polpo ComponentGroup containing inputs to be shown in the layout (default is None).
+        id_prefix : str, optional
+            Prefix for the component IDs (default is an empty string).
+        postproc_pred : Polpo PostTransformingEstimator, optional
+            Post-processing model for predictions (default is None).
+        layout : Polpo Layout, optional
+            Layout for the explorer (default is MultiRowLayout).
+        """
         self.models = models
         self.inputs = inputs
         self.outputs = outputs
@@ -373,6 +442,25 @@ class SingleInputOutputModelsBasedExplorer(BaseComponentGroup):
     def __init__(
         self, model, input, output, shown_input=None, id_prefix="", postproc_pred=None, layout=None
     ):
+        """SingleInputOutputModelsBasedExplorer class for managing a single model with shared input and output.
+
+        Parameters
+        ----------
+        model : Polpo model
+            Polpo model to be used for predictions.
+        input : Polpo ComponentGroup
+            Polpo ComponentGroup containing input components.
+        output : Polpo Graph
+            Polpo Graph object for displaying the output.
+        shown_input : Polpo ComponentGroup, optional
+            Polpo ComponentGroup containing inputs to be shown in the layout (default is None).
+        id_prefix : str, optional
+            Prefix for the component IDs (default is an empty string).
+        postproc_pred : Polpo PostTransformingEstimator, optional
+            Post-processing model for predictions (default is None).
+        layout : Polpo Layout, optional
+            Layout for the explorer (default is TwoRowLayout).
+        """
         if layout is None:
             layout = TwoRowLayout()
 
@@ -411,6 +499,10 @@ class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but fo
     def __init__(
         self, cmap="gray", title="Slice Visualization", x_label="X", y_label="Y", just_image=False
     ):
+        """ SlicePlotter class for visualizing MRI slices.
+        
+        Edited from Polpo version to remove x and y ticks, and to allow for just image visualization.
+        """
         self.cmap = cmap
         self.title = title
         self.x_label = x_label
@@ -504,7 +596,7 @@ class RadioButton(Component): # the one in polpo had a bug
                 dcc.RadioItems(
                     id=self.id_,
                     options=[
-                        {"label": label, "value": value}
+                        {"label": f"{label}     ", "value": value}
                         for value, label in self.options
                     ],
                     value=self.default_value,
@@ -521,82 +613,3 @@ class RadioButton(Component): # the one in polpo had a bug
     def as_output(self, component_property="value", allow_duplicate=False):
         return [Output(self.id_, component_property, allow_duplicate=allow_duplicate)]
 
-
-# class Slider(VarDefComponent):
-#     """Slider."""
-
-#     def __init__(self, var_def, step=1, id_prefix="", label_style=None):
-#         super().__init__(var_def=var_def, id_prefix=id_prefix, id_suffix="-slider")
-#         # TODO: think more about this design
-
-#         self.step = step
-
-#         # TODO: can default be set for the general app instead?
-#         default_label_style = {
-#             "fontSize": S.text_fontsize,
-#             "fontFamily": S.text_fontfamily,
-#         }
-#         self.label_style = (label_style or {}).update(default_label_style)
-
-#     def __repr__(self):
-#         return f"Slider({self.id})"
-
-#     def to_dash(self):
-#         # TODO: allow to config from config file, e.g. label_style
-#         label = dbc.Label(
-#             self.var_def.label,
-#             style=self.label_style,
-#         )
-
-#         # ensure default value is on the slider
-#         min_value, max_value = self.var_def.min_value, self.var_def.max_value
-#         step = self.step
-#         value = min(max_value, self.var_def.default_value)
-#         value = max(min_value, value)
-#         n_steps = round((value - min_value) / step)
-#         value = min_value + step * n_steps
-
-#         # slider = dcc.Slider(
-#         #     id=self.id,
-#         #     min=min_value,
-#         #     max=max_value,
-#         #     step=step,
-#         #     value=value,
-#         #     marks={
-#         #         self.var_def.min_value: {"label": "min"},
-#         #         self.var_def.max_value: {"label": "max"},
-#         #     },
-#         #     tooltip={
-#         #         "placement": "bottom",
-#         #         "always_visible": True,
-#         #         "style": {"fontSize": "25px", "fontFamily": S.text_fontfamily},
-#         #     },
-#         # )
-#         slider = html.Div(
-#             [
-#                 html.Span(self.var_def.label, style={"marginRight": "16px", "fontWeight": "bold"}),
-#                 dcc.Slider(
-#                 id=self.id,
-#                 min=min_value,
-#                 max=max_value,
-#                 step=step,
-#                 value=value,
-#                 marks={
-#                     self.var_def.min_value: {"label": "min"},
-#                     self.var_def.max_value: {"label": "max"},
-#                 },
-#                 tooltip={
-#                     "placement": "bottom",
-#                     "always_visible": True,
-#                     "style": {"fontSize": "25px", "fontFamily": S.text_fontfamily},
-#                 },
-#             )
-#             ],
-#             style={"display": "flex", "alignItems": "center"}
-#         )
-
-#         # return [label, slider]
-#         return slider
-
-#     def as_input(self):
-#         return [Input(self.id, "drag_value")]
