@@ -86,6 +86,14 @@ def gpt_chat_component():
                                     "backgroundColor": "#f8f9fa",
                                 },
                             ),
+                            html.P(
+                                "Disclaimer: Neurobot is an educational tool designed to spark curiosity and provide general information about neuroscience. It may generate incomplete, outdated, or inaccurate responses, and should not be relied upon for medical or diagnostic purposes. Neurobot is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with any questions about your health or medical condition.",
+                                style={
+                                    "fontSize": "0.9em",
+                                    "fontFamily": S.text_fontfamily,
+                                    "color": "#666",
+                                },
+                            ),
                             # Store for chat history
                             dcc.Store(id="chat-store", data=[]),
                         ]
