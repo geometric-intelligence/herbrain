@@ -30,6 +30,7 @@ from polpo.preprocessing.learning import DictsToXY, NestedDictsToXY
 from polpo.sklearn.compose import PostTransformingEstimator
 
 import herbrain.pregnancy.page_content as page_content
+from herbrain.pregnancy.pregnancy_explorer import PregnancyExplorer
 
 from .data import (
     HormonesCsvLoader,
@@ -40,10 +41,11 @@ from .data import (
     TemplateImageLoader,
 )
 from .models import MeshPCR
-from .page_content import ai_hormone_prediction, homepage, mri_page
+from .page_content import pregnancy_page, menstrual_page, homepage
 
 
 def my_app(cfg, data, gpt):
+    data_type = data
     style = cfg.style
     update_style(style)
 
@@ -68,7 +70,7 @@ def my_app(cfg, data, gpt):
     hormones_for_pred = ppd.ColumnsToDict(hormones_ordering)(hormones_df)
     hormones_gest_week = ppd.ColumnToDict("gestWeek")(hormones_df)
 
-    if data == "multiple":
+    if data_type == "multiple":
         dicts_to_xy = NestedDictsToXY()
     else:
         dicts_to_xy = DictsToXY()
@@ -84,7 +86,7 @@ def my_app(cfg, data, gpt):
             [0.0, 0.0, 0.0, 1.0],
         ]
     )
-    if data == "multiple":
+    if data_type == "multiple":
         structs = [
             "BrStem",
             "L_Thal",
@@ -115,7 +117,7 @@ def my_app(cfg, data, gpt):
             data_dir=maternal_data_dir, max_iterations=500
         )()
 
-    n_pipes = n_structs if data == "multiple" else None
+    n_pipes = n_structs if data_type == "multiple" else None
     week_mesh_model = MeshPCR(
         model=None, affine_transform=affine_transform, n_pipes=n_pipes
     )
@@ -124,7 +126,7 @@ def my_app(cfg, data, gpt):
         model=None, affine_transform=affine_transform, n_pipes=n_pipes
     )
 
-    Colorizer = DictMeshColorizer if data == "multiple" else MeshColorizer
+    Colorizer = DictMeshColorizer if data_type == "multiple" else MeshColorizer
 
     week_colorizer = Colorizer(x_ref=np.asarray(0.5), delta_lim=np.asarray(15.0))
     week_mesh_model = PostTransformingEstimator(week_mesh_model, week_colorizer)
@@ -140,93 +142,24 @@ def my_app(cfg, data, gpt):
     X, y = dicts_to_xy([hormones_for_pred, registered_meshes])
     hormones_mesh_model.fit(X, y)
 
-    session_id = VarDef("sessionID", name="Session Number", min_value=1, max_value=26)
-    mri_vars = [session_id] + [
-        VarDef(id_, name=name)
-        for id_, name in [
-            ("mri_x", "X Coordinate (Changes Side View)"),
-            ("mri_y", "Y Coordinate (Changes Front View)"),
-            ("mri_z", "Z Coordinate (Changes Top View)"),
-        ]
-    ]
-    gest_week = VarDef(
-        "gestWeek", name="Gestational Week", min_value=0, max_value=36, default_value=15
-    )
-    estro = VarDef(
-        "estro",
-        name="Estrogen",
-        unit="pg/ml",
-        min_value=4100,
-        max_value=12400,
-    )
-    prog = VarDef(
-        "prog",
-        name="Progesterone",
-        unit="ng/ml",
-        min_value=54,
-        max_value=103,
-    )
-    lh = VarDef(
-        "lh",
-        name="LH",
-        unit="ng/ml",
-        min_value=0.59,
-        max_value=1.45,
-    )
-    endo_status = VarDef("EndoStatus", name="Pregnancy status")
-    trimester = VarDef("trimester", name="trimester")
 
-    mri_steps = [1] + [5] * 3
-    mri_sliders = MriSliders(
-        [Slider(var, step) for var, step in zip(mri_vars, mri_steps)],
-        trims=((20, 40), 50, 70),
+    app = Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        suppress_callback_exceptions=True,
+        assets_folder=cfg.app.assets_folder,
     )
 
-    session_info = ComponentGroup(
-        components=[
-            DepVar(var)
-            for var in (session_id, gest_week, estro, lh, endo_status, trimester)
-        ],
-        title="Session information",
-    )
-    mri_explorer = MriExplorer(
-        mri_data, hormones_df, mri_sliders, session_info, id_prefix="mri-"
-    )
-
-    template_mesh = NibImage2Mesh()(template_image)
-
-    postproc_pred = None
-    if data == "multiple":
-        postproc_pred = ppdict.DictMap(step=ListSqueeze()) + ppdict.DictToValuesList()
-
-    hormone_label_style = {"fontSize": 30, "display": "block"}
-    template_visibility = True
-    mesh_explorer = MultiModelsMeshExplorer(
-        graph=Graph(
-            id_="mesh-plot",
-            plotter=MeshesPlotter(
-                plotters=[MeshPlotter() for _ in range(n_structs)],
-                overlay_plotter=StaticMeshPlotter(
-                    mesh=template_mesh, visible=template_visibility
-                ),
-                bounds=None,  # TODO: check need
-                overlay_bounds=None,  # TODO: check need
-            ),
-        ),
-        models=(week_mesh_model, hormones_mesh_model),
-        inputs=(
-            Slider(gest_week),
-            ComponentGroup(
-                ordering=hormones_ordering,
-                components=[
-                    Slider(var, step, label_style=hormone_label_style)
-                    for var, step in [(estro, 500), (prog, 3), (lh, 0.05)]
-                ],
-            ),
-        ),
-        checkbox_labels=((-1, "Show Full Brain", template_visibility),),
-        button_label=" Click Here to Toggle Between Gestational Week vs Hormone Value Prediction",
-        postproc_pred=postproc_pred,
+    pregnancy_explorer = PregnancyExplorer(
+        cfg,
+        mri_data, 
+        hormones_df, 
+        data_type, 
+        template_image,
+        n_structs,
+        week_mesh_model,
+        hormones_mesh_model,
+        hormones_ordering,
     )
 
     sidebar_elems = [
@@ -234,7 +167,10 @@ def my_app(cfg, data, gpt):
         SidebarElem(
             active=True,
             tab_header=SidebarHeader(
-                href="/", text="Home", image_url="home_emoji.jpeg"
+                href="/", 
+                text="Homepage", 
+                image_url="gi-logo.png",
+                image_width=40,
             ),
             page=FunctionComponent(homepage),
         ),
@@ -243,35 +179,30 @@ def my_app(cfg, data, gpt):
             active=True,
             tab_header=SidebarHeader(
                 href="/page-1",
-                text="Explore MRI Data",
-                image_url="brain_emoji.jpeg",
+                text="Pregnancy",
+                image_url="pregnancy_logo.png",
                 image_width=40,
             ),
-            page=FunctionComponent(mri_page, mri_explorer=mri_explorer),
+            page=FunctionComponent(
+                pregnancy_page,
+                pregnancy_explorer=pregnancy_explorer,
+                gpt=gpt,
+            ),
         ),
         # mesh explorer
         SidebarElem(
             active=True,
             tab_header=SidebarHeader(
                 href="/page-2",
-                text="AI: Hormones to Hippocampus Shape",
-                image_url="robot_emoji.jpeg",
+                text="Menstruation",
+                image_url="menstrual_logo.png",
                 image_width=40,
             ),
             page=FunctionComponent(
-                ai_hormone_prediction,
-                mesh_explorer=mesh_explorer,
-                gpt=gpt,
+                menstrual_page
             ),
         ),
     ]
-
-    app = Dash(
-        __name__,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
-        suppress_callback_exceptions=True,
-        assets_folder=cfg.app.assets_folder,
-    )
 
     page_register = PageRegister()
 
@@ -284,5 +215,5 @@ def my_app(cfg, data, gpt):
         debug=server_cfg.debug,
         use_reloader=server_cfg.use_reloader,
         host=server_cfg.host,
-        port=server_cfg.port,
+        port=8888, #8888 server_cfg.port
     )

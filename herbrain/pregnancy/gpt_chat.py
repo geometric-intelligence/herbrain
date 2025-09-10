@@ -86,6 +86,14 @@ def gpt_chat_component():
                                     "backgroundColor": "#f8f9fa",
                                 },
                             ),
+                            html.P(
+                                "Disclaimer: Neurobot is an educational tool designed to spark curiosity and provide general information about neuroscience. It may generate incomplete, outdated, or inaccurate responses, and should not be relied upon for medical or diagnostic purposes. Neurobot is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with any questions about your health or medical condition.",
+                                style={
+                                    "fontSize": "0.9em",
+                                    "fontFamily": S.text_fontfamily,
+                                    "color": "#666",
+                                },
+                            ),
                             # Store for chat history
                             dcc.Store(id="chat-store", data=[]),
                         ]
@@ -165,6 +173,7 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
         else:
             img_base64 = None
 
+
         # Prepare messages for the API call
         messages = [
             {
@@ -180,6 +189,41 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
                 "content": "Just above your chat box, you see the rendered 3D hippocampus of a brain of a pregnant woman—this is the image provided in your context. Be prepared to answer questions based on what you observe in this brain image.",
             },
             {"role": "system", "content": context},
+            {
+                "role": "system",
+                "content": "You can refer to the 3D mesh visualization of the brain and the MRI image provided in the chat or by the messages appended below.",
+            },
+            {"role": "system",
+                "content": "You can also refer to the hormone levels and gestation week provided in the context."},
+            {
+                "role": "system",
+                "content": "The user can also see an mri of the brain, which shows the brain during pregnancy at the gestation week indicated in the context. On the larger scale of the whole brain, it is difficult to see the changes that are happening as a result of pregnancy."
+            },
+            {
+                "role": "system",
+                "content": "The 3D mesh visualization shown in the appended message shows the hippocampus of the brain during pregnancy. This is a more localized view of the brain, and it is easier to see the changes that are happening as a result of pregnancy. Red indicates areas that are shrinking as a result of pregnancy, and blue shows areas that are getting bigger as a result of pregnancy. Beige areas have not changed from the pre-pregnancy state.",
+            },
+            {
+                "role": "system",
+                "content": "When answering questions, try to explain what is happening in the figures appended below. Try to explain that some areas are shrinking and some areas are growing, and that is a result of changing gestation week. Feel free to include any other observations you make."
+            },
+            {
+                "role": "system",
+                "content": "If you are unsure about the answer, please say that you don't know.",
+            },
+            {
+                "role": "system",
+                "content": "Your job is to be a scientific assistant. Assume that this app is sent to someone with no knowledge of neuroscience, who does not know how to read scientific plots. You are here to help them understand the data and results presented in the app.",
+            },
+            {
+                "role": "system",
+                "content": "You are a helpful assistant explaining brain changes during pregnancy. Focus on the relationship between hormones and brain structure.",
+            },
+            {
+                "role": "system",
+                "content": "The structures you see in the 3D mesh visualization are subcortical structures. Specifically, they are the accumbens nucleus, Amygdala, Caudate nucleus, Hippocampus, Globus pallidus (Pallidum), Putamen, Thalamus.",
+            },
+
         ]
 
         # Add the image if available
@@ -198,6 +242,7 @@ Please analyze the attached 3D mesh visualization and use these hormone values t
             )
         else:
             messages.append({"role": "user", "content": question})
+        
 
         # Create the chat completion
         response = client.chat.completions.create(

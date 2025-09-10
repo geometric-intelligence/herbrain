@@ -31,18 +31,22 @@ def img_study_timeline():
     )
 
 
-def instructions_title():
+def background_title():
     return dbc.Row(
         [
             dbc.Col(
-                html.Img(
-                    src=get_asset_url("instructions_emoji.jpeg"),
-                    style={"width": "50px", "height": "auto"},
-                ),
-                width=1,
+                html.P("Background", style={"fontSize": S.title_fontsize}),
+                width=10,
             ),
+        ],
+        align="center",
+    )
+
+def digital_twin_title():
+    return dbc.Row(
+        [
             dbc.Col(
-                html.P("Instructions", style={"fontSize": S.title_fontsize}),
+                html.P("Digital Twins", style={"fontSize": S.title_fontsize}),
                 width=10,
             ),
         ],
@@ -50,18 +54,18 @@ def instructions_title():
     )
 
 
-def overview_title():
+def pregnancy_title():
     return dbc.Row(
         [
             dbc.Col(
                 html.Img(
-                    src=get_asset_url("overview_emoji.jpeg"),
-                    style={"width": "50px", "height": "auto"},
+                    src=get_asset_url("pregnancy_logo.png"),
+                    style={"width": "70px", "height": "auto"},
                 ),
-                width=1,
+                width=2,
             ),
             dbc.Col(
-                html.P("Overview", style={"fontSize": S.title_fontsize}),
+                html.P("Digital Twin of the Pregnant Brain", style={"fontSize": S.title_fontsize}),
                 width=10,
             ),
         ],
@@ -72,13 +76,6 @@ def overview_title():
 def acknowledgements_title():
     return dbc.Row(
         [
-            dbc.Col(
-                html.Img(
-                    src=get_asset_url("acknowledgements_emoji.jpeg"),
-                    style={"width": "50px", "height": "auto"},
-                ),
-                width=1,
-            ),
             dbc.Col(
                 html.P("Acknowledgements", style={"fontSize": S.title_fontsize}),
                 width=10,
@@ -180,13 +177,13 @@ def homepage():
         [
             *banner,
             html.Hr(),
-            overview_title(),
+            background_title(),
             html.Div(style={"height": S.space_between_title_and_content}),
             overview_text,
             brain_image_row,
             html.Div(style={"height": S.space_between_sections}),
             html.Hr(),
-            instructions_title(),
+            digital_twin_title(),
             html.Div(style={"height": S.space_between_title_and_content}),
             instructions_text,
             html.Div(style={"height": S.space_between_sections}),
@@ -209,26 +206,29 @@ def homepage():
     ]
 
 
-def mri_page(mri_explorer):
-    """Return the content of the data exploration page."""
-    study_row = dbc.Row(
-        [dbc.Col(md=1), dbc.Col(img_study_timeline(), md=10), dbc.Col(md=1)],
-        style={"marginLeft": S.margin_side, "marginRight": S.margin_side},
-    )
 
+def pregnancy_page(pregnancy_explorer, gpt=False):
+    """Creates the pregnancy page. 
+    
+    A button will indicate whether the user wants to predict by gestation week or hormones. If the user
+    indicates gestation week, this page will display the image seq on the far left, the mri in the middle, 
+    and the mri on the right. All of these will be controller by one gestation week slider.
+    
+    If the user selects hormones, this page will only display the mesh explorer, with sliders for 
+    hormones."""
     banner = [
         dbc.Row(
             [
                 dbc.Col(
                     html.Img(
-                        src=get_asset_url("brain_emoji.jpeg"),
+                        src=get_asset_url("pregnancy_logo.png"),
                         style={"width": "70px", "height": "auto"},
                     ),
                     width=1,
                 ),
                 dbc.Col(
                     html.P(
-                        "Explore Brain MRIs Throughout Pregnancy",
+                        "Digital Twin of the Pregnant Brain",
                         style={"fontSize": S.title_fontsize},
                     ),
                     width=10,
@@ -242,26 +242,10 @@ def mri_page(mri_explorer):
         [
             html.P(
                 [
-                    "MRI data was collected ~ once every 2 weeks throughout pregnancy, showing the structural changes that occur in the brain over the course of a human pregnancy. Estrogen, progesterone, and LH levels were also measured at most sessions.",
+                    "Overview: The subcortical structures of the brain are sensitive to sex hormone changes. In pregnancy, hormones experience extreme fluctuations, and subcortical structure volumes are known to decrease. However, we find that the shape of these structures change as well. We have trained an AI to predict shape changes of the subcortical structures based on hormone levels or gestation week. Blue areas indicate growth and red areas indicate shrinkage compared to pre-pregnancy shape. Beige color indicates pre-pregnancy shape.",
+                    html.Br(),
                 ],
                 style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
-            ),
-            study_row,
-        ],
-    )
-
-    acknowledgements_text = dbc.Row(
-        [
-            html.P(
-                [
-                    "Data and study timeline image from: Pritschet, Taylor, Cossio, Santander, Grotzinger, Faskowitz, Handwerker, Layher, Chrastil, Jacobs. Neuroanatomical changes observed over the course of a human pregnancy. (2024)",
-                ],
-                style={
-                    "fontSize": S.text_fontsize,
-                    "fontFamily": S.text_fontfamily,
-                    "marginLeft": S.margin_side,
-                    "marginRight": S.margin_side,
-                },
             ),
         ],
     )
@@ -271,91 +255,18 @@ def mri_page(mri_explorer):
             html.P(
                 [
                     (
-                        "Use the 'Session Number' slider to flip through T1 brain data from each MRI session. "
-                        "Use the X, Y, Z coordinate sliders to choose the MRI slice. "
-                        "Additional information about the session will be displayed to the right of the sliders."
+                        "Instructions: Change the gestational week slider or hormone sliders, and the AI model will predict subcortical structure shape changes for these inputs."
+                        " The MRI view will update to show the closest corresponding MRI data."
                     )
                 ],
                 style={
                     "fontSize": S.text_fontsize,
                     "fontFamily": S.text_fontfamily,
-                    "marginLeft": S.margin_side,
-                    "marginRight": S.margin_side,
                 },
             ),
         ],
     )
 
-    contents_container = dbc.Container(
-        [
-            *banner,
-            html.Hr(),
-            overview_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            overview_text,
-            html.Div(style={"height": S.space_between_sections}),
-            html.Hr(),
-            instructions_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            instructions_text,
-        ]
-        + mri_explorer.to_dash()
-        + [
-            html.Div(style={"height": S.space_between_sections}),
-            html.Hr(),
-            acknowledgements_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            acknowledgements_text,
-        ],
-        fluid=True,
-    )
-
-    return [
-        dbc.Row(
-            [
-                dbc.Col(sm=1),
-                dbc.Col(contents_container, sm=10),
-                dbc.Col(sm=1),
-            ]
-        )
-    ]
-
-
-def ai_hormone_prediction(mesh_explorer, gpt=False):
-    """Return the content of the AI hormone prediction page."""
-    banner = [
-        dbc.Row(
-            [
-                dbc.Col(
-                    html.Img(
-                        src=get_asset_url("robot_emoji.jpeg"),
-                        style={"width": "70px", "height": "auto"},
-                    ),
-                    width=1,
-                ),
-                dbc.Col(
-                    html.P(
-                        "AI: Hormones to Hippocampus Shape",
-                        style={"fontSize": S.title_fontsize},
-                    ),
-                    width=10,
-                ),
-            ],
-            align="center",
-        ),
-    ]
-
-    overview_text = dbc.Row(
-        [
-            html.P(
-                [
-                    "The hippocampus is a brain region that is particularly sensitive to hormones. In pregnancy the hippocampus volume is known to decrease, but we find that the shape of the hippocampus changes as well. We have trained an AI to predict the shape of the hippocampus based on hormone levels.",
-                    html.Br(),
-                ],
-                style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
-            ),
-        ],
-    )
 
     gpt_component = []
     if gpt:
@@ -366,30 +277,12 @@ def ai_hormone_prediction(mesh_explorer, gpt=False):
         [
             *banner,
             html.Hr(),
-            overview_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
             overview_text,
-            html.Div(style={"height": S.space_between_sections}),
-            html.Hr(),
-            instructions_title(),
             html.Div(style={"height": S.space_between_title_and_content}),
-            dbc.Row(
-                [
-                    html.P(
-                        [
-                            "Use the hormone sliders or the gestational week slider to adjust observe the predicted shape changes in the left hippocampal formation.",
-                            html.Br(),
-                        ],
-                        style={
-                            "fontSize": S.text_fontsize,
-                            "fontFamily": S.text_fontfamily,
-                        },
-                    ),
-                ],
-            ),
+            instructions_text,
         ]
-        + mesh_explorer.to_dash()
-        + [html.Div(style={"height": S.space_between_sections}), html.Hr()]
+        + pregnancy_explorer.to_dash()
+        + [html.Div(style={"height": 0}), html.Hr()]
         + gpt_component,
         fluid=True,
     )
@@ -399,6 +292,19 @@ def ai_hormone_prediction(mesh_explorer, gpt=False):
             [
                 dbc.Col(sm=1),
                 dbc.Col(contents_container, sm=10),
+                dbc.Col(sm=1),
+            ]
+        )
+    ]
+
+
+def menstrual_page():
+    """Not Implemented."""
+    return [
+        dbc.Row(
+            [
+                dbc.Col(sm=1),
+                dbc.Col([], sm=10),
                 dbc.Col(sm=1),
             ]
         )

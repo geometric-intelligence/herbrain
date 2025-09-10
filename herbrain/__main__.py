@@ -5,7 +5,7 @@ from typing import List, Optional
 import typer
 from hydra import compose, initialize
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_short=False) # turn this to False if you want to see more the error path.
 
 
 class PregnancyDataOptions(str, Enum):
