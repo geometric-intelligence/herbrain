@@ -1,6 +1,7 @@
 outputs/
 results/
 openai_api_key.txt
+*vtk
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
