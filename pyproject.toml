@@ -37,6 +37,9 @@ app = [
     "openai",
     "kaleido",
 ]
+doc = [
+    "polpo[doc]@git+https://github.com/geometric-intelligence/polpo.git@main",
+]
 app-menstrual = ["herbrain[app]", "paramiko", "scp"]
 lddmm = [
     "torch",
