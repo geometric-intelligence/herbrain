@@ -19,13 +19,13 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "polpo.sphinx.ext.nbsymlink",
-    # "polpo.sphinx.ext.nbtaggallery",
+    "polpo.sphinx.ext.nbtaggallery",
 ]
 
 nbsymlink_notebooks_dir = "../notebooks"
 nbsymlink_renamings = {}
 
-nbtaggallery_tags = []
+nbtaggallery_tags = ["volume"]
 nbtaggallery_tag_captions = {}
 
 

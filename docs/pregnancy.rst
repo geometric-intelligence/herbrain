@@ -10,6 +10,9 @@ Pregnancy
    _generated/notebooks/pregnancy/**
 
 
+.. nbtaggalleries::
+   :path: _generated/notebooks/pregnancy
+
 
 
 All
