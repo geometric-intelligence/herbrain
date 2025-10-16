@@ -25,8 +25,8 @@ extensions = [
 nbsymlink_notebooks_dir = "../notebooks"
 nbsymlink_renamings = {}
 
-nbtaggallery_tags = ["volume"]
-nbtaggallery_tag_captions = {}
+nbtaggallery_tags = ["volume", "lddmm"]
+nbtaggallery_tag_captions = {"lddmm": "LDDMM"}
 
 
 autosummary_imported_members = True
