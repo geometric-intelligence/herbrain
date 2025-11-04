@@ -3,11 +3,13 @@
 Pregnancy
 =========
 
-.. toctree::
-   :glob:
+.. nbgallery::
    :maxdepth: 1
+   :glob:
 
    _generated/notebooks/pregnancy/**
+
+
 
 
 .. nbtaggalleries::
