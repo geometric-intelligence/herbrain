@@ -205,11 +205,11 @@ class PregnancyExplorer:
         return [
             dbc.Row(
                 [
-                    dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "20px"}),
+                    dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "visible", "padding": "20px"}),
                     dbc.Col(self.mri_explorer.to_dash(), width=5, style={"overflow": "auto", "padding": "20px"}),
                     dbc.Col(self.gest_week_mesh_explorer.to_dash(), width=5, style={"overflow": "auto", "padding": "20px"}),
                 ],
-                align="center",
+                align="start",
             ),
         ]
     
@@ -366,10 +366,18 @@ class AnimationExplorer():
         eliminating network requests when the gestational week slider changes.
         """
         # Video element - preloaded, muted, no controls
+        # Use object-fit: contain to ensure full video is visible within container
         video = html.Video(
             id="pregnancy-video",
             src=self.video_url,
-            style={"width": "100%", "height": "auto", "maxWidth": "200px"},
+            style={
+                "width": "auto",
+                "height": "100%",
+                "maxHeight": "500px",
+                "objectFit": "contain",
+                "display": "block",
+                "margin": "0 auto",
+            },
             preload="auto",  # Preload entire video for instant seeking
             muted=True,  # Required for autoplay policies
             **{"data-testid": "pregnancy-video"}  # For testing
@@ -379,7 +387,7 @@ class AnimationExplorer():
             video,
             # Hidden output for the clientside callback (video currentTime is set via JS)
             html.Div(id="pregnancy-video-time-setter", style={"display": "none"}),
-        ])
+        ], style={"height": "500px", "display": "flex", "alignItems": "center", "justifyContent": "center"})
 
 
 
