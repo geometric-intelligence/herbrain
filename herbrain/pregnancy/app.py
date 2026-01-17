@@ -210,9 +210,9 @@ def my_app(cfg, data, gpt):
     )
 
     sidebar_elems = [
-        # home
+        # home (inactive - not shown in nav, but route still registered)
         SidebarElem(
-            active=True,
+            active=False,  # Don't show in sidebar nav, but still register the route
             tab_header=SidebarHeader(
                 href="/", 
                 text="Homepage", 

@@ -87,28 +87,40 @@ def acknowledgements_title():
 
 def sidebar(sidebar_elems, page_register):
     """Return the sidebar of the app."""
+    # Make logo and title clickable to go to home page
     title = dbc.Row(
         [
             dbc.Col(
-                html.Img(
-                    src=get_asset_url("wbhi_logo.png"),
-                    style={"width": "100px", "height": "auto"},
+                dcc.Link(
+                    html.Img(
+                        src=get_asset_url("wbhi_logo.png"),
+                        style={"width": "100px", "height": "auto", "cursor": "pointer"},
+                    ),
+                    href="/",
+                    style={"textDecoration": "none"},
                 ),
                 width=2,
             ),
             dbc.Col(width=0.5),
             dbc.Col(
-                html.H2("HerBrain", className="display-4"),
+                dcc.Link(
+                    html.H2("HerBrain", className="display-4", style={"cursor": "pointer", "margin": 0}),
+                    href="/",
+                    style={"textDecoration": "none", "color": "inherit"},
+                ),
                 width=10,
             ),
         ],
         align="center",
     )
 
+    # Register all routes (including inactive ones), but only show active ones in nav
     headers = []
     for elem in sidebar_elems:
+        # Register route for all elements (active or not)
+        compns = elem.to_dash(page_register)
+        # Only add to nav if active
         if elem.active:
-            compns = elem.to_dash(page_register)
             headers.append(compns[0])
 
     return html.Div(
