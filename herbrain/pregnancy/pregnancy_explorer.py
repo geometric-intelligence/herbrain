@@ -1,58 +1,26 @@
 from polpo.dash.components import (
-    ComponentGroup,
-    DepVar,
-    FunctionComponent,
-    Graph,
-    MriSliders,
-    MultiModelsMeshExplorer,
-    SharedInputModelsBasedExplorer,
-    MeshExplorer,
-    SidebarElem,
-    SidebarHeader,
-    Slider,
-    MriGraphRow,
     BaseComponentGroup,
-    RadioButton,
     Component,
-    VarDefComponent,
+    ComponentGroup,
+    Graph,
+    MultiModelsMeshExplorer,
+    Slider as PolpoSlider,
 )
-from polpo.dash.layout import MultiRowLayout, TwoRowLayout
-from polpo.models import (
-    MriSlicesLookup,
-    PdDfLookup,
-)
-from polpo.dash.callbacks import (
-    create_button_toggler_for_view_model_update,
-    create_view_model_update,
-)
+from polpo.dash.layout import MultiRowLayout
+from polpo.dash.callbacks import create_view_model_update
 import polpo.preprocessing.dict as ppdict
 import dash_bootstrap_components as dbc
 from polpo.dash.variables import VarDef
 from polpo.preprocessing import ListSqueeze
 from polpo.plot.mesh import MeshesPlotter, MeshPlotter, StaticMeshPlotter
-from polpo.plot.plotly import GoPlotter #SlicePlotter
-from .data import (
-    # HormonesCsvLoader,
-    # MaternalRegisteredMeshesLoader,
-    # MultipleMaternalMeshesLoader,
-    NibImage2Mesh,
-    # PilotMriImageLoader,
-    # TemplateImageLoader,
-)
+from polpo.plot.plotly import GoPlotter
+from .data import NibImage2Mesh
 from .layout import MeshLayout, MriLayout
-from .models import MriModel, ClosestImageLookup
+from .models import MriModel
 from polpo.dash.style import STYLE as S
-from dash import Dash, Input, Output, State, callback, dcc, html
+from dash import Input, Output, dcc, html, get_asset_url
 import numpy as np
 import plotly.graph_objs as go
-
-from polpo.dash.components import Image, Slider as PolpoSlider
-from polpo.dash.style import update_style
-from polpo.dash.variables import VarDef
-from polpo.models import ListLookup   
-import os
-import sys
-from polpo.preprocessing import Sorter
 
 
 class DebouncedSlider(PolpoSlider):
@@ -99,10 +67,6 @@ class DebouncedSlider(PolpoSlider):
 
 # Replace Slider with DebouncedSlider for better performance
 Slider = DebouncedSlider
-from polpo.preprocessing.path import FileFinder
-from dash import Dash, get_asset_url
-
-    
 
 
 class PregnancyExplorer:
@@ -117,7 +81,6 @@ class PregnancyExplorer:
         week_mesh_model,
         hormones_mesh_model,
         hormones_ordering,
-        prerendered_week_figures=None,
     ):
         """PregnancyExplorer class. 
         
@@ -141,11 +104,7 @@ class PregnancyExplorer:
             Model for the mesh corresponding to hormone values.
         hormones_ordering : list of str
             List defining the order of hormones for visualization.
-        prerendered_week_figures : dict, optional
-            Pre-rendered Plotly figures for each gestational week (0-45).
-            Used for clientside switching to eliminate network traffic.
         """
-        self.prerendered_week_figures = prerendered_week_figures or {}
         # Variable definitions
         
         self.gest_week_var = VarDef(
@@ -244,8 +203,6 @@ class PregnancyExplorer:
             A Dash layout containing the MRI explorer, animation explorer, and mesh explorer.
         """
         return [
-            # Store prerendered figures for clientside switching (eliminates network traffic)
-            dcc.Store(id="prerendered-mesh-figures", data=self.prerendered_week_figures),
             dbc.Row(
                 [
                     dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "20px"}),
@@ -514,63 +471,6 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
                 continue
 
         return out
-    
-
-class SingleInputOutputModelsBasedExplorer(BaseComponentGroup):
-    def __init__(
-        self, model, input, output, shown_input=None, id_prefix="", postproc_pred=None, layout=None
-    ):
-        """SingleInputOutputModelsBasedExplorer class for managing a single model with shared input and output.
-
-        Parameters
-        ----------
-        model : Polpo model
-            Polpo model to be used for predictions.
-        input : Polpo ComponentGroup
-            Polpo ComponentGroup containing input components.
-        output : Polpo Graph
-            Polpo Graph object for displaying the output.
-        shown_input : Polpo ComponentGroup, optional
-            Polpo ComponentGroup containing inputs to be shown in the layout (default is None).
-        id_prefix : str, optional
-            Prefix for the component IDs (default is an empty string).
-        postproc_pred : Polpo PostTransformingEstimator, optional
-            Post-processing model for predictions (default is None).
-        layout : Polpo Layout, optional
-            Layout for the explorer (default is TwoRowLayout).
-        """
-        if layout is None:
-            layout = TwoRowLayout()
-
-        self.model = model
-        self.input = input
-        self.output = output
-        self.postproc_pred = postproc_pred
-        self.layout = layout
-        self.shown_input = shown_input
-
-        super().__init__([output, input], id_prefix=id_prefix)
-
-    def to_dash(self):
-        if self.shown_input is None:
-            out = dbc.Row([
-                    dbc.Col(self.output.to_dash(), width=12),
-            ])
-        else:
-            out = dbc.Row([
-                    dbc.Col(self.output.to_dash(), width=12),
-                    dbc.Col(self.shown_input.to_dash(), width=12),
-            ])
-
-        create_view_model_update(
-            output_view=self.output,
-            input_view=self.input,
-            model=self.model,
-            postproc_pred=self.postproc_pred,
-        )
-
-        return out
-    
 
 
 class SlicePlotter(GoPlotter):

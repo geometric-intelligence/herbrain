@@ -1,5 +1,6 @@
 """Creates a Dash app where week/hormone sliders predict brain shape."""
 
+import json
 import os
 import socket
 
@@ -7,23 +8,11 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import polpo.preprocessing.dict as ppdict
 import polpo.preprocessing.pd as ppd
-from dash import Dash, Input, Output, State, clientside_callback
+from dash import Dash, Input, Output, State
 from flask_compress import Compress
 from polpo.dash.callbacks import PageRegister
-from polpo.dash.components import (
-    ComponentGroup,
-    DepVar,
-    FunctionComponent,
-    Graph,
-    MriExplorer,
-    MriSliders,
-    MultiModelsMeshExplorer,
-    SidebarElem,
-    SidebarHeader,
-    Slider,
-)
+from polpo.dash.components import FunctionComponent, SidebarElem, SidebarHeader
 from polpo.dash.style import update_style
-from polpo.dash.variables import VarDef
 from polpo.models import DictMeshColorizer, MeshColorizer
 from polpo.plot.mesh import MeshesPlotter, MeshPlotter, StaticMeshPlotter
 from polpo.preprocessing import ListSqueeze
@@ -41,8 +30,12 @@ from .data import (
     PilotMriImageLoader,
     TemplateImageLoader,
 )
-from .models import MeshPCR, CachingMeshModel
-from .page_content import pregnancy_page, menstrual_page, homepage
+from .models import MeshPCR
+from .page_content import homepage, menstrual_page, pregnancy_page
+
+
+# Weeks to prerender - every 5 weeks for efficient coverage
+PRERENDER_WEEKS = [0, 5, 10, 15, 20, 25, 30, 35, 40]
 
 
 def my_app(cfg, data, gpt):
@@ -145,46 +138,69 @@ def my_app(cfg, data, gpt):
     X, y = dicts_to_xy([hormones_for_pred, registered_meshes])
     hormones_mesh_model.fit(X, y)
 
-    # Pre-render all mesh figures for clientside switching (eliminates network traffic)
-    print("Pre-rendering mesh figures for clientside switching...")
+    # Prerender mesh figures for fast clientside switching
+    # Only render key weeks (every 5 weeks) to reduce file size
+    # Figures are saved to a static JSON file that loads asynchronously
+    # Use absolute path based on this module's location
+    module_dir = os.path.dirname(os.path.abspath(__file__))
+    assets_folder = os.path.join(module_dir, "assets")
+    prerendered_figures_path = os.path.join(assets_folder, "prerendered_meshes.json")
     
-    # Create the template mesh for the brain overlay
-    template_mesh = NibImage2Mesh()(template_image)
+    # Check if prerendered figures already exist and are up-to-date
+    should_prerender = not os.path.exists(prerendered_figures_path)
     
-    # Set up postprocessing if needed
-    postproc_pred = None
-    if data_type == "multiple":
-        postproc_pred = ppdict.DictMap(step=ListSqueeze()) + ppdict.DictToValuesList()
-    
-    # Create the mesh plotter (same configuration as MultiModelsMeshExplorer)
-    mesh_plotter = MeshesPlotter(
-        plotters=[MeshPlotter() for _ in range(n_structs)],
-        overlay_plotter=StaticMeshPlotter(mesh=template_mesh, visible=True),
-        bounds=None,
-        overlay_bounds=None,
-    )
-    
-    # Pre-render all figures for gestational weeks 0-45
-    prerendered_week_figures = {}
-    for week in range(0, 46):
-        try:
-            result = week_mesh_model.predict(np.array([[week]]))
-            # Extract the prediction - handle both list/array and direct dict returns
-            if isinstance(result, (list, np.ndarray)) and len(result) > 0:
-                mesh_data = result[0]
-            else:
-                mesh_data = result
-            # Apply postprocessing if needed
-            if postproc_pred is not None:
-                mesh_data = postproc_pred(mesh_data)
-            fig = mesh_plotter.plot(mesh_data)
-            prerendered_week_figures[str(week)] = fig.to_dict()  # Use string keys for JSON
-        except Exception as e:
-            import traceback
-            print(f"Warning: Could not pre-render week {week}: {type(e).__name__}: {e}")
-            traceback.print_exc()
-    
-    print(f"Pre-rendered {len(prerendered_week_figures)} mesh figures for gestational weeks")
+    if should_prerender:
+        print("Pre-rendering mesh figures for clientside switching...")
+        
+        # Set up postprocessing if needed
+        postproc_pred = None
+        if data_type == "multiple":
+            postproc_pred = ppdict.DictMap(step=ListSqueeze()) + ppdict.DictToValuesList()
+        
+        # Create mesh plotter WITHOUT overlay (overlay is static and added separately)
+        # This significantly reduces file size since overlay isn't duplicated for each week
+        mesh_plotter = MeshesPlotter(
+            plotters=[MeshPlotter() for _ in range(n_structs)],
+            overlay_plotter=None,  # No overlay in prerendered figures
+            bounds=None,
+            overlay_bounds=None,
+        )
+        
+        # Pre-render figures for key gestational weeks only
+        prerendered_figures = {}
+        for week in PRERENDER_WEEKS:
+            try:
+                result = week_mesh_model.predict(np.array([[week]]))
+                if isinstance(result, (list, np.ndarray)) and len(result) > 0:
+                    mesh_data = result[0]
+                else:
+                    mesh_data = result
+                if postproc_pred is not None:
+                    mesh_data = postproc_pred(mesh_data)
+                fig = mesh_plotter.plot(mesh_data)
+                
+                # Optimize figure data: remove unnecessary fields to reduce size
+                fig_dict = fig.to_dict()
+                for trace in fig_dict.get('data', []):
+                    # Remove colorbar (not needed for quick switching)
+                    if 'colorbar' in trace:
+                        del trace['colorbar']
+                    # Remove hover info (not needed for quick preview)
+                    if 'hoverinfo' not in trace:
+                        trace['hoverinfo'] = 'skip'
+                
+                prerendered_figures[str(week)] = fig_dict
+            except Exception as e:
+                print(f"Warning: Could not pre-render week {week}: {e}")
+        
+        # Save to static JSON file (gzip compression happens via flask-compress)
+        with open(prerendered_figures_path, 'w') as f:
+            json.dump(prerendered_figures, f, separators=(',', ':'))  # Compact JSON
+        
+        file_size_mb = os.path.getsize(prerendered_figures_path) / (1024 * 1024)
+        print(f"Pre-rendered {len(prerendered_figures)} figures, saved to {prerendered_figures_path} ({file_size_mb:.1f} MB)")
+    else:
+        print(f"Using cached prerendered figures from {prerendered_figures_path}")
 
     app = Dash(
         __name__,
@@ -198,15 +214,14 @@ def my_app(cfg, data, gpt):
 
     pregnancy_explorer = PregnancyExplorer(
         cfg,
-        mri_data, 
-        hormones_df, 
-        data_type, 
+        mri_data,
+        hormones_df,
+        data_type,
         template_image,
         n_structs,
         week_mesh_model,
         hormones_mesh_model,
         hormones_ordering,
-        prerendered_week_figures=prerendered_week_figures,
     )
 
     sidebar_elems = [
@@ -257,26 +272,70 @@ def my_app(cfg, data, gpt):
 
     app.title = cfg.app.title
 
-    # Clientside callback for instant mesh figure switching (zero network traffic)
-    # This callback runs entirely in the browser using prerendered figures
+    # Clientside callback for instant mesh figure switching using prerendered figures
+    # The figures are loaded asynchronously from a static JSON file (cached by browser)
+    # Maps any week to the nearest prerendered week for instant switching
+    # Prerendered figures don't include the brain overlay - it's merged from current figure
     app.clientside_callback(
         """
-        function(week, figures, currentFigure) {
-            // Round to nearest integer week
-            const weekInt = Math.round(week).toString();
+        function(week, currentFigure) {
+            // Available prerendered weeks
+            const prerenderWeeks = [0, 5, 10, 15, 20, 25, 30, 35, 40];
             
-            // Return prerendered figure if available
-            if (figures && figures[weekInt]) {
-                return figures[weekInt];
+            // Find nearest prerendered week
+            let nearestWeek = prerenderWeeks[0];
+            let minDiff = Math.abs(week - nearestWeek);
+            for (let w of prerenderWeeks) {
+                const diff = Math.abs(week - w);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    nearestWeek = w;
+                }
+            }
+            const weekKey = nearestWeek.toString();
+            
+            // Check if figures are already cached in window
+            if (window._prerenderedMeshFigures && window._prerenderedMeshFigures[weekKey]) {
+                const prerenderedFig = window._prerenderedMeshFigures[weekKey];
+                
+                // Merge with current figure to preserve overlay brain and layout
+                if (currentFigure && currentFigure.data) {
+                    // Find the overlay trace (last trace, usually the brain template)
+                    const overlayTrace = currentFigure.data.find(t => t.name === 'overlay' || t.opacity < 1);
+                    
+                    // Create merged figure with prerendered data + overlay from current
+                    const mergedData = [...prerenderedFig.data];
+                    if (overlayTrace) {
+                        mergedData.push(overlayTrace);
+                    }
+                    
+                    return {
+                        data: mergedData,
+                        layout: currentFigure.layout || prerenderedFig.layout
+                    };
+                }
+                
+                return prerenderedFig;
             }
             
-            // Fall back to current figure if no prerendered version
+            // Load figures asynchronously if not already loading
+            if (!window._loadingMeshFigures) {
+                window._loadingMeshFigures = true;
+                fetch('/assets/prerendered_meshes.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        window._prerenderedMeshFigures = data;
+                        console.log('Prerendered mesh figures loaded (' + Object.keys(data).length + ' weeks)');
+                    })
+                    .catch(err => console.error('Failed to load prerendered figures:', err));
+            }
+            
+            // Return no_update while loading - server callback will handle initial render
             return window.dash_clientside.no_update;
         }
         """,
         Output("mesh-plot", "figure", allow_duplicate=True),
         Input("gestWeek-slider", "value"),
-        State("prerendered-mesh-figures", "data"),
         State("mesh-plot", "figure"),
         prevent_initial_call=True,
     )
