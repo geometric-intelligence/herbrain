@@ -11,8 +11,8 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "19rem",
-    "padding": "1.75rem 1.5rem",
+    "width": "18rem",
+    "padding": "1.75rem 1.25rem",
     "backgroundColor": "#FFFFFF",
     "borderRight": "1px solid #EAEAEA",
     "display": "flex",
@@ -27,7 +27,7 @@ def sidebar(sidebar_elems, page_register):
         html.Img(
             src=get_asset_url("herbrain_logo.png"),
             style={
-                "width": "140px",
+                "width": "220px",
                 "height": "auto",
                 "cursor": "pointer",
             },
@@ -122,9 +122,9 @@ def homepage():
             html.Img(
                 src=get_asset_url("herbrain_logo.png"),
                 style={
-                    "width": "200px",
+                    "width": "320px",
                     "height": "auto",
-                    "marginBottom": "1.25rem",
+                    "marginBottom": "1.5rem",
                 },
             ),
             html.P(
@@ -413,7 +413,7 @@ def app_layout(sidebar_elems, page_register):
     # the styles for the main content position it to the right of the sidebar and
     # add some padding.
     CONTENT_STYLE = {
-        "marginLeft": "19rem",
+        "marginLeft": "18rem",
         "marginRight": "1.5rem",
         "padding": "1.5rem 1rem",
         "minHeight": "100vh",
