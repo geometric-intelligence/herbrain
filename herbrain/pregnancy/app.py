@@ -202,9 +202,12 @@ def my_app(cfg, data, gpt):
     else:
         print(f"Using cached prerendered figures from {prerendered_figures_path}")
 
+    # Google Fonts for homepage typography
+    google_fonts = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap"
+    
     app = Dash(
         __name__,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        external_stylesheets=[dbc.themes.BOOTSTRAP, google_fonts],
         suppress_callback_exceptions=True,
         assets_folder=cfg.app.assets_folder,
     )
