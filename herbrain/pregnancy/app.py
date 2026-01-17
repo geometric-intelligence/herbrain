@@ -78,17 +78,19 @@ def my_app(cfg, data, gpt):
     template_image = TemplateImageLoader(data_dir=pregnancy_data_dir)()
 
     n_structs = 1
+    # Affine transformation to center the subcortical structures within the brain template
+    # The ENIGMA meshes need to be translated to align with the template brain coordinates
     affine_transform = np.array(
         [
-            [1.0, 0.0, 0.0, 25.0],
-            [0.0, 1.0, 0.0, 28.0],
-            [0.0, 0.0, 1.0, 23.0],
+            [1.0, 0.0, 0.0, -23.0],  # translate x to center structures
+            [0.0, 1.0, 0.0, -9.0],   # translate y
+            [0.0, 0.0, 1.0, 27.0],   # translate z
             [0.0, 0.0, 0.0, 1.0],
         ]
     )
     if data_type == "multiple":
+        # Note: BrStem is not supported in the enigma derivative, so we exclude it
         structs = [
-            "BrStem",
             "L_Thal",
             "R_Thal",
             "L_Caud",
@@ -105,7 +107,7 @@ def my_app(cfg, data, gpt):
             "R_Accu",
         ]
         if cfg.server.debug:
-            structs = structs[2:]
+            structs = structs[:2]
 
         n_structs = len(structs)
         registered_meshes = MultipleMaternalMeshesLoader(
