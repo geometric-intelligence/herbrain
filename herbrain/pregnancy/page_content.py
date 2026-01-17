@@ -11,45 +11,29 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "18rem",
-    "padding": "2rem 1.5rem",
+    "width": "19rem",
+    "padding": "1.75rem 1.5rem",
     "backgroundColor": "#FFFFFF",
-    "borderRight": "1px solid #F0F0F0",
+    "borderRight": "1px solid #EAEAEA",
+    "display": "flex",
+    "flexDirection": "column",
 }
 
 
 def sidebar(sidebar_elems, page_register):
     """Return the sidebar of the app."""
-    # Header with logo and title
+    # Header with logo
     header = dcc.Link(
-        html.Div(
-            [
-                html.Img(
-                    src=get_asset_url("herbrain_logo.png"),
-                    style={
-                        "width": "50px",
-                        "height": "auto",
-                        "marginRight": "0.75rem",
-                    },
-                ),
-                html.Span(
-                    "HerBrain",
-                    style={
-                        "fontFamily": "'Playfair Display', Georgia, serif",
-                        "fontSize": "1.75rem",
-                        "fontWeight": "700",
-                        "color": "#2D3436",
-                    }
-                ),
-            ],
+        html.Img(
+            src=get_asset_url("herbrain_logo.png"),
             style={
-                "display": "flex",
-                "alignItems": "center",
+                "width": "140px",
+                "height": "auto",
                 "cursor": "pointer",
-            }
+            },
         ),
         href="/",
-        style={"textDecoration": "none"},
+        style={"textDecoration": "none", "display": "block"},
     )
     
     # Subtitle
@@ -57,11 +41,12 @@ def sidebar(sidebar_elems, page_register):
         "Digital twins of women's brains",
         style={
             "fontFamily": "'Inter', -apple-system, sans-serif",
-            "fontSize": "0.95rem",
-            "color": "#636E72",
-            "marginTop": "0.75rem",
+            "fontSize": "0.9rem",
+            "color": "#7F8C8D",
+            "marginTop": "1rem",
             "marginBottom": "0",
             "fontWeight": "400",
+            "letterSpacing": "0.01em",
         }
     )
 
@@ -88,7 +73,15 @@ def sidebar(sidebar_elems, page_register):
                             src=get_asset_url(image_url),
                             className="sidebar-nav-icon",
                         ),
-                        html.Span(text),
+                        html.Span(
+                            text,
+                            style={
+                                "fontFamily": "'Inter', -apple-system, sans-serif",
+                                "fontSize": "1.1rem",
+                                "fontWeight": "500",
+                                "letterSpacing": "0.01em",
+                            }
+                        ),
                     ],
                     style={
                         "display": "flex",
@@ -105,7 +98,7 @@ def sidebar(sidebar_elems, page_register):
         [
             header,
             subtitle,
-            html.Hr(style={"borderColor": "#F0F0F0", "marginTop": "1.5rem", "marginBottom": "1.5rem"}),
+            html.Hr(style={"borderColor": "#EAEAEA", "marginTop": "1.75rem", "marginBottom": "1.5rem", "opacity": "0.7"}),
             html.Div(nav_items),
         ],
         style=SIDEBAR_STYLE,
@@ -115,51 +108,50 @@ def sidebar(sidebar_elems, page_register):
 def homepage():
     """Return the content of the homepage with card-based design."""
     
-    # Color scheme
-    accent_color = "#E8927C"  # Coral/salmon color for "Digital Twin" labels
-    bg_color = "#F5F6F8"  # Light gray background
+    # Color scheme - refined palette
+    green_accent = "#4A7C6F"  # Teal green for Pregnancy
+    orange_accent = "#E8927C"  # Coral/salmon for Menstruation & labels
+    bg_color = "#FAFBFC"  # Subtle off-white background
     card_bg = "#FFFFFF"
-    text_dark = "#2D3436"
-    text_muted = "#636E72"
+    text_dark = "#1A1A2E"  # Deep charcoal
+    text_muted = "#6B7280"  # Refined gray
     
-    # Main title section
+    # Main title section - centered logo
     header = html.Div(
         [
-            html.H1(
-                "HerBrain",
+            html.Img(
+                src=get_asset_url("herbrain_logo.png"),
                 style={
-                    "fontFamily": "'Playfair Display', Georgia, serif",
-                    "fontSize": "4rem",
-                    "fontWeight": "700",
-                    "color": text_dark,
-                    "marginBottom": "0.5rem",
-                    "letterSpacing": "-1px",
-                }
+                    "width": "200px",
+                    "height": "auto",
+                    "marginBottom": "1.25rem",
+                },
             ),
             html.P(
                 "Digital Twins of Women's Brains",
                 style={
                     "fontFamily": "'Inter', -apple-system, sans-serif",
-                    "fontSize": "1.25rem",
+                    "fontSize": "1.15rem",
                     "color": text_muted,
                     "fontWeight": "400",
+                    "letterSpacing": "0.02em",
                 }
             ),
         ],
         style={
             "textAlign": "center",
-            "paddingTop": "3rem",
-            "paddingBottom": "3rem",
+            "paddingTop": "4rem",
+            "paddingBottom": "3.5rem",
         }
     )
     
-    # Base card style
+    # Base card style - premium feel
     card_style_base = {
         "backgroundColor": card_bg,
-        "borderRadius": "12px",
-        "padding": "2rem 1.5rem",
+        "borderRadius": "16px",
+        "padding": "2.5rem 2rem",
         "textAlign": "center",
-        "border": "1px solid #E8EAED",
+        "border": "1px solid #E5E7EB",
         "height": "100%",
         "display": "flex",
         "flexDirection": "column",
@@ -172,26 +164,28 @@ def homepage():
             [
                 html.Img(
                     src=get_asset_url("pregnancy_logo.png"),
-                    style={"width": "70px", "height": "70px", "marginBottom": "1.25rem"}
+                    style={"width": "80px", "height": "80px", "marginBottom": "1.5rem"}
                 ),
                 html.H2(
                     "Pregnancy",
                     style={
                         "fontFamily": "'Playfair Display', Georgia, serif",
-                        "fontSize": "1.75rem",
+                        "fontSize": "1.85rem",
                         "fontWeight": "600",
                         "color": text_dark,
-                        "marginBottom": "0.4rem",
+                        "marginBottom": "0.5rem",
+                        "letterSpacing": "-0.01em",
                     }
                 ),
                 html.P(
                     "Digital Twin",
                     style={
-                        "color": accent_color,
+                        "color": orange_accent,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "0.9rem",
+                        "fontSize": "0.95rem",
                         "fontWeight": "500",
-                        "marginBottom": "0.75rem",
+                        "marginBottom": "1rem",
+                        "letterSpacing": "0.02em",
                     }
                 ),
                 html.P(
@@ -199,9 +193,9 @@ def homepage():
                     style={
                         "color": text_muted,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "0.875rem",
-                        "lineHeight": "1.6",
-                        "maxWidth": "280px",
+                        "fontSize": "0.925rem",
+                        "lineHeight": "1.7",
+                        "maxWidth": "300px",
                     }
                 ),
             ],
@@ -218,26 +212,28 @@ def homepage():
             [
                 html.Img(
                     src=get_asset_url("menstrual_logo.png"),
-                    style={"width": "70px", "height": "70px", "marginBottom": "1.25rem"}
+                    style={"width": "80px", "height": "80px", "marginBottom": "1.5rem"}
                 ),
                 html.H2(
                     "Menstruation",
                     style={
                         "fontFamily": "'Playfair Display', Georgia, serif",
-                        "fontSize": "1.75rem",
+                        "fontSize": "1.85rem",
                         "fontWeight": "600",
                         "color": text_dark,
-                        "marginBottom": "0.4rem",
+                        "marginBottom": "0.5rem",
+                        "letterSpacing": "-0.01em",
                     }
                 ),
                 html.P(
                     "Digital Twin",
                     style={
-                        "color": accent_color,
+                        "color": orange_accent,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "0.9rem",
+                        "fontSize": "0.95rem",
                         "fontWeight": "500",
-                        "marginBottom": "0.75rem",
+                        "marginBottom": "1rem",
+                        "letterSpacing": "0.02em",
                     }
                 ),
                 html.P(
@@ -245,9 +241,9 @@ def homepage():
                     style={
                         "color": text_muted,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "0.875rem",
-                        "lineHeight": "1.6",
-                        "maxWidth": "280px",
+                        "fontSize": "0.925rem",
+                        "lineHeight": "1.7",
+                        "maxWidth": "300px",
                     }
                 ),
             ],
@@ -261,26 +257,26 @@ def homepage():
     # Cards row
     cards_row = dbc.Row(
         [
-            dbc.Col(pregnancy_card, md=6, lg=5, className="mb-4"),
-            dbc.Col(menstruation_card, md=6, lg=5, className="mb-4"),
+            dbc.Col(pregnancy_card, md=6, lg=5, className="mb-4 px-3"),
+            dbc.Col(menstruation_card, md=6, lg=5, className="mb-4 px-3"),
         ],
         justify="center",
-        style={"paddingLeft": "1rem", "paddingRight": "1rem"},
     )
     
     # Footer
     footer = html.Div(
         [
-            html.Hr(style={"borderColor": "#E8EAED", "marginTop": "3rem"}),
+            html.Hr(style={"borderColor": "#E5E7EB", "marginTop": "4rem", "opacity": "0.6"}),
             html.P(
                 "© 2024 Geometric Intelligence",
                 style={
                     "textAlign": "center",
                     "color": text_muted,
                     "fontFamily": "'Inter', sans-serif",
-                    "fontSize": "0.9rem",
+                    "fontSize": "0.85rem",
                     "paddingTop": "1.5rem",
                     "paddingBottom": "2rem",
+                    "letterSpacing": "0.01em",
                 }
             ),
         ]
@@ -297,13 +293,12 @@ def homepage():
                         footer,
                     ],
                     fluid=True,
-                    style={"maxWidth": "1000px"},
+                    style={"maxWidth": "960px"},
                 ),
             ],
             style={
                 "backgroundColor": bg_color,
                 "minHeight": "100vh",
-                "paddingTop": "1rem",
             }
         )
     ]
@@ -418,9 +413,11 @@ def app_layout(sidebar_elems, page_register):
     # the styles for the main content position it to the right of the sidebar and
     # add some padding.
     CONTENT_STYLE = {
-        "margin-left": "18rem",
-        "margin-right": "2rem",
-        "padding": "2rem 1rem",
+        "marginLeft": "19rem",
+        "marginRight": "1.5rem",
+        "padding": "1.5rem 1rem",
+        "minHeight": "100vh",
+        "backgroundColor": "#FAFBFC",
     }
     content = html.Div(id="page-content", style=CONTENT_STYLE)
 
@@ -429,5 +426,6 @@ def app_layout(sidebar_elems, page_register):
             dcc.Location(id="url"),
             sidebar(sidebar_elems, page_register),
             content,
-        ]
+        ],
+        style={"backgroundColor": "#FAFBFC"},
     )
