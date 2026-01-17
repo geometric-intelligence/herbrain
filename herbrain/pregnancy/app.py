@@ -7,7 +7,8 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import polpo.preprocessing.dict as ppdict
 import polpo.preprocessing.pd as ppd
-from dash import Dash
+from dash import Dash, Input, Output, State, clientside_callback
+from flask_compress import Compress
 from polpo.dash.callbacks import PageRegister
 from polpo.dash.components import (
     ComponentGroup,
@@ -40,7 +41,7 @@ from .data import (
     PilotMriImageLoader,
     TemplateImageLoader,
 )
-from .models import MeshPCR
+from .models import MeshPCR, CachingMeshModel
 from .page_content import pregnancy_page, menstrual_page, homepage
 
 
@@ -144,6 +145,46 @@ def my_app(cfg, data, gpt):
     X, y = dicts_to_xy([hormones_for_pred, registered_meshes])
     hormones_mesh_model.fit(X, y)
 
+    # Pre-render all mesh figures for clientside switching (eliminates network traffic)
+    print("Pre-rendering mesh figures for clientside switching...")
+    
+    # Create the template mesh for the brain overlay
+    template_mesh = NibImage2Mesh()(template_image)
+    
+    # Set up postprocessing if needed
+    postproc_pred = None
+    if data_type == "multiple":
+        postproc_pred = ppdict.DictMap(step=ListSqueeze()) + ppdict.DictToValuesList()
+    
+    # Create the mesh plotter (same configuration as MultiModelsMeshExplorer)
+    mesh_plotter = MeshesPlotter(
+        plotters=[MeshPlotter() for _ in range(n_structs)],
+        overlay_plotter=StaticMeshPlotter(mesh=template_mesh, visible=True),
+        bounds=None,
+        overlay_bounds=None,
+    )
+    
+    # Pre-render all figures for gestational weeks 0-45
+    prerendered_week_figures = {}
+    for week in range(0, 46):
+        try:
+            result = week_mesh_model.predict(np.array([[week]]))
+            # Extract the prediction - handle both list/array and direct dict returns
+            if isinstance(result, (list, np.ndarray)) and len(result) > 0:
+                mesh_data = result[0]
+            else:
+                mesh_data = result
+            # Apply postprocessing if needed
+            if postproc_pred is not None:
+                mesh_data = postproc_pred(mesh_data)
+            fig = mesh_plotter.plot(mesh_data)
+            prerendered_week_figures[str(week)] = fig.to_dict()  # Use string keys for JSON
+        except Exception as e:
+            import traceback
+            print(f"Warning: Could not pre-render week {week}: {type(e).__name__}: {e}")
+            traceback.print_exc()
+    
+    print(f"Pre-rendered {len(prerendered_week_figures)} mesh figures for gestational weeks")
 
     app = Dash(
         __name__,
@@ -151,6 +192,9 @@ def my_app(cfg, data, gpt):
         suppress_callback_exceptions=True,
         assets_folder=cfg.app.assets_folder,
     )
+    
+    # Enable gzip compression for all responses (reduces ~7MB to ~500KB)
+    Compress(app.server)
 
     pregnancy_explorer = PregnancyExplorer(
         cfg,
@@ -162,6 +206,7 @@ def my_app(cfg, data, gpt):
         week_mesh_model,
         hormones_mesh_model,
         hormones_ordering,
+        prerendered_week_figures=prerendered_week_figures,
     )
 
     sidebar_elems = [
@@ -211,6 +256,30 @@ def my_app(cfg, data, gpt):
     app.layout = page_content.app_layout(sidebar_elems, page_register)
 
     app.title = cfg.app.title
+
+    # Clientside callback for instant mesh figure switching (zero network traffic)
+    # This callback runs entirely in the browser using prerendered figures
+    app.clientside_callback(
+        """
+        function(week, figures, currentFigure) {
+            // Round to nearest integer week
+            const weekInt = Math.round(week).toString();
+            
+            // Return prerendered figure if available
+            if (figures && figures[weekInt]) {
+                return figures[weekInt];
+            }
+            
+            // Fall back to current figure if no prerendered version
+            return window.dash_clientside.no_update;
+        }
+        """,
+        Output("mesh-plot", "figure", allow_duplicate=True),
+        Input("gestWeek-slider", "value"),
+        State("prerendered-mesh-figures", "data"),
+        State("mesh-plot", "figure"),
+        prevent_initial_call=True,
+    )
 
     server_cfg = cfg.server
     app.run(

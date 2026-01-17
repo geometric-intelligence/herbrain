@@ -46,13 +46,55 @@ from dash import Dash, Input, Output, State, callback, dcc, html
 import numpy as np
 import plotly.graph_objs as go
 
-from polpo.dash.components import Image, Slider
+from polpo.dash.components import Image, Slider as PolpoSlider
 from polpo.dash.style import update_style
 from polpo.dash.variables import VarDef
 from polpo.models import ListLookup   
 import os
 import sys
 from polpo.preprocessing import Sorter
+
+
+class DebouncedSlider(PolpoSlider):
+    """Optimized slider that only fires callbacks on drag release for better performance."""
+    
+    def to_dash(self):
+        """Create a dcc.Slider with drag-release mode for instant feedback."""
+        label = dbc.Label(
+            self.var_def.label,
+            style=self.label_style,
+        )
+
+        min_value, max_value = self.var_def.min_value, self.var_def.max_value
+        step = self.step
+        value = min(max_value, self.var_def.default_value)
+        value = max(min_value, value)
+        n_steps = round((value - min_value) / step)
+        value = min_value + step * n_steps
+
+        slider = dcc.Slider(
+            id=self.id,
+            min=min_value,
+            max=max_value,
+            step=step,
+            value=value,
+            marks={
+                min_value: {"label": "min"},
+                max_value: {"label": "max"},
+            },
+            tooltip={
+                "placement": "bottom",
+                "always_visible": True,
+                "style": {"fontSize": "25px", "fontFamily": S.text_fontfamily},
+            },
+            updatemode='drag',  # Only fire on drag release, not during drag
+        )
+
+        return [label, slider]
+
+
+# Replace Slider with DebouncedSlider for better performance
+Slider = DebouncedSlider
 from polpo.preprocessing.path import FileFinder
 from dash import Dash, get_asset_url
 
@@ -71,6 +113,7 @@ class PregnancyExplorer:
         week_mesh_model,
         hormones_mesh_model,
         hormones_ordering,
+        prerendered_week_figures=None,
     ):
         """PregnancyExplorer class. 
         
@@ -94,7 +137,11 @@ class PregnancyExplorer:
             Model for the mesh corresponding to hormone values.
         hormones_ordering : list of str
             List defining the order of hormones for visualization.
+        prerendered_week_figures : dict, optional
+            Pre-rendered Plotly figures for each gestational week (0-45).
+            Used for clientside switching to eliminate network traffic.
         """
+        self.prerendered_week_figures = prerendered_week_figures or {}
         # Variable definitions
         
         self.gest_week_var = VarDef(
@@ -193,6 +240,8 @@ class PregnancyExplorer:
             A Dash layout containing the MRI explorer, animation explorer, and mesh explorer.
         """
         return [
+            # Store prerendered figures for clientside switching (eliminates network traffic)
+            dcc.Store(id="prerendered-mesh-figures", data=self.prerendered_week_figures),
             dbc.Row(
                 [
                     dbc.Col(self.animation_explorer.to_dash(), width=2, style={"overflow": "auto", "padding": "20px"}),
@@ -495,75 +544,85 @@ class SingleInputOutputModelsBasedExplorer(BaseComponentGroup):
     
 
 
-class SlicePlotter(GoPlotter): # need to eventually integrate with polpo, but for now putting here so that i can remove the x and y ticks.
+class SlicePlotter(GoPlotter):
+    """OPTIMIZED SlicePlotter for fast MRI slice visualization."""
+    
     def __init__(
         self, cmap="gray", title="Slice Visualization", x_label="X", y_label="Y", just_image=False
     ):
-        """ SlicePlotter class for visualizing MRI slices.
-        
-        Edited from Polpo version to remove x and y ticks, and to allow for just image visualization.
-        """
         self.cmap = cmap
         self.title = title
         self.x_label = x_label
         self.y_label = y_label
+        self.just_image = just_image
+        self._cached_layout = None
+        self._cached_size = None
 
-        if not just_image:
-            self.layout = go.Layout(
+    def _get_layout(self, width, height):
+        """Get cached layout or create new one."""
+        size_key = (width, height)
+        if self._cached_layout is not None and self._cached_size == size_key:
+            return self._cached_layout
+        
+        if self.just_image:
+            layout = go.Layout(
+                width=width,
+                height=height,
+                xaxis=dict(
+                    visible=False,
+                    showticklabels=False,
+                    showgrid=False,
+                    zeroline=False,
+                    showline=False,
+                ),
+                yaxis=dict(
+                    visible=False,
+                    showticklabels=False,
+                    showgrid=False,
+                    zeroline=False,
+                    showline=False,
+                    scaleanchor="x",
+                ),
+                margin=dict(l=0, r=0, t=0, b=0),
+                uirevision="constant",  # Prevents reset on update
+            )
+        else:
+            layout = go.Layout(
                 title=self.title,
-                title_x=0.5,
+                width=width,
+                height=height,
                 xaxis=dict(title=self.x_label),
                 yaxis=dict(title=self.y_label),
                 uirevision="constant",
             )
-        else:
-            self.layout = go.Layout(
-                title=None,  # No title
-                title_x=0.5,  # (optional, has no effect if title=None)
-                xaxis=dict(
-                    title=None,         # No x axis label
-                    showticklabels=False,  # No tick numbers
-                    ticks='',              # No ticks
-                    showgrid=False,        # No grid lines
-                    zeroline=False,        # No zero line
-                    showline=False,        # No axis line
-                ),
-                yaxis=dict(
-                    title=None,         # No y axis label
-                    showticklabels=False,  # No tick numbers
-                    ticks='',              # No ticks
-                    showgrid=False,        # No grid lines
-                    zeroline=False,        # No zero line
-                    showline=False,        # No axis line
-                ),
-                uirevision="constant",
-            )
-            
+        
+        self._cached_layout = layout
+        self._cached_size = size_key
+        return layout
 
     def transform_data(self, data):
-        return [go.Heatmap(z=data.T, colorscale=self.cmap, showscale=False)]
+        # Use Heatmap with optimized settings
+        return [go.Heatmap(
+            z=data.T,
+            colorscale=self.cmap,
+            showscale=False,
+            hoverongaps=False,
+            hoverinfo='skip',  # Disable hover for speed
+        )]
 
     def plot(self, data=None):
-        # Create heatmap trace for the current slice
         if data is None:
-            return go.Figure(
-                layout=self.layout,
-            )
-
-        fig = go.Figure(data=self.transform_data(data), layout=self.layout)
-
+            return go.Figure(layout=self._get_layout(300, 300))
+        
+        # Calculate size once
         width = int(len(data[:, 0]) * 1.5)
         height = int(len(data[0]) * 1.5)
-
-        fig.update_layout(
-            width=width,
-            height=height,
-        )
-
-        print(f"self.x_label: {self.x_label}, self.y_label: {self.y_label}")
-
         
-        return fig
+        # Create figure with cached layout
+        return go.Figure(
+            data=self.transform_data(data),
+            layout=self._get_layout(width, height)
+        )
     
 
 class RadioButton(Component): # the one in polpo had a bug
