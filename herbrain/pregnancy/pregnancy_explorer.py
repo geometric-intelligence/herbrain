@@ -372,51 +372,53 @@ class MriExplorer(BaseComponentGroup): # different from one in polpo because it 
 
 class AnimationExplorer():
     def __init__(self, assets_folder_path, week_slider):
-        """AnimationExplorer class for visualizing pregnancy images.
+        """AnimationExplorer class for visualizing pregnancy animation via video.
+
+        Uses a pre-rendered video file with clientside frame seeking for instant
+        frame switching without network requests.
 
         Parameters
         ----------
         assets_folder_path : str
-            Path to the folder containing pregnancy images.
+            Path to the folder containing the pregnancy animation video.
         week_slider : Polpo Slider
             Polpo object. Precursor for the gestational week slider.
         """
         self.assets_folder_path = assets_folder_path
-        self.image_paths = self._load_pregnancy_images()
-        self.week_slider = week_slider # should be a VarDef
+        self.week_slider = week_slider
+        self.video_url = self._get_video_url()
 
-    def _load_pregnancy_images(self):
-        """Load pregnancy images from the specified assets folder.
+    def _get_video_url(self):
+        """Get the URL for the pregnancy animation video.
         
         Returns
         -------
-        List[str]
-            List of URLs for the loaded images.
+        str
+            URL for the pregnancy animation video.
         """
-        # assumes assets at app folder level
-        file_path = os.path.dirname(sys.modules[__package__].__file__)
-        # removes ./
-        short_assets_folder = "/".join(self.assets_folder_path.split("/")[1:])
-
-        assets_folder_abs = os.path.join(file_path, short_assets_folder)
-
-        images = (
-            FileFinder(data_dir=os.path.join(assets_folder_abs, "pregnancy_frames")) + Sorter()
-        )()
-
-        n_path_assets = len(assets_folder_abs)
-        return [get_asset_url(image[n_path_assets + 1 :]) for image in images]
-
+        return get_asset_url("pregnancy_animation.mp4")
 
     def to_dash(self):
-        model = ClosestImageLookup(self.image_paths) #here, input will be weeks, and output needs to be an image.
-
-        input = self.week_slider
+        """Create the Dash layout with video and clientside frame seeking.
         
-        output = Image(id_=f"pregnancy-image", style={"width": "100%", "height": "auto", "maxWidth": "1000px"})
-
-        image_seq_explorer = SingleInputOutputModelsBasedExplorer(model, input, output, shown_input=None)
-        return dbc.Container(image_seq_explorer.to_dash())
+        The video is loaded once and frame seeking happens entirely in the browser,
+        eliminating network requests when the gestational week slider changes.
+        """
+        # Video element - preloaded, muted, no controls
+        video = html.Video(
+            id="pregnancy-video",
+            src=self.video_url,
+            style={"width": "100%", "height": "auto", "maxWidth": "200px"},
+            preload="auto",  # Preload entire video for instant seeking
+            muted=True,  # Required for autoplay policies
+            **{"data-testid": "pregnancy-video"}  # For testing
+        )
+        
+        return dbc.Container([
+            video,
+            # Hidden output for the clientside callback (video currentTime is set via JS)
+            html.Div(id="pregnancy-video-time-setter", style={"display": "none"}),
+        ])
 
 
 

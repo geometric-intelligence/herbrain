@@ -281,6 +281,40 @@ def my_app(cfg, data, gpt):
         prevent_initial_call=True,
     )
 
+    # Clientside callback for instant pregnancy animation frame switching
+    # The video has 10 frames (weeks 00, 05, 10, 15, 20, 25, 30, 35, 40, 41) at 1fps
+    # Frame seeking happens entirely in the browser - no network requests
+    app.clientside_callback(
+        """
+        function(week) {
+            // Get the video element
+            const video = document.getElementById('pregnancy-video');
+            if (!video) {
+                return window.dash_clientside.no_update;
+            }
+            
+            // Map gestational week to video time (frame number at 1fps)
+            // Frames: 0=week0-4, 1=week5-9, 2=week10-14, ..., 8=week40, 9=week41+
+            let frameTime;
+            if (week >= 41) {
+                frameTime = 9;
+            } else if (week >= 40) {
+                frameTime = 8;
+            } else {
+                frameTime = Math.floor(week / 5);
+            }
+            
+            // Seek to the frame (add small offset to ensure we're in the frame)
+            video.currentTime = frameTime + 0.001;
+            
+            return '';  // Return empty string to satisfy the callback
+        }
+        """,
+        Output("pregnancy-video-time-setter", "children"),
+        Input("gestWeek-slider", "value"),
+        prevent_initial_call=False,  # Run on initial load too
+    )
+
     server_cfg = cfg.server
     app.run(
         debug=server_cfg.debug,
