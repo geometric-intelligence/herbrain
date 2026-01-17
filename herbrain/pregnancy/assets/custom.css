@@ -1,0 +1,78 @@
+/* HerBrain Custom Styles - Minimalist, High-End, Professional */
+
+/* ============================================
+   HOMEPAGE CARD HOVER EFFECTS
+   ============================================ */
+
+/* Pregnancy card - green hover border */
+.pregnancy-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pregnancy-card:hover {
+    border-color: #4A7C6F !important;
+    box-shadow: 0 4px 12px rgba(74, 124, 111, 0.15) !important;
+}
+
+/* Menstruation card - orange hover border */
+.menstruation-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menstruation-card:hover {
+    border-color: #E8927C !important;
+    box-shadow: 0 4px 12px rgba(232, 146, 124, 0.15) !important;
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION STYLES
+   ============================================ */
+
+/* Sidebar nav item base style */
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    text-decoration: none !important;
+    color: #2D3436 !important;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Active/selected state - salmon/coral tint for Pregnancy */
+.sidebar-nav-item.active-pregnancy {
+    background-color: rgba(232, 146, 124, 0.15);
+    color: #E8927C !important;
+}
+
+/* Active/selected state - coral tint for Menstruation */
+.sidebar-nav-item.active-menstruation {
+    background-color: rgba(232, 146, 124, 0.15);
+    color: #E8927C !important;
+}
+
+/* Sidebar nav item icon */
+.sidebar-nav-icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   GENERAL TYPOGRAPHY
+   ============================================ */
+
+/* Ensure clean font rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

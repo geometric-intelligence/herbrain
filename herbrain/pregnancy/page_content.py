@@ -12,62 +12,101 @@ SIDEBAR_STYLE = {
     "left": 0,
     "bottom": 0,
     "width": "18rem",
-    "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
+    "padding": "2rem 1.5rem",
+    "backgroundColor": "#FFFFFF",
+    "borderRight": "1px solid #F0F0F0",
 }
 
 
 def sidebar(sidebar_elems, page_register):
     """Return the sidebar of the app."""
-    # Make logo and title clickable to go to home page
-    title = dbc.Row(
-        [
-            dbc.Col(
-                dcc.Link(
-                    html.Img(
-                        src=get_asset_url("wbhi_logo.png"),
-                        style={"width": "100px", "height": "auto", "cursor": "pointer"},
-                    ),
-                    href="/",
-                    style={"textDecoration": "none"},
+    # Header with logo and title
+    header = dcc.Link(
+        html.Div(
+            [
+                html.Img(
+                    src=get_asset_url("herbrain_logo.png"),
+                    style={
+                        "width": "50px",
+                        "height": "auto",
+                        "marginRight": "0.75rem",
+                    },
                 ),
-                width=2,
-            ),
-            dbc.Col(width=0.5),
-            dbc.Col(
-                dcc.Link(
-                    html.H2("HerBrain", className="display-4", style={"cursor": "pointer", "margin": 0}),
-                    href="/",
-                    style={"textDecoration": "none", "color": "inherit"},
+                html.Span(
+                    "HerBrain",
+                    style={
+                        "fontFamily": "'Playfair Display', Georgia, serif",
+                        "fontSize": "1.75rem",
+                        "fontWeight": "700",
+                        "color": "#2D3436",
+                    }
                 ),
-                width=10,
-            ),
-        ],
-        align="center",
+            ],
+            style={
+                "display": "flex",
+                "alignItems": "center",
+                "cursor": "pointer",
+            }
+        ),
+        href="/",
+        style={"textDecoration": "none"},
+    )
+    
+    # Subtitle
+    subtitle = html.P(
+        "Digital twins of women's brains",
+        style={
+            "fontFamily": "'Inter', -apple-system, sans-serif",
+            "fontSize": "0.95rem",
+            "color": "#636E72",
+            "marginTop": "0.75rem",
+            "marginBottom": "0",
+            "fontWeight": "400",
+        }
     )
 
-    # Register all routes (including inactive ones), but only show active ones in nav
-    headers = []
+    # Register all routes (including inactive ones), but build custom nav items
+    nav_items = []
     for elem in sidebar_elems:
         # Register route for all elements (active or not)
-        compns = elem.to_dash(page_register)
+        elem.to_dash(page_register)
+        
         # Only add to nav if active
         if elem.active:
-            headers.append(compns[0])
+            # Get the href and text from the tab_header
+            href = elem.tab_header.href
+            text = elem.tab_header.text
+            image_url = elem.tab_header.image_url
+            
+            # Determine which card class to use for active state
+            card_class = "sidebar-nav-item"
+            
+            nav_item = dcc.Link(
+                html.Div(
+                    [
+                        html.Img(
+                            src=get_asset_url(image_url),
+                            className="sidebar-nav-icon",
+                        ),
+                        html.Span(text),
+                    ],
+                    style={
+                        "display": "flex",
+                        "alignItems": "center",
+                    }
+                ),
+                href=href,
+                className=card_class,
+                id=f"nav-{text.lower()}",
+            )
+            nav_items.append(nav_item)
 
     return html.Div(
         [
-            title,
-            html.Hr(),
-            html.P(
-                "Explore how the female brain changes during pregnancy",
-                className="lead",
-            ),
-            dbc.Nav(
-                headers,
-                vertical=True,
-                pills=True,
-            ),
+            header,
+            subtitle,
+            html.Hr(style={"borderColor": "#F0F0F0", "marginTop": "1.5rem", "marginBottom": "1.5rem"}),
+            html.Div(nav_items),
         ],
         style=SIDEBAR_STYLE,
     )
@@ -114,13 +153,12 @@ def homepage():
         }
     )
     
-    # Card style
-    card_style = {
+    # Base card style
+    card_style_base = {
         "backgroundColor": card_bg,
-        "borderRadius": "16px",
-        "padding": "2.5rem 2rem",
+        "borderRadius": "12px",
+        "padding": "2rem 1.5rem",
         "textAlign": "center",
-        "boxShadow": "0 1px 3px rgba(0,0,0,0.04)",
         "border": "1px solid #E8EAED",
         "height": "100%",
         "display": "flex",
@@ -134,16 +172,16 @@ def homepage():
             [
                 html.Img(
                     src=get_asset_url("pregnancy_logo.png"),
-                    style={"width": "80px", "height": "80px", "marginBottom": "1.5rem"}
+                    style={"width": "70px", "height": "70px", "marginBottom": "1.25rem"}
                 ),
                 html.H2(
                     "Pregnancy",
                     style={
                         "fontFamily": "'Playfair Display', Georgia, serif",
-                        "fontSize": "2rem",
+                        "fontSize": "1.75rem",
                         "fontWeight": "600",
                         "color": text_dark,
-                        "marginBottom": "0.5rem",
+                        "marginBottom": "0.4rem",
                     }
                 ),
                 html.P(
@@ -151,9 +189,9 @@ def homepage():
                     style={
                         "color": accent_color,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "1rem",
+                        "fontSize": "0.9rem",
                         "fontWeight": "500",
-                        "marginBottom": "1rem",
+                        "marginBottom": "0.75rem",
                     }
                 ),
                 html.P(
@@ -161,13 +199,14 @@ def homepage():
                     style={
                         "color": text_muted,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "0.95rem",
+                        "fontSize": "0.875rem",
                         "lineHeight": "1.6",
-                        "maxWidth": "320px",
+                        "maxWidth": "280px",
                     }
                 ),
             ],
-            style=card_style,
+            style=card_style_base,
+            className="pregnancy-card",
         ),
         href="/page-1",
         style={"textDecoration": "none", "display": "block", "height": "100%"},
@@ -179,16 +218,16 @@ def homepage():
             [
                 html.Img(
                     src=get_asset_url("menstrual_logo.png"),
-                    style={"width": "80px", "height": "80px", "marginBottom": "1.5rem"}
+                    style={"width": "70px", "height": "70px", "marginBottom": "1.25rem"}
                 ),
                 html.H2(
                     "Menstruation",
                     style={
                         "fontFamily": "'Playfair Display', Georgia, serif",
-                        "fontSize": "2rem",
+                        "fontSize": "1.75rem",
                         "fontWeight": "600",
                         "color": text_dark,
-                        "marginBottom": "0.5rem",
+                        "marginBottom": "0.4rem",
                     }
                 ),
                 html.P(
@@ -196,9 +235,9 @@ def homepage():
                     style={
                         "color": accent_color,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "1rem",
+                        "fontSize": "0.9rem",
                         "fontWeight": "500",
-                        "marginBottom": "1rem",
+                        "marginBottom": "0.75rem",
                     }
                 ),
                 html.P(
@@ -206,13 +245,14 @@ def homepage():
                     style={
                         "color": text_muted,
                         "fontFamily": "'Inter', sans-serif",
-                        "fontSize": "0.95rem",
+                        "fontSize": "0.875rem",
                         "lineHeight": "1.6",
-                        "maxWidth": "320px",
+                        "maxWidth": "280px",
                     }
                 ),
             ],
-            style=card_style,
+            style=card_style_base,
+            className="menstruation-card",
         ),
         href="/page-2",
         style={"textDecoration": "none", "display": "block", "height": "100%"},

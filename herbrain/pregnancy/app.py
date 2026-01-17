@@ -377,6 +377,38 @@ def my_app(cfg, data, gpt):
         prevent_initial_call=False,  # Run on initial load too
     )
 
+    # Clientside callback for sidebar active state highlighting
+    app.clientside_callback(
+        """
+        function(pathname) {
+            // Update sidebar nav items based on current pathname
+            const pregnancyNav = document.getElementById('nav-pregnancy');
+            const menstruationNav = document.getElementById('nav-menstruation');
+            
+            if (pregnancyNav) {
+                if (pathname === '/page-1') {
+                    pregnancyNav.className = 'sidebar-nav-item active-pregnancy';
+                } else {
+                    pregnancyNav.className = 'sidebar-nav-item';
+                }
+            }
+            
+            if (menstruationNav) {
+                if (pathname === '/page-2') {
+                    menstruationNav.className = 'sidebar-nav-item active-menstruation';
+                } else {
+                    menstruationNav.className = 'sidebar-nav-item';
+                }
+            }
+            
+            return window.dash_clientside.no_update;
+        }
+        """,
+        Output("page-content", "className"),
+        Input("url", "pathname"),
+        prevent_initial_call=False,
+    )
+
     server_cfg = cfg.server
     app.run(
         debug=server_cfg.debug,
