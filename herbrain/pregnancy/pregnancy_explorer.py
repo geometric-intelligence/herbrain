@@ -91,6 +91,10 @@ class DebouncedSlider(PolpoSlider):
         )
 
         return [label, slider]
+    
+    def as_input(self):
+        """Override to return 'value' instead of 'drag_value' for consistency with clientside callbacks."""
+        return [Input(self.id, "value")]
 
 
 # Replace Slider with DebouncedSlider for better performance
@@ -423,6 +427,9 @@ class AnimationExplorer():
 
 
 class SharedOutputModelsBasedExplorer(BaseComponentGroup):
+    # Class-level set to track which callbacks have been registered
+    _registered_callbacks = set()
+    
     def __init__(
         self, models, inputs, outputs, shown_inputs=None, id_prefix="", postproc_pred=None, layout=None
     ):
@@ -479,12 +486,32 @@ class SharedOutputModelsBasedExplorer(BaseComponentGroup):
 
         # Create callbacks for each input-model pair
         for model in self.models:
-            create_view_model_update(
-                output_view=self.outputs,
-                input_view=self.inputs,
-                model=model,
-                postproc_pred=self.postproc_pred,
+            # Create a unique key for this callback to prevent duplicate registration
+            callback_key = (
+                self.outputs.id_ if hasattr(self.outputs, 'id_') else str(self.outputs),
+                type(model).__name__,
+                tuple(str(inp) for inp in self.inputs.as_input())
             )
+            
+            # Skip if this callback has already been registered
+            if callback_key in SharedOutputModelsBasedExplorer._registered_callbacks:
+                continue
+            
+            try:
+                create_view_model_update(
+                    output_view=self.outputs,
+                    input_view=self.inputs,
+                    model=model,
+                    postproc_pred=self.postproc_pred,
+                )
+                # Mark this callback as registered
+                SharedOutputModelsBasedExplorer._registered_callbacks.add(callback_key)
+            except Exception as e:
+                import traceback
+                print(f"ERROR: Failed to create callback for model {model}: {e}")
+                traceback.print_exc()
+                # Don't re-raise - allow page to load even if callback creation fails
+                continue
 
         return out
     

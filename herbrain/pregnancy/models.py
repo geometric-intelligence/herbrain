@@ -159,41 +159,84 @@ class MriModel(Model):
 
     def predict(self, X):
         """Fast prediction with caching."""
-        if len(X) != 3:
-            raise ValueError("Input X must be a tuple/list of (gest_week, view_index, slice_index)")
-        
-        gest_week, view_index, slice_index = X
-        
-        # Convert string view_index to int if needed
-        if isinstance(view_index, str):
-            view_index = {"sagittal": 0, "coronal": 1, "axial": 2}.get(view_index, 0)
-        
-        # Get data index from precomputed mapping
-        gest_week = int(gest_week)
-        if gest_week in self._gest_week_to_data_idx:
-            data_idx = self._gest_week_to_data_idx[gest_week]
-        else:
-            data_idx = 0
-        
-        slice_index = int(slice_index)
-        
-        # Check cache first
-        cache_key = (data_idx, view_index, slice_index)
-        if cache_key in self._slice_cache:
-            return self._slice_cache[cache_key]
-        
-        # Compute and cache
-        datum = self.data[data_idx]
-        shape = datum.shape
-        slice_indices = [shape[i] // 2 if i != view_index else slice_index for i in range(3)]
-        slices = self.slicer.slice(datum, slice_indices)
-        result = slices[view_index] if isinstance(slices, list) else slices
-        
-        # Cache it (limit cache size to prevent memory issues)
-        if len(self._slice_cache) < 5000:
-            self._slice_cache[cache_key] = result
-        
-        return result
+        # Handle None or invalid inputs gracefully to prevent callback failures
+        try:
+            if X is None or (hasattr(X, '__len__') and len(X) != 3):
+                # Return default empty slice if inputs are invalid
+                if len(self.data) > 0:
+                    sample_shape = self.data[0].shape
+                    return np.zeros((sample_shape[1], sample_shape[2]), dtype=np.float32)
+                return np.zeros((100, 100), dtype=np.float32)
+            
+            gest_week, view_index, slice_index = X
+            
+            # Handle None values
+            if gest_week is None:
+                gest_week = 15  # Default to week 15
+            if view_index is None:
+                view_index = 0  # Default to sagittal
+            if slice_index is None:
+                slice_index = 0  # Default to first slice
+            
+            # Convert string view_index to int if needed
+            if isinstance(view_index, str):
+                view_index = {"sagittal": 0, "coronal": 1, "axial": 2}.get(view_index.lower(), 0)
+            
+            # Get data index from precomputed mapping
+            try:
+                gest_week = int(gest_week)
+            except (ValueError, TypeError):
+                gest_week = 15  # Default to week 15
+            
+            if gest_week in self._gest_week_to_data_idx:
+                data_idx = self._gest_week_to_data_idx[gest_week]
+            else:
+                data_idx = 0
+            
+            try:
+                slice_index = int(slice_index)
+            except (ValueError, TypeError):
+                slice_index = 0
+            
+            # Ensure indices are within bounds
+            if data_idx < 0 or data_idx >= len(self.data):
+                data_idx = 0
+            
+            # Check cache first
+            cache_key = (data_idx, view_index, slice_index)
+            if cache_key in self._slice_cache:
+                return self._slice_cache[cache_key]
+            
+            # Compute and cache
+            datum = self.data[data_idx]
+            shape = datum.shape
+            
+            # Ensure slice_index is within bounds for the selected view
+            max_slice = shape[view_index] - 1
+            if slice_index < 0:
+                slice_index = 0
+            elif slice_index > max_slice:
+                slice_index = max_slice
+            
+            slice_indices = [shape[i] // 2 if i != view_index else slice_index for i in range(3)]
+            slices = self.slicer.slice(datum, slice_indices)
+            result = slices[view_index] if isinstance(slices, list) else slices
+            
+            # Cache it (limit cache size to prevent memory issues)
+            if len(self._slice_cache) < 5000:
+                self._slice_cache[cache_key] = result
+            
+            return result
+            
+        except Exception as e:
+            import traceback
+            print(f"Error in MriModel.predict(): {e}")
+            traceback.print_exc()
+            # Return a default empty slice
+            if len(self.data) > 0:
+                sample_shape = self.data[0].shape
+                return np.zeros((sample_shape[1], sample_shape[2]), dtype=np.float32)
+            return np.zeros((100, 100), dtype=np.float32)
         
 
 class ClosestImageLookup(Model):
