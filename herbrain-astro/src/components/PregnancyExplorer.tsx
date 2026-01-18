@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import AnimationExplorer from './AnimationExplorer';
 import MriViewer from './MriViewer';
 import GptChat from './GptChat';
@@ -10,6 +10,30 @@ import WeekSlider from './WeekSlider';
  */
 export default function PregnancyExplorer() {
   const [week, setWeek] = useState(15);
+  const meshContainerRef = useRef<HTMLDivElement>(null);
+
+  // Screenshot capture function for GPT chat
+  const getMeshScreenshot = useCallback(async (): Promise<string | null> => {
+    try {
+      const plotDiv = meshContainerRef.current?.querySelector('.js-plotly-plot') as HTMLElement | null;
+      if (!plotDiv) {
+        console.warn('Could not find Plotly chart element');
+        return null;
+      }
+      
+      // Dynamically import Plotly for toImage
+      const Plotly = await import('plotly.js-dist-min');
+      const dataUrl = await Plotly.default.toImage(plotDiv, {
+        format: 'png',
+        width: 800,
+        height: 600,
+      });
+      return dataUrl;
+    } catch (err) {
+      console.warn('Failed to capture mesh screenshot:', err);
+      return null;
+    }
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -76,12 +100,12 @@ export default function PregnancyExplorer() {
 
         {/* Mesh Explorer - Right Column (no internal slider, uses shared week) */}
         <div className="lg:col-span-5">
-          <MeshExplorerSimple week={week} />
+          <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
         </div>
       </div>
 
       {/* GPT Chat */}
-      <GptChat week={week} />
+      <GptChat week={week} getMeshScreenshot={getMeshScreenshot} />
     </div>
   );
 }
@@ -90,7 +114,7 @@ export default function PregnancyExplorer() {
  * Simplified MeshExplorer that only displays, without its own slider
  * (week is controlled by parent)
  */
-function MeshExplorerSimple({ week }: { week: number }) {
+function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef?: React.RefObject<HTMLDivElement | null> }) {
   const [meshData, setMeshData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,7 +208,7 @@ function MeshExplorerSimple({ week }: { week: number }) {
   }
 
   return (
-    <div className="flex flex-col items-center bg-white rounded-xl border border-gray-200 p-6">
+    <div ref={containerRef} className="flex flex-col items-center bg-white rounded-xl border border-gray-200 p-6">
       <div className="mb-4">
         <Plot
           data={getPlotData()}
