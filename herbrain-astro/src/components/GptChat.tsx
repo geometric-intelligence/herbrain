@@ -65,11 +65,6 @@ export default function GptChat({ week, getMeshScreenshot }: GptChatProps) {
         dangerouslyAllowBrowser: true,
       });
 
-      // Build context
-      const context = `Current gestational week: ${week}
-
-Please analyze the brain visualization and provide insights about brain changes during pregnancy.`;
-
       // System messages for the neurobot
       const systemMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         {
@@ -84,12 +79,16 @@ Please analyze the brain visualization and provide insights about brain changes 
         },
         {
           role: 'system',
-          content: context,
+          content:
+            'The 3D mesh visualization shows subcortical structures including the accumbens nucleus, Amygdala, Caudate nucleus, Hippocampus, Globus pallidus (Pallidum), Putamen, and Thalamus. Red indicates areas that are growing as a result of pregnancy, and blue shows areas that are shrinking. Beige areas have not changed from the pre-pregnancy state.',
         },
         {
           role: 'system',
           content:
-            'The 3D mesh visualization shows subcortical structures including the accumbens nucleus, Amygdala, Caudate nucleus, Hippocampus, Globus pallidus (Pallidum), Putamen, and Thalamus. Red indicates areas that are growing as a result of pregnancy, and blue shows areas that are shrinking. Beige areas have not changed from the pre-pregnancy state.',
+            `CURRENT APP STATE - You have access to the following information about the user's current view:
+- Gestational Week Slider: Currently set to week ${week} (out of 40 weeks total)
+
+When the user asks about the current slider value, gestational week, or what week they're viewing, tell them it is week ${week}. Use this context to provide relevant information about brain changes at this specific stage of pregnancy.`,
         },
       ];
 

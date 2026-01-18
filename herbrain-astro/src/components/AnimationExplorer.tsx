@@ -4,6 +4,57 @@ interface AnimationExplorerProps {
   week: number;
 }
 
+// Fetus size comparisons by gestational week (common pregnancy milestone descriptions)
+const FETUS_SIZE_BY_WEEK: Record<number, string> = {
+  0: 'a poppy seed',
+  1: 'a poppy seed',
+  2: 'a poppy seed',
+  3: 'a poppy seed',
+  4: 'a poppy seed',
+  5: 'a sesame seed',
+  6: 'a lentil',
+  7: 'a blueberry',
+  8: 'a raspberry',
+  9: 'a grape',
+  10: 'a kumquat',
+  11: 'a fig',
+  12: 'a lime',
+  13: 'a lemon',
+  14: 'a peach',
+  15: 'an apple',
+  16: 'an avocado',
+  17: 'a pear',
+  18: 'a bell pepper',
+  19: 'a mango',
+  20: 'a banana',
+  21: 'a carrot',
+  22: 'a papaya',
+  23: 'a grapefruit',
+  24: 'an ear of corn',
+  25: 'a cauliflower',
+  26: 'a lettuce head',
+  27: 'a cabbage',
+  28: 'an eggplant',
+  29: 'a butternut squash',
+  30: 'a coconut',
+  31: 'a pineapple',
+  32: 'a squash',
+  33: 'a durian',
+  34: 'a cantaloupe',
+  35: 'a honeydew melon',
+  36: 'a romaine lettuce',
+  37: 'a winter melon',
+  38: 'a leek',
+  39: 'a mini watermelon',
+  40: 'a small pumpkin',
+};
+
+function getFetusSize(week: number): string {
+  // Clamp week to valid range
+  const clampedWeek = Math.max(0, Math.min(40, Math.round(week)));
+  return FETUS_SIZE_BY_WEEK[clampedWeek] || 'a small pumpkin';
+}
+
 /**
  * AnimationExplorer component that displays a pregnancy animation video
  * with frame seeking based on gestational week.
@@ -47,7 +98,7 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
-      <div className="relative bg-white rounded-xl border border-gray-200 p-3 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 p-3 overflow-hidden">
         <video
           ref={videoRef}
           src="/assets/pregnancy_animation.mp4"
@@ -55,16 +106,14 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
           muted
           playsInline
           onLoadedData={handleLoadedData}
-          className="max-h-80 w-auto object-contain"
+          className="max-h-72 w-auto object-contain"
           style={{ display: 'block', margin: '0 auto' }}
         />
         
-        {/* Week indicator */}
-        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-lg shadow-sm">
-          <span className="text-xs font-medium text-herbrain-dark">
-            Week {week}
-          </span>
-        </div>
+        {/* Fetus size description */}
+        <p className="text-xs text-center text-herbrain-muted mt-2 px-2">
+          The fetus is about the size of {getFetusSize(week)}
+        </p>
       </div>
     </div>
   );
