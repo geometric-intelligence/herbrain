@@ -100,6 +100,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
   const [meshData, setMeshData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showBrainOverlay, setShowBrainOverlay] = useState(true);
 
   // Dynamic import to avoid SSR issues with Plotly
   const [Plot, setPlot] = useState<any>(null);
@@ -145,7 +146,14 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
     }
     
     const figure = meshData[String(nearestWeek)];
-    return figure?.data || [];
+    let data = figure?.data || [];
+    
+    // Filter out brain_overlay trace if toggle is off
+    if (!showBrainOverlay) {
+      data = data.filter((trace: any) => trace.name !== 'brain_overlay');
+    }
+    
+    return data;
   };
 
   const getLayout = () => ({
@@ -207,19 +215,33 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
         />
       </div>
 
-      {/* Compact Legend */}
-      <div className="flex items-center justify-center gap-6 pt-3 border-t border-herbrain-border/40">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
-          <span className="text-sm text-herbrain-muted">Growing</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
-          <span className="text-sm text-herbrain-muted">Shrinking</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
-          <span className="text-sm text-herbrain-muted">Baseline</span>
+      {/* Brain Overlay Toggle + Legend */}
+      <div className="flex items-center justify-between pt-3 border-t border-herbrain-border/40">
+        {/* Brain Overlay Toggle */}
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showBrainOverlay}
+            onChange={(e) => setShowBrainOverlay(e.target.checked)}
+            className="w-4 h-4 rounded border-herbrain-border text-herbrain-green focus:ring-herbrain-green/30 cursor-pointer"
+          />
+          <span className="text-sm text-herbrain-muted">Show Full Brain</span>
+        </label>
+
+        {/* Compact Legend */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
+            <span className="text-xs text-herbrain-muted">Growing</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
+            <span className="text-xs text-herbrain-muted">Shrinking</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
+            <span className="text-xs text-herbrain-muted">Baseline</span>
+          </div>
         </div>
       </div>
     </div>
