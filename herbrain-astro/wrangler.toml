@@ -1,0 +1,15 @@
+# Cloudflare Pages configuration
+name = "herbrain"
+compatibility_date = "2024-01-01"
+
+# Pages configuration
+pages_build_output_dir = "dist"
+
+# Environment variables (optional, can also be set in Cloudflare dashboard)
+[vars]
+PUBLIC_R2_BUCKET_URL = "https://herbrain-mri.r2.cloudflarestorage.com"
+
+# R2 bucket binding (for future use if needed)
+# [[r2_buckets]]
+# binding = "MRI_BUCKET"
+# bucket_name = "herbrain-mri"

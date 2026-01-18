@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  
+  body {
+    @apply bg-herbrain-bg text-herbrain-dark;
+  }
+}
+
+@layer components {
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200;
+    @apply hover:bg-gray-100;
+  }
+  
+  .sidebar-nav-item.active-pregnancy {
+    @apply bg-herbrain-green/10 text-herbrain-green;
+  }
+  
+  .sidebar-nav-item.active-menstruation {
+    @apply bg-herbrain-coral/10 text-herbrain-coral;
+  }
+  
+  .sidebar-nav-icon {
+    @apply w-8 h-8 object-contain;
+  }
+  
+  .pregnancy-card {
+    @apply transition-all duration-300;
+    @apply hover:shadow-lg hover:-translate-y-1;
+    @apply hover:border-herbrain-green;
+  }
+  
+  .menstruation-card {
+    @apply transition-all duration-300;
+    @apply hover:shadow-lg hover:-translate-y-1;
+    @apply hover:border-herbrain-coral;
+  }
+  
+  .chat-bubble-user {
+    @apply bg-blue-500 text-white p-3 rounded-xl max-w-[80%] ml-auto;
+  }
+  
+  .chat-bubble-assistant {
+    @apply bg-gray-200 text-gray-900 p-3 rounded-xl max-w-[80%] mr-auto;
+  }
+  
+  .slider-container {
+    @apply w-full;
+  }
+  
+  .slider-container input[type="range"] {
+    @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+  }
+  
+  .slider-container input[type="range"]::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 bg-herbrain-green rounded-full cursor-pointer;
+  }
+}
+
+/* Plotly container styles */
+.js-plotly-plot .plotly .main-svg {
+  background: transparent !important;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-herbrain-green;
+}

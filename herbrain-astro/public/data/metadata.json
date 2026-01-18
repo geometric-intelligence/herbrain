@@ -1,0 +1,25 @@
+{
+  "weekToSession": {
+    "0": "session-01",
+    "5": "session-05",
+    "10": "session-10",
+    "15": "session-15",
+    "20": "session-20",
+    "25": "session-25",
+    "30": "session-30",
+    "35": "session-35",
+    "40": "session-40"
+  },
+  "sessionUrls": {
+    "session-01": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-01.nii.gz",
+    "session-05": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-05.nii.gz",
+    "session-10": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-10.nii.gz",
+    "session-15": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-15.nii.gz",
+    "session-20": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-20.nii.gz",
+    "session-25": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-25.nii.gz",
+    "session-30": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-30.nii.gz",
+    "session-35": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-35.nii.gz",
+    "session-40": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-40.nii.gz"
+  },
+  "_note": "Update sessionUrls with your actual R2 bucket URL after running upload_mri.sh"
+}

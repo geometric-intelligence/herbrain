@@ -1,0 +1,35 @@
+---
+import Sidebar from '../components/Sidebar.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  showSidebar?: boolean;
+}
+
+const { title, showSidebar = true } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HerBrain - Digital twins of women's brains. Explore brain transformations during pregnancy and menstruation.">
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <title>{title} | HerBrain</title>
+</head>
+<body class="bg-herbrain-bg">
+  {showSidebar && <Sidebar currentPath={currentPath} />}
+  
+  <main class:list={[
+    showSidebar ? 'ml-72 mr-6 p-6 min-h-screen' : 'min-h-screen'
+  ]}>
+    <slot />
+  </main>
+</body>
+</html>
