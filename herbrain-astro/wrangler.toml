@@ -7,7 +7,7 @@ pages_build_output_dir = "dist"
 
 # Environment variables (optional, can also be set in Cloudflare dashboard)
 [vars]
-PUBLIC_R2_BUCKET_URL = "https://herbrain-mri.r2.cloudflarestorage.com"
+PUBLIC_R2_BUCKET_URL = "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev"
 
 # R2 bucket binding (for future use if needed)
 # [[r2_buckets]]

@@ -27,13 +27,13 @@ find "$DATA_DIR" -type f \( -name "*.nii" -o -name "*.nii.gz" \) | while read -r
     relative_path="${file#$DATA_DIR/}"
     
     echo "Uploading: $relative_path"
-    npx --yes wrangler r2 object put "$BUCKET_NAME/$relative_path" --file="$file"
+    npx --yes wrangler r2 object put "$BUCKET_NAME/$relative_path" --file="$file" --remote
 done
 
 echo ""
 echo "Upload complete!"
 echo ""
-echo "To enable public access (optional):"
-echo "  npx wrangler r2 bucket public-access set $BUCKET_NAME --enable"
+echo "To enable public access (if not already enabled):"
+echo "  npx wrangler r2 bucket dev-url enable $BUCKET_NAME"
 echo ""
-echo "Your bucket URL will be: https://<account-id>.r2.cloudflarestorage.com/$BUCKET_NAME"
+echo "Your bucket URL will be: https://pub-<hash>.r2.dev"

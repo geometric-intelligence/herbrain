@@ -1,25 +1,25 @@
 {
   "weekToSession": {
-    "0": "session-01",
-    "5": "session-05",
-    "10": "session-10",
-    "15": "session-15",
-    "20": "session-20",
-    "25": "session-25",
-    "30": "session-30",
-    "35": "session-35",
-    "40": "session-40"
+    "0": "ses-01",
+    "5": "ses-04",
+    "10": "ses-07",
+    "15": "ses-10",
+    "20": "ses-13",
+    "25": "ses-17",
+    "30": "ses-20",
+    "35": "ses-23",
+    "40": "ses-26"
   },
   "sessionUrls": {
-    "session-01": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-01.nii.gz",
-    "session-05": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-05.nii.gz",
-    "session-10": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-10.nii.gz",
-    "session-15": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-15.nii.gz",
-    "session-20": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-20.nii.gz",
-    "session-25": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-25.nii.gz",
-    "session-30": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-30.nii.gz",
-    "session-35": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-35.nii.gz",
-    "session-40": "https://herbrain-mri.r2.cloudflarestorage.com/subject-01/session-40.nii.gz"
+    "ses-01": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-01_T1w.nii",
+    "ses-04": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-04_T1w.nii",
+    "ses-07": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-07_T1w.nii",
+    "ses-10": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-10_T1w.nii",
+    "ses-13": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-13_T1w.nii",
+    "ses-17": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-17_T1w.nii",
+    "ses-20": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-20_T1w.nii",
+    "ses-23": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-23_T1w.nii",
+    "ses-26": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/folder2/T1/sub-01_ses-26_T1w.nii"
   },
-  "_note": "Update sessionUrls with your actual R2 bucket URL after running upload_mri.sh"
+  "_note": "Week-to-session mapping: 26 sessions distributed over 40-week pregnancy, matching original app prerender weeks [0,5,10,15,20,25,30,35,40]"
 }
