@@ -37,8 +37,8 @@ export default function PregnancyExplorer() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Hero Header - Clean and focused */}
-      <header className="premium-card-static p-5">
+      {/* Hero Header */}
+      <header className="premium-card-static p-6">
         <div className="flex items-center gap-5">
           <div className="relative flex-shrink-0">
             <div className="absolute inset-0 bg-herbrain-green/10 rounded-2xl blur-xl"></div>
@@ -49,29 +49,20 @@ export default function PregnancyExplorer() {
             />
           </div>
           <div className="flex-1">
-            <h1 className="text-[22px] font-semibold text-herbrain-dark tracking-tight">
-              Digital Twin of the Pregnant Brain
+            <h1 className="text-2xl font-semibold text-herbrain-dark tracking-tight">
+              Your Brain's Digital Twin During Pregnancy
             </h1>
-            <p className="text-[14px] text-herbrain-muted mt-1 leading-relaxed font-normal">
-              Explore AI-predicted shape changes of subcortical brain structures during pregnancy.
+            <p className="text-base text-herbrain-muted mt-1.5 leading-relaxed">
+              Watch how your brain transforms week by week. Move the timeline below to see AI-predicted changes in real time.
             </p>
           </div>
         </div>
       </header>
 
-      {/* Week Slider - Premium Design */}
-      <div className="premium-card-static px-6 py-4">
-        <WeekSlider
-          value={week}
-          onChange={setWeek}
-          label="Gestational Week"
-        />
-      </div>
-
-      {/* Main Visualization Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Animation Explorer - Left Column */}
-        <div className="lg:col-span-3">
+      {/* Main Visualization Grid - Fixed height cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4" style={{ minHeight: '420px' }}>
+        {/* Animation Explorer - Narrower Left Column */}
+        <div className="lg:col-span-2">
           <AnimationExplorer week={week} />
         </div>
 
@@ -81,9 +72,18 @@ export default function PregnancyExplorer() {
         </div>
 
         {/* Mesh Explorer - Right Column - Prominent */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-6">
           <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
         </div>
+      </div>
+
+      {/* Week Slider - YouTube style, below cards */}
+      <div className="premium-card-static px-6 py-5">
+        <WeekSlider
+          value={week}
+          onChange={setWeek}
+          label="Gestational Week"
+        />
       </div>
 
       {/* GPT Chat */}
@@ -150,8 +150,8 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
 
   const getLayout = () => ({
     margin: { l: 0, r: 0, t: 0, b: 0 },
-    width: 440,
-    height: 360,
+    width: 480,
+    height: 340,
     scene: {
       aspectmode: 'data',
       xaxis: { visible: false, showgrid: false },
@@ -167,20 +167,20 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
 
   if (loading || !Plot) {
     return (
-      <div className="premium-card-static flex flex-col items-center justify-center h-[420px] p-6">
+      <div className="premium-card-highlight flex flex-col h-full items-center justify-center p-6">
         <div className="loading-spinner mb-3"></div>
-        <p className="text-sm text-herbrain-muted">Loading 3D visualization...</p>
+        <p className="text-base text-herbrain-muted">Loading 3D visualization...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="premium-card-static flex flex-col items-center justify-center h-[420px] p-6">
-        <p className="text-red-500 text-sm mb-3">{error}</p>
+      <div className="premium-card-highlight flex flex-col h-full items-center justify-center p-6">
+        <p className="text-red-500 text-base mb-3">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="premium-btn-secondary text-xs"
+          className="premium-btn-secondary text-sm"
         >
           Retry
         </button>
@@ -189,10 +189,12 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
   }
 
   return (
-    <div ref={containerRef} className="premium-card-highlight flex flex-col items-center p-4">
-      <div className="section-label mb-2">3D Brain Model</div>
+    <div ref={containerRef} className="premium-card-highlight flex flex-col h-full p-5">
+      <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
+        3D Brain Model
+      </h2>
       
-      <div className="plotly-container">
+      <div className="flex-1 flex items-center justify-center plotly-container">
         <Plot
           data={getPlotData()}
           layout={getLayout()}
@@ -206,18 +208,18 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
       </div>
 
       {/* Compact Legend */}
-      <div className="flex items-center justify-center gap-5 mt-2 pt-3 border-t border-herbrain-border/40 w-full">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
-          <span className="text-[10px] text-herbrain-muted">Growing</span>
+      <div className="flex items-center justify-center gap-6 pt-3 border-t border-herbrain-border/40">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
+          <span className="text-sm text-herbrain-muted">Growing</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
-          <span className="text-[10px] text-herbrain-muted">Shrinking</span>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
+          <span className="text-sm text-herbrain-muted">Shrinking</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
-          <span className="text-[10px] text-herbrain-muted">Baseline</span>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
+          <span className="text-sm text-herbrain-muted">Baseline</span>
         </div>
       </div>
     </div>

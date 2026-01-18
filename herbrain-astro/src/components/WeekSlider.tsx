@@ -39,28 +39,27 @@ export default function WeekSlider({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <span className="section-label">{label}</span>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-3xl font-semibold text-herbrain-dark tabular-nums">
+      {/* Header with week number and trimester */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-baseline gap-3">
+          <span className="text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-semibold text-herbrain-dark tabular-nums">
               {localValue}
             </span>
-            <span className="text-sm text-herbrain-muted/50">/ {max}</span>
+            <span className="text-lg text-herbrain-muted/60">/ {max}</span>
           </div>
         </div>
         
-        <div className="text-right">
-          <span className="pill-badge pill-badge-green">
-            {trimester.label}
-          </span>
-        </div>
+        <span className="pill-badge pill-badge-green text-sm">
+          {trimester.label}
+        </span>
       </div>
       
       {/* Slider container */}
       <div className="relative pt-2 pb-1">
         {/* Track background with trimester markers */}
-        <div className="relative h-1.5 bg-herbrain-surface rounded-full">
+        <div className="relative h-2 bg-herbrain-surface rounded-full">
           {/* Progress fill */}
           <div 
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-herbrain-green to-herbrain-green-light rounded-full transition-all duration-75"
@@ -69,11 +68,11 @@ export default function WeekSlider({
           
           {/* Trimester markers */}
           <div 
-            className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-herbrain-border/60"
+            className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-herbrain-border/80"
             style={{ left: '30%' }}
           />
           <div 
-            className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-herbrain-border/60"
+            className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-herbrain-border/80"
             style={{ left: '67.5%' }}
           />
         </div>
@@ -86,20 +85,20 @@ export default function WeekSlider({
           value={localValue}
           onChange={handleChange}
           className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
-          style={{ height: '24px', top: '-4px' }}
+          style={{ height: '28px', top: '-6px' }}
         />
         
         {/* Custom thumb */}
         <div 
           className="absolute top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-75"
-          style={{ left: `calc(${progress}% - 8px)` }}
+          style={{ left: `calc(${progress}% - 10px)` }}
         >
-          <div className="w-4 h-4 rounded-full bg-white border-[3px] border-herbrain-green shadow-md" />
+          <div className="w-5 h-5 rounded-full bg-white border-[3px] border-herbrain-green shadow-md" />
         </div>
       </div>
       
       {/* Week labels */}
-      <div className="flex justify-between text-[10px] text-herbrain-muted/60 mt-2 px-0.5">
+      <div className="flex justify-between text-sm text-herbrain-muted mt-3 px-0.5">
         <span>Week 0</span>
         <span>Week 12</span>
         <span>Week 27</span>

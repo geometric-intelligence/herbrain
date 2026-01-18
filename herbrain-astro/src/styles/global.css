@@ -95,21 +95,21 @@
   /* Chat bubbles - refined */
   .chat-bubble-user {
     @apply bg-gradient-to-br from-herbrain-green to-herbrain-green-dark;
-    @apply text-white px-3 py-2 rounded-xl rounded-br-sm;
+    @apply text-white px-4 py-2.5 rounded-xl rounded-br-sm;
     @apply max-w-[85%] ml-auto shadow-sm;
-    @apply text-[12px] leading-relaxed;
+    @apply text-sm leading-relaxed;
   }
   
   .chat-bubble-assistant {
     @apply bg-white text-herbrain-dark;
-    @apply px-3 py-2 rounded-xl rounded-bl-sm;
+    @apply px-4 py-2.5 rounded-xl rounded-bl-sm;
     @apply max-w-[85%] mr-auto border border-herbrain-border/40;
-    @apply text-[12px] leading-relaxed;
+    @apply text-sm leading-relaxed;
   }
   
   /* Premium slider */
   .premium-slider {
-    @apply w-full h-1.5 rounded-full appearance-none cursor-pointer;
+    @apply w-full h-2 rounded-full appearance-none cursor-pointer;
     @apply bg-gradient-to-r from-herbrain-border to-herbrain-surface;
   }
   
@@ -128,7 +128,7 @@
   
   /* Premium button */
   .premium-btn {
-    @apply px-4 py-2 rounded-xl font-medium text-sm;
+    @apply px-5 py-2.5 rounded-xl font-medium text-sm;
     @apply bg-gradient-to-br from-herbrain-green to-herbrain-green-dark;
     @apply text-white shadow-sm;
     @apply transition-all duration-200;
@@ -137,7 +137,7 @@
   }
   
   .premium-btn-secondary {
-    @apply px-4 py-2 rounded-xl font-medium text-sm;
+    @apply px-5 py-2.5 rounded-xl font-medium text-sm;
     @apply bg-herbrain-surface text-herbrain-dark;
     @apply border border-herbrain-border;
     @apply transition-all duration-200;
@@ -146,7 +146,7 @@
   
   /* Premium input */
   .premium-input {
-    @apply w-full px-4 py-2.5 rounded-xl text-sm;
+    @apply w-full px-4 py-3 rounded-xl text-sm;
     @apply bg-herbrain-surface border border-herbrain-border/60;
     @apply text-herbrain-dark placeholder-herbrain-muted/60;
     @apply transition-all duration-200;
@@ -156,13 +156,13 @@
   
   /* Section label */
   .section-label {
-    @apply text-[11px] font-semibold uppercase tracking-wider;
+    @apply text-xs font-semibold uppercase tracking-wider;
     @apply text-herbrain-muted/70;
   }
   
   /* Pill badge */
   .pill-badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1.5 rounded-full font-medium;
   }
   
   .pill-badge-green {
@@ -191,7 +191,7 @@
 
 /* Loading spinner - refined */
 .loading-spinner {
-  @apply animate-spin rounded-full h-6 w-6;
+  @apply animate-spin rounded-full h-8 w-8;
   border: 2px solid theme('colors.herbrain-border');
   border-top-color: theme('colors.herbrain-green');
 }

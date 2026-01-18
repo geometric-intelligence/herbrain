@@ -49,7 +49,7 @@ export default function MriViewer({ week }: MriViewerProps) {
 
     const url = metadata.sessionUrls[sessionId];
     if (!url) {
-      setError('No MRI data available for this week');
+      setError('No MRI data available');
       return;
     }
 
@@ -66,7 +66,7 @@ export default function MriViewer({ week }: MriViewerProps) {
         setSliceIndex(Math.floor(maxSlice / 2));
       } catch (err) {
         console.error('Failed to load MRI volume:', err);
-        setError('Failed to load MRI data');
+        setError('Failed to load MRI');
       } finally {
         setLoading(false);
       }
@@ -137,11 +137,13 @@ export default function MriViewer({ week }: MriViewerProps) {
   const maxSlice = volume ? getMaxSliceIndex(volume.dims, view) : 100;
 
   return (
-    <div className="viz-card flex flex-col p-4">
-      <div className="section-label mb-2">MRI Scan</div>
+    <div className="viz-card flex flex-col h-full p-5">
+      <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
+        MRI Scan
+      </h2>
       
-      {/* MRI Display - Compact */}
-      <div className="flex-1 flex items-center justify-center bg-herbrain-dark rounded-xl overflow-hidden relative" style={{ minHeight: '200px' }}>
+      {/* MRI Display */}
+      <div className="relative flex-1 flex items-center justify-center bg-herbrain-dark rounded-xl overflow-hidden">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-herbrain-dark/90 z-10">
             <div className="loading-spinner"></div>
@@ -150,10 +152,10 @@ export default function MriViewer({ week }: MriViewerProps) {
 
         {error ? (
           <div className="flex flex-col items-center justify-center p-4 text-center">
-            <svg className="w-6 h-6 text-herbrain-muted/40 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-8 h-8 text-herbrain-subtle/40 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-herbrain-muted/60 text-[10px]">{error}</p>
+            <p className="text-herbrain-subtle/60 text-sm">{error}</p>
           </div>
         ) : volume ? (
           <Plot
@@ -166,33 +168,36 @@ export default function MriViewer({ week }: MriViewerProps) {
           />
         ) : (
           <div className="flex items-center justify-center">
-            <p className="text-herbrain-muted/40 text-[10px]">Loading MRI...</p>
+            <p className="text-herbrain-subtle/40 text-sm">Loading MRI...</p>
           </div>
         )}
+        
+        {/* View buttons - overlaid on MRI */}
+        <div 
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 rounded-lg"
+          style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(8px)' }}
+        >
+          {(['sagittal', 'coronal', 'axial'] as ViewType[]).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                view === v 
+                  ? 'bg-herbrain-green text-white shadow-sm' 
+                  : 'text-white/80 hover:bg-white/20'
+              }`}
+            >
+              {v.charAt(0).toUpperCase() + v.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* View Selection - Pill Style */}
-      <div className="flex items-center justify-center gap-1 mt-3 mb-2">
-        {(['sagittal', 'coronal', 'axial'] as ViewType[]).map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-150 ${
-              view === v
-                ? 'bg-herbrain-green text-white shadow-sm'
-                : 'text-herbrain-muted hover:bg-herbrain-surface'
-            }`}
-          >
-            {v.charAt(0).toUpperCase() + v.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Slice Slider - Minimal */}
-      <div className="px-1">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-[9px] text-herbrain-muted/60 uppercase tracking-wide">Slice</span>
-          <span className="text-[10px] text-herbrain-muted tabular-nums">
+      {/* Slice Slider */}
+      <div className="mt-4 px-1">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs text-herbrain-muted">Slice</span>
+          <span className="text-sm text-herbrain-dark tabular-nums font-medium">
             {sliceIndex} / {maxSlice}
           </span>
         </div>
