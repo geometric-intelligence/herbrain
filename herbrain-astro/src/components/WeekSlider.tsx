@@ -32,11 +32,11 @@ export default function WeekSlider({
 
   return (
     <div className="w-full max-w-md">
-      <div className="flex justify-between items-center mb-2">
-        <label className="text-lg font-medium text-herbrain-dark">
+      <div className="flex justify-between items-center mb-1.5">
+        <label className="text-sm font-medium text-herbrain-dark">
           {label}
         </label>
-        <span className="text-2xl font-semibold text-herbrain-green bg-herbrain-green/10 px-3 py-1 rounded-lg">
+        <span className="text-lg font-semibold text-herbrain-green bg-herbrain-green/10 px-2.5 py-0.5 rounded-lg">
           {localValue}
         </span>
       </div>
@@ -50,7 +50,7 @@ export default function WeekSlider({
         onTouchEnd={handleChangeEnd}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-herbrain-green"
       />
-      <div className="flex justify-between text-sm text-herbrain-muted mt-1">
+      <div className="flex justify-between text-xs text-herbrain-muted mt-1">
         <span>Week {min}</span>
         <span>Week {max}</span>
       </div>

@@ -47,7 +47,7 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
-      <div className="relative bg-white rounded-xl border border-gray-200 p-4 overflow-hidden">
+      <div className="relative bg-white rounded-xl border border-gray-200 p-3 overflow-hidden">
         <video
           ref={videoRef}
           src="/assets/pregnancy_animation.mp4"
@@ -55,22 +55,17 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
           muted
           playsInline
           onLoadedData={handleLoadedData}
-          className="max-h-96 w-auto object-contain"
+          className="max-h-80 w-auto object-contain"
           style={{ display: 'block', margin: '0 auto' }}
         />
         
         {/* Week indicator */}
-        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg shadow-sm">
-          <span className="text-sm font-medium text-herbrain-dark">
+        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-lg shadow-sm">
+          <span className="text-xs font-medium text-herbrain-dark">
             Week {week}
           </span>
         </div>
       </div>
-      
-      {/* Caption */}
-      <p className="text-sm text-herbrain-muted mt-3 text-center max-w-xs">
-        Pregnancy progression visualization showing body and brain changes
-      </p>
     </div>
   );
 }
