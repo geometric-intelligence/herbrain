@@ -166,6 +166,10 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
       yaxis: { visible: false, showgrid: false },
       zaxis: { visible: false, showgrid: false },
       bgcolor: 'rgba(248, 250, 251, 0)',
+      camera: {
+        eye: { x: 0.8, y: 0.8, z: 0.6 },  // More zoomed in
+        center: { x: 0, y: 0, z: 0 },
+      },
     },
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
