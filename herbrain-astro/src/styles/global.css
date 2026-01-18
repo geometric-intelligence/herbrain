@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,6 +7,8 @@
 @layer base {
   html {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   body {
@@ -15,53 +17,160 @@
 }
 
 @layer components {
+  /* Premium card styling */
+  .premium-card {
+    @apply bg-white rounded-2xl border border-herbrain-border/60;
+    @apply shadow-premium transition-all duration-300;
+    @apply hover:shadow-premium-md hover:border-herbrain-border;
+  }
+  
+  .premium-card-static {
+    @apply bg-white rounded-2xl border border-herbrain-border/60 shadow-premium;
+  }
+  
+  /* Premium card highlight - for featured content */
+  .premium-card-highlight {
+    @apply bg-white rounded-2xl shadow-premium-md;
+    @apply border border-herbrain-green/20;
+    @apply transition-all duration-300;
+  }
+  
+  .premium-card-highlight:hover {
+    @apply shadow-premium-lg;
+    border-color: rgb(61 122 107 / 0.3);
+  }
+  
+  /* Visualization card with hover */
+  .viz-card {
+    @apply bg-white rounded-2xl border border-herbrain-border/60 shadow-premium;
+    @apply transition-all duration-200;
+  }
+  
+  .viz-card:hover {
+    @apply shadow-premium-md;
+    transform: translateY(-1px);
+  }
+  
+  /* Glass effect card */
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/80 rounded-2xl;
+    @apply border border-white/60 shadow-premium-lg;
+  }
+
+  /* Sidebar styles */
   .sidebar-nav-item {
     @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200;
-    @apply hover:bg-gray-100;
+    @apply hover:bg-herbrain-surface;
   }
   
   .sidebar-nav-item.active-pregnancy {
-    @apply bg-herbrain-green/10 text-herbrain-green;
+    @apply text-herbrain-green border;
+    background-color: rgb(61 122 107 / 0.08);
+    border-color: rgb(61 122 107 / 0.1);
   }
   
   .sidebar-nav-item.active-menstruation {
-    @apply bg-herbrain-coral/10 text-herbrain-coral;
+    @apply text-herbrain-coral border;
+    background-color: rgb(232 146 124 / 0.08);
+    border-color: rgb(232 146 124 / 0.1);
   }
   
   .sidebar-nav-icon {
     @apply w-8 h-8 object-contain;
   }
   
+  /* Homepage cards */
   .pregnancy-card {
     @apply transition-all duration-300;
-    @apply hover:shadow-lg hover:-translate-y-1;
-    @apply hover:border-herbrain-green;
+    @apply hover:shadow-premium-lg hover:-translate-y-1;
+    @apply hover:border-herbrain-green/30;
   }
   
   .menstruation-card {
     @apply transition-all duration-300;
-    @apply hover:shadow-lg hover:-translate-y-1;
-    @apply hover:border-herbrain-coral;
+    @apply hover:shadow-premium-lg hover:-translate-y-1;
+    @apply hover:border-herbrain-coral/30;
   }
   
+  /* Chat bubbles - refined */
   .chat-bubble-user {
-    @apply bg-blue-500 text-white p-3 rounded-xl max-w-[80%] ml-auto;
+    @apply bg-gradient-to-br from-herbrain-green to-herbrain-green-dark;
+    @apply text-white px-3 py-2 rounded-xl rounded-br-sm;
+    @apply max-w-[85%] ml-auto shadow-sm;
+    @apply text-[12px] leading-relaxed;
   }
   
   .chat-bubble-assistant {
-    @apply bg-gray-200 text-gray-900 p-3 rounded-xl max-w-[80%] mr-auto;
+    @apply bg-white text-herbrain-dark;
+    @apply px-3 py-2 rounded-xl rounded-bl-sm;
+    @apply max-w-[85%] mr-auto border border-herbrain-border/40;
+    @apply text-[12px] leading-relaxed;
   }
   
-  .slider-container {
-    @apply w-full;
+  /* Premium slider */
+  .premium-slider {
+    @apply w-full h-1.5 rounded-full appearance-none cursor-pointer;
+    @apply bg-gradient-to-r from-herbrain-border to-herbrain-surface;
   }
   
-  .slider-container input[type="range"] {
-    @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+  .premium-slider::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 rounded-full cursor-pointer;
+    @apply bg-gradient-to-br from-herbrain-green to-herbrain-green-dark;
+    @apply shadow-md border-2 border-white;
+    @apply transition-transform duration-150 hover:scale-110;
   }
   
-  .slider-container input[type="range"]::-webkit-slider-thumb {
-    @apply appearance-none w-5 h-5 bg-herbrain-green rounded-full cursor-pointer;
+  .premium-slider::-moz-range-thumb {
+    @apply w-5 h-5 rounded-full cursor-pointer border-0;
+    @apply bg-gradient-to-br from-herbrain-green to-herbrain-green-dark;
+    @apply shadow-md;
+  }
+  
+  /* Premium button */
+  .premium-btn {
+    @apply px-4 py-2 rounded-xl font-medium text-sm;
+    @apply bg-gradient-to-br from-herbrain-green to-herbrain-green-dark;
+    @apply text-white shadow-sm;
+    @apply transition-all duration-200;
+    @apply hover:shadow-md hover:from-herbrain-green-light hover:to-herbrain-green;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-sm;
+  }
+  
+  .premium-btn-secondary {
+    @apply px-4 py-2 rounded-xl font-medium text-sm;
+    @apply bg-herbrain-surface text-herbrain-dark;
+    @apply border border-herbrain-border;
+    @apply transition-all duration-200;
+    @apply hover:bg-herbrain-border/50 hover:border-herbrain-muted/30;
+  }
+  
+  /* Premium input */
+  .premium-input {
+    @apply w-full px-4 py-2.5 rounded-xl text-sm;
+    @apply bg-herbrain-surface border border-herbrain-border/60;
+    @apply text-herbrain-dark placeholder-herbrain-muted/60;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-herbrain-green/20 focus:border-herbrain-green/40;
+    @apply disabled:bg-herbrain-border/30 disabled:cursor-not-allowed;
+  }
+  
+  /* Section label */
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-wider;
+    @apply text-herbrain-muted/70;
+  }
+  
+  /* Pill badge */
+  .pill-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .pill-badge-green {
+    @apply bg-herbrain-green/10 text-herbrain-green;
+  }
+  
+  .pill-badge-muted {
+    @apply bg-herbrain-surface text-herbrain-muted;
   }
 }
 
@@ -70,7 +179,46 @@
   background: transparent !important;
 }
 
-/* Loading spinner */
+/* Hide Plotly modebar by default, show on hover */
+.plotly-container .modebar {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.plotly-container:hover .modebar {
+  opacity: 1;
+}
+
+/* Loading spinner - refined */
 .loading-spinner {
-  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-herbrain-green;
+  @apply animate-spin rounded-full h-6 w-6;
+  border: 2px solid theme('colors.herbrain-border');
+  border-top-color: theme('colors.herbrain-green');
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-herbrain-border rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-herbrain-muted/40;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, select {
+  @apply transition-all duration-200;
+}
+
+/* Focus visible styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-herbrain-green/30 ring-offset-2;
 }

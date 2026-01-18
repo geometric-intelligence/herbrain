@@ -4,7 +4,7 @@ interface AnimationExplorerProps {
   week: number;
 }
 
-// Fetus size comparisons by gestational week (common pregnancy milestone descriptions)
+// Fetus size comparisons by gestational week
 const FETUS_SIZE_BY_WEEK: Record<number, string> = {
   0: 'a poppy seed',
   1: 'a poppy seed',
@@ -50,55 +50,37 @@ const FETUS_SIZE_BY_WEEK: Record<number, string> = {
 };
 
 function getFetusSize(week: number): string {
-  // Clamp week to valid range
   const clampedWeek = Math.max(0, Math.min(40, Math.round(week)));
   return FETUS_SIZE_BY_WEEK[clampedWeek] || 'a small pumpkin';
 }
 
-/**
- * AnimationExplorer component that displays a pregnancy animation video
- * with frame seeking based on gestational week.
- * 
- * The video has 10 frames (weeks 00, 05, 10, 15, 20, 25, 30, 35, 40, 41) at 1fps.
- * Frame seeking happens entirely in the browser - no network requests.
- */
 export default function AnimationExplorer({ week }: AnimationExplorerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Map gestational week to video time (frame number at 1fps)
   const getFrameTime = (gestWeek: number): number => {
-    if (gestWeek >= 41) {
-      return 9;
-    } else if (gestWeek >= 40) {
-      return 8;
-    } else {
-      return Math.floor(gestWeek / 5);
-    }
+    if (gestWeek >= 41) return 9;
+    if (gestWeek >= 40) return 8;
+    return Math.floor(gestWeek / 5);
   };
 
-  // Seek video to correct frame when week changes
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const frameTime = getFrameTime(week);
-    // Add small offset to ensure we're in the frame
-    video.currentTime = frameTime + 0.001;
+    video.currentTime = getFrameTime(week) + 0.001;
   }, [week]);
 
-  // Initial load handler
   const handleLoadedData = () => {
     const video = videoRef.current;
     if (!video) return;
-
-    // Seek to initial frame
-    const frameTime = getFrameTime(week);
-    video.currentTime = frameTime + 0.001;
+    video.currentTime = getFrameTime(week) + 0.001;
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <div className="bg-white rounded-xl border border-gray-200 p-3 overflow-hidden">
+    <div className="viz-card flex flex-col h-full overflow-hidden">
+      <div className="section-label px-4 pt-4 pb-2">Pregnancy Journey</div>
+      
+      {/* Video Container */}
+      <div className="flex-1 flex items-center justify-center px-3 py-2">
         <video
           ref={videoRef}
           src="/assets/pregnancy_animation.mp4"
@@ -106,14 +88,20 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
           muted
           playsInline
           onLoadedData={handleLoadedData}
-          className="max-h-72 w-auto object-contain"
-          style={{ display: 'block', margin: '0 auto' }}
+          className="max-h-56 w-auto object-contain"
         />
-        
-        {/* Fetus size description */}
-        <p className="text-xs text-center text-herbrain-muted mt-2 px-2">
-          The fetus is about the size of {getFetusSize(week)}
+      </div>
+      
+      {/* Fetus size - Highlighted */}
+      <div className="px-4 pb-4 pt-3 border-t border-herbrain-border/30 mt-auto">
+        <p className="text-[10px] text-center text-herbrain-muted/70 uppercase tracking-wide">
+          Baby is about the size of
         </p>
+        <div className="flex justify-center mt-1.5">
+          <span className="inline-block px-3 py-1 text-herbrain-green text-[15px] font-medium rounded-full" style={{ backgroundColor: 'rgb(61 122 107 / 0.08)' }}>
+            {getFetusSize(week)}
+          </span>
+        </div>
       </div>
     </div>
   );

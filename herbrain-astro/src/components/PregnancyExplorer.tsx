@@ -9,7 +9,7 @@ import WeekSlider from './WeekSlider';
  * with shared gestational week state.
  */
 export default function PregnancyExplorer() {
-  const [week, setWeek] = useState(15);
+  const [week, setWeek] = useState(20);
   const meshContainerRef = useRef<HTMLDivElement>(null);
 
   // Screenshot capture function for GPT chat
@@ -36,36 +36,36 @@ export default function PregnancyExplorer() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      {/* Compact Header with Overview */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center gap-4 mb-3">
-          <img
-            src="/assets/pregnancy_logo.png"
-            alt="Pregnancy"
-            className="w-12 h-12"
-          />
-          <h1 className="text-xl font-semibold text-herbrain-dark">
-            Digital Twin of the Pregnant Brain
-          </h1>
+    <div className="space-y-5 animate-fade-in">
+      {/* Hero Header - Clean and focused */}
+      <header className="premium-card-static p-5">
+        <div className="flex items-center gap-5">
+          <div className="relative flex-shrink-0">
+            <div className="absolute inset-0 bg-herbrain-green/10 rounded-2xl blur-xl"></div>
+            <img
+              src="/assets/pregnancy_logo.png"
+              alt="Pregnancy"
+              className="relative w-14 h-14 drop-shadow-sm"
+            />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-[22px] font-semibold text-herbrain-dark tracking-tight">
+              Digital Twin of the Pregnant Brain
+            </h1>
+            <p className="text-[14px] text-herbrain-muted mt-1 leading-relaxed font-normal">
+              Explore AI-predicted shape changes of subcortical brain structures during pregnancy.
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-herbrain-muted leading-relaxed">
-          Explore AI-predicted shape changes of subcortical brain structures during pregnancy.{' '}
-          <span className="text-red-500 font-medium">Red</span> = growing,{' '}
-          <span className="text-blue-500 font-medium">blue</span> = shrinking,{' '}
-          <span style={{ color: '#B5A08A' }} className="font-medium">beige</span> = pre-pregnancy baseline.
-        </p>
-      </div>
+      </header>
 
-      {/* Week Slider - Inline */}
-      <div className="bg-white rounded-xl border border-gray-200 px-6 py-3">
-        <div className="max-w-md mx-auto">
-          <WeekSlider
-            value={week}
-            onChange={setWeek}
-            label="Gestational Week"
-          />
-        </div>
+      {/* Week Slider - Premium Design */}
+      <div className="premium-card-static px-6 py-4">
+        <WeekSlider
+          value={week}
+          onChange={setWeek}
+          label="Gestational Week"
+        />
       </div>
 
       {/* Main Visualization Grid */}
@@ -80,7 +80,7 @@ export default function PregnancyExplorer() {
           <MriViewer week={week} />
         </div>
 
-        {/* Mesh Explorer - Right Column */}
+        {/* Mesh Explorer - Right Column - Prominent */}
         <div className="lg:col-span-5">
           <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
         </div>
@@ -150,14 +150,14 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
 
   const getLayout = () => ({
     margin: { l: 0, r: 0, t: 0, b: 0 },
-    width: 480,
-    height: 380,
+    width: 440,
+    height: 360,
     scene: {
       aspectmode: 'data',
       xaxis: { visible: false, showgrid: false },
       yaxis: { visible: false, showgrid: false },
       zaxis: { visible: false, showgrid: false },
-      bgcolor: 'rgba(250, 251, 252, 0)',
+      bgcolor: 'rgba(248, 250, 251, 0)',
     },
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
@@ -167,20 +167,20 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
 
   if (loading || !Plot) {
     return (
-      <div className="flex flex-col items-center justify-center h-80 bg-white rounded-xl border border-gray-200 p-6">
+      <div className="premium-card-static flex flex-col items-center justify-center h-[420px] p-6">
         <div className="loading-spinner mb-3"></div>
-        <p className="text-sm text-herbrain-muted">Loading brain visualization...</p>
+        <p className="text-sm text-herbrain-muted">Loading 3D visualization...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-80 bg-white rounded-xl border border-gray-200 p-6">
+      <div className="premium-card-static flex flex-col items-center justify-center h-[420px] p-6">
         <p className="text-red-500 text-sm mb-3">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-3 py-1.5 text-sm bg-herbrain-green text-white rounded-lg hover:bg-herbrain-green/90"
+          className="premium-btn-secondary text-xs"
         >
           Retry
         </button>
@@ -189,36 +189,37 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center bg-white rounded-xl border border-gray-200 p-4">
-      <div className="mb-2">
+    <div ref={containerRef} className="premium-card-highlight flex flex-col items-center p-4">
+      <div className="section-label mb-2">3D Brain Model</div>
+      
+      <div className="plotly-container">
         <Plot
           data={getPlotData()}
           layout={getLayout()}
           config={{
             displayModeBar: true,
-            modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+            modeBarButtonsToRemove: ['toImage', 'sendDataToCloud', 'select2d', 'lasso2d'],
             displaylogo: false,
             responsive: true,
           }}
         />
       </div>
 
-      {/* Color Legend - Compact */}
-      <div className="flex items-center gap-4 text-xs">
+      {/* Compact Legend */}
+      <div className="flex items-center justify-center gap-5 mt-2 pt-3 border-t border-herbrain-border/40 w-full">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-red-500"></div>
-          <span className="text-herbrain-muted">Growing</span>
+          <span className="w-2 h-2 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
+          <span className="text-[10px] text-herbrain-muted">Growing</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-blue-500"></div>
-          <span className="text-herbrain-muted">Shrinking</span>
+          <span className="w-2 h-2 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
+          <span className="text-[10px] text-herbrain-muted">Shrinking</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: '#E5D4C0' }}></div>
-          <span className="text-herbrain-muted">Baseline</span>
+          <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
+          <span className="text-[10px] text-herbrain-muted">Baseline</span>
         </div>
       </div>
     </div>
   );
 }
-

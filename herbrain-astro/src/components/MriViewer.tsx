@@ -29,7 +29,6 @@ export default function MriViewer({ week }: MriViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentSession, setCurrentSession] = useState<string | null>(null);
 
-  // Load metadata on mount
   useEffect(() => {
     async function load() {
       try {
@@ -42,7 +41,6 @@ export default function MriViewer({ week }: MriViewerProps) {
     load();
   }, []);
 
-  // Load volume when week changes
   useEffect(() => {
     if (!metadata) return;
 
@@ -64,12 +62,11 @@ export default function MriViewer({ week }: MriViewerProps) {
         setVolume(vol);
         setCurrentSession(sessionId);
 
-        // Reset slice index to middle
         const maxSlice = getMaxSliceIndex(vol.dims, view);
         setSliceIndex(Math.floor(maxSlice / 2));
       } catch (err) {
         console.error('Failed to load MRI volume:', err);
-        setError('Failed to load MRI data. Make sure R2 storage is configured.');
+        setError('Failed to load MRI data');
       } finally {
         setLoading(false);
       }
@@ -78,21 +75,18 @@ export default function MriViewer({ week }: MriViewerProps) {
     loadVolume();
   }, [week, metadata, currentSession, view]);
 
-  // Update slice index bounds when view changes
   useEffect(() => {
     if (!volume) return;
     const maxSlice = getMaxSliceIndex(volume.dims, view);
     setSliceIndex(Math.floor(maxSlice / 2));
   }, [view, volume]);
 
-  // Get slice data for visualization
   const getSliceData = useCallback((): number[][] | null => {
     if (!volume) return null;
 
     const slice = extractSlice(volume, view, sliceIndex);
     const [width, height] = getSliceDims(volume.dims, view);
 
-    // Convert 1D array to 2D for Plotly
     const data: number[][] = [];
     for (let y = 0; y < height; y++) {
       const row: number[] = [];
@@ -104,7 +98,6 @@ export default function MriViewer({ week }: MriViewerProps) {
     return data;
   }, [volume, view, sliceIndex]);
 
-  // Plotly data
   const plotData: Data[] = volume
     ? [
         {
@@ -117,10 +110,9 @@ export default function MriViewer({ week }: MriViewerProps) {
       ]
     : [];
 
-  // Plotly layout
   const sliceDims = volume ? getSliceDims(volume.dims, view) : [100, 100];
   const aspectRatio = sliceDims[1] / sliceDims[0];
-  const baseWidth = 300;
+  const baseWidth = 260;
   const layout: Partial<Layout> = {
     width: baseWidth,
     height: baseWidth * aspectRatio,
@@ -145,24 +137,23 @@ export default function MriViewer({ week }: MriViewerProps) {
   const maxSlice = volume ? getMaxSliceIndex(volume.dims, view) : 100;
 
   return (
-    <div className="flex flex-col items-center bg-white rounded-xl border border-gray-200 p-4">
-      {/* MRI Slice Display */}
-      <div className="mb-3 relative">
+    <div className="viz-card flex flex-col p-4">
+      <div className="section-label mb-2">MRI Scan</div>
+      
+      {/* MRI Display - Compact */}
+      <div className="flex-1 flex items-center justify-center bg-herbrain-dark rounded-xl overflow-hidden relative" style={{ minHeight: '200px' }}>
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-herbrain-dark/90 z-10">
             <div className="loading-spinner"></div>
           </div>
         )}
 
         {error ? (
-          <div className="flex items-center justify-center h-64 w-80 bg-gray-100 rounded-lg">
-            <p className="text-herbrain-muted text-sm text-center px-4">
-              {error}
-              <br />
-              <span className="text-xs mt-2 block">
-                Configure R2 storage to enable MRI viewing
-              </span>
-            </p>
+          <div className="flex flex-col items-center justify-center p-4 text-center">
+            <svg className="w-6 h-6 text-herbrain-muted/40 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-herbrain-muted/60 text-[10px]">{error}</p>
           </div>
         ) : volume ? (
           <Plot
@@ -174,39 +165,34 @@ export default function MriViewer({ week }: MriViewerProps) {
             }}
           />
         ) : (
-          <div className="flex items-center justify-center h-64 w-80 bg-gray-100 rounded-lg">
-            <p className="text-herbrain-muted text-sm">Loading MRI data...</p>
+          <div className="flex items-center justify-center">
+            <p className="text-herbrain-muted/40 text-[10px]">Loading MRI...</p>
           </div>
         )}
       </div>
 
-      {/* View Selection */}
-      <div className="flex items-center gap-3 mb-3">
-        <span className="text-xs font-medium text-herbrain-dark">View:</span>
-        <div className="flex gap-1.5">
-          {(['sagittal', 'coronal', 'axial'] as ViewType[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-2.5 py-1 text-xs rounded-lg transition-colors ${
-                view === v
-                  ? 'bg-herbrain-green text-white'
-                  : 'bg-gray-100 text-herbrain-dark hover:bg-gray-200'
-              }`}
-            >
-              {v.charAt(0).toUpperCase() + v.slice(1)}
-            </button>
-          ))}
-        </div>
+      {/* View Selection - Pill Style */}
+      <div className="flex items-center justify-center gap-1 mt-3 mb-2">
+        {(['sagittal', 'coronal', 'axial'] as ViewType[]).map((v) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-150 ${
+              view === v
+                ? 'bg-herbrain-green text-white shadow-sm'
+                : 'text-herbrain-muted hover:bg-herbrain-surface'
+            }`}
+          >
+            {v.charAt(0).toUpperCase() + v.slice(1)}
+          </button>
+        ))}
       </div>
 
-      {/* Slice Slider */}
-      <div className="w-full max-w-xs">
+      {/* Slice Slider - Minimal */}
+      <div className="px-1">
         <div className="flex justify-between items-center mb-1">
-          <label className="text-xs font-medium text-herbrain-dark">
-            Slice
-          </label>
-          <span className="text-xs text-herbrain-muted">
+          <span className="text-[9px] text-herbrain-muted/60 uppercase tracking-wide">Slice</span>
+          <span className="text-[10px] text-herbrain-muted tabular-nums">
             {sliceIndex} / {maxSlice}
           </span>
         </div>
@@ -216,7 +202,7 @@ export default function MriViewer({ week }: MriViewerProps) {
           max={maxSlice}
           value={sliceIndex}
           onChange={(e) => setSliceIndex(parseInt(e.target.value, 10))}
-          className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-herbrain-green"
+          className="premium-slider w-full"
           disabled={!volume || loading}
         />
       </div>
