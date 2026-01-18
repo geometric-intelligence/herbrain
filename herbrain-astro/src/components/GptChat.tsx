@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { getApiKey, setApiKey, clearApiKey } from '../lib/storage';
 import OpenAI from 'openai';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -241,7 +242,22 @@ Please analyze the brain visualization and provide insights about brain changes 
                   msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'
                 }
               >
-                {msg.content}
+                {msg.role === 'user' ? (
+                  msg.content
+                ) : (
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                )}
               </div>
             ))}
             {loading && (
