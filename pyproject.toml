@@ -36,6 +36,7 @@ app = [
     "pyvista",
     "openai",
     "kaleido",
+    "flask-compress",
 ]
 doc = [
     "polpo[doc]@git+https://github.com/geometric-intelligence/polpo.git@main",

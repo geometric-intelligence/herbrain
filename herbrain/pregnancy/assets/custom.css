@@ -1,0 +1,116 @@
+/* HerBrain Custom Styles - Professional & Sleek Design */
+
+/* ============================================
+   GLOBAL TYPOGRAPHY
+   ============================================ */
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #FAFBFC;
+}
+
+/* ============================================
+   HOMEPAGE CARD HOVER EFFECTS
+   ============================================ */
+
+/* Pregnancy card - green hover border */
+.pregnancy-card {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.pregnancy-card:hover {
+    border-color: #4A7C6F !important;
+    box-shadow: 0 8px 24px rgba(74, 124, 111, 0.12) !important;
+    transform: translateY(-2px);
+}
+
+/* Menstruation card - orange hover border */
+.menstruation-card {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.menstruation-card:hover {
+    border-color: #E8927C !important;
+    box-shadow: 0 8px 24px rgba(232, 146, 124, 0.12) !important;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION STYLES
+   ============================================ */
+
+/* Sidebar nav item base style */
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    text-decoration: none !important;
+    color: #374151 !important;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(74, 124, 111, 0.06);
+    color: #1A1A2E !important;
+}
+
+/* Active/selected state - salmon/coral tint for Pregnancy */
+.sidebar-nav-item.active-pregnancy {
+    background-color: rgba(232, 146, 124, 0.12);
+    color: #C4735F !important;
+}
+
+.sidebar-nav-item.active-pregnancy:hover {
+    background-color: rgba(232, 146, 124, 0.18);
+}
+
+/* Active/selected state - coral tint for Menstruation */
+.sidebar-nav-item.active-menstruation {
+    background-color: rgba(232, 146, 124, 0.12);
+    color: #C4735F !important;
+}
+
+.sidebar-nav-item.active-menstruation:hover {
+    background-color: rgba(232, 146, 124, 0.18);
+}
+
+/* Sidebar nav item icon */
+.sidebar-nav-icon {
+    width: 44px;
+    height: 44px;
+    margin-right: 0.9rem;
+    flex-shrink: 0;
+    border-radius: 8px;
+}
+
+/* ============================================
+   SUBTLE REFINEMENTS
+   ============================================ */
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Remove default focus outlines, add custom */
+a:focus,
+button:focus {
+    outline: none;
+}
+
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid #4A7C6F;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Link styling */
+a {
+    text-decoration: none;
+}

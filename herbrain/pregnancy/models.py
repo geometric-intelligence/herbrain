@@ -1,10 +1,10 @@
-from polpo.models import DictMeshes2Comps, Meshes2Comps, ObjectRegressor
+from polpo.models import DictMeshes2Comps, Meshes2Comps, Model, ObjectRegressor
 from polpo.preprocessing import Map
 from polpo.preprocessing.mesh.transform import AffineTransformation
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LinearRegression
-from polpo.models import Model
 from polpo.plot.mri import MriSlicer
+import numpy as np
 
 
 def MeshPCR(model=None, affine_transform=None, n_components=4, n_pipes=None):
@@ -40,131 +40,126 @@ def MeshPCR(model=None, affine_transform=None, n_components=4, n_pipes=None):
 class MriModel(Model):
     def __init__(self, data, hormones_df, index_tar=1, slicer=None):
         """Model for predicting MRI slices based on gestational week and view index.
+        
+        OPTIMIZED: Uses efficient caching for fast lookups.
 
         Parameters:
         ----------
-        data: list or array-like, MRI data for different gestational weeks (TODO: CHECK TYPE)
+        data: list or array-like, MRI data for different gestational weeks
         hormones_df: pandas DataFrame, contains gestational week information
         index_tar: int, 
-            The number at which the target MRI data starts in the list (default is 1, meaning the first MRI corresponds to gestational week 1)
-        slicer: MriSlicer, optional, used to slice the MRI data (default is None, which creates a new MriSlicer)
+            The number at which the target MRI data starts in the list
+        slicer: MriSlicer, optional, used to slice the MRI data
         """
         if slicer is None:
             slicer = MriSlicer()
         self.data = data
         self.index_tar = index_tar
         self.slicer = slicer
-        self.hormones_df = hormones_df  # Store hormones data if needed for future use
+        self.hormones_df = hormones_df
+        self._num_data = len(data)
+        
+        # Precompute gestational week to data index mapping
+        self._gest_week_to_data_idx = {}
+        gest_week_id = "gestWeek"
+        if hasattr(hormones_df, "loc") and gest_week_id in hormones_df.columns:
+            all_gest_weeks = hormones_df[gest_week_id].values
+            all_indices = hormones_df.index.values
+            
+            # Map each gestational week (0-45) to closest data index
+            for week in range(0, 46):
+                closest_session_idx = np.argmin(np.abs(all_gest_weeks - week))
+                session = all_indices[closest_session_idx]
+                data_idx = min(session - index_tar, self._num_data - 1)
+                data_idx = max(0, data_idx)
+                self._gest_week_to_data_idx[week] = data_idx
+        
+        # Cache for slices - populated on demand
+        self._slice_cache = {}
+        self._data_shapes = [d.shape for d in data]
 
     @classmethod
-    def from_index_ordering(cls, data, index_tar=1, index_ordering=(0, 1, 2)):
+    def from_index_ordering(cls, data, hormones_df, index_tar=1, index_ordering=(0, 1, 2)):
         slicer = MriSlicer(index_ordering=index_ordering)
-        return cls(data, index_tar, slicer)
+        return cls(data, hormones_df, index_tar, slicer)
 
     def predict(self, X):
-        """
-        X: tuple or list of (gest_week, view_index, slice_index)
-           - gest_week: int, gestational week (from slider)
-           - view_index: int, which view to return (from radiobutton: 0=sagittal, 1=coronal, 2=axial)
-           - slice_index: int, which slice along the selected axis
-        Returns: 2D numpy array, the selected MRI slice
-        """
-        if len(X) == 3:
+        """Fast prediction with caching."""
+        # Handle None or invalid inputs gracefully to prevent callback failures
+        try:
+            if X is None or (hasattr(X, '__len__') and len(X) != 3):
+                # Return default empty slice if inputs are invalid
+                if len(self.data) > 0:
+                    sample_shape = self.data[0].shape
+                    return np.zeros((sample_shape[1], sample_shape[2]), dtype=np.float32)
+                return np.zeros((100, 100), dtype=np.float32)
+            
             gest_week, view_index, slice_index = X
-        else:
-            raise ValueError("Input X must be a tuple/list of (gest_week, view_index, slice_index)")
-        
-        if view_index in [0, 1, 2]:
-            # view_index is already an integer, use it directly
-            pass
-        elif view_index == "sagittal":
-            view_index = 0
-        elif view_index == "coronal":
-            view_index = 1
-        elif view_index == "axial":
-            view_index = 2
-        else:
-            raise ValueError(f"view_index: {view_index}, must be 'sagittal', 'coronal', or 'axial'")
-        
-        gest_week_id = "gestWeek"  # This is the column name in hormones_df for gestational week
-        # Use hormones_df to compute the session number associated with the gestational week.
-        # We assume hormones_df is indexed by session or has a column for gestational week.
-        # Try to find the session number corresponding to the given gest_week.
-        # If hormones_df is a DataFrame with a 'gest_week' column, find the session index.
-        session_number = None
-        if hasattr(self.hormones_df, "loc") and gest_week_id in self.hormones_df.columns:
-            # Find the first row where gest_week matches
-            matches = self.hormones_df[self.hormones_df[gest_week_id] == gest_week]
-            if not matches.empty:
-                # Use the index of the first match as the session number
-                session_number = matches.index[0]
+            
+            # Handle None values
+            if gest_week is None:
+                gest_week = 15  # Default to week 15
+            if view_index is None:
+                view_index = 0  # Default to sagittal
+            if slice_index is None:
+                slice_index = 0  # Default to first slice
+            
+            # Convert string view_index to int if needed
+            if isinstance(view_index, str):
+                view_index = {"sagittal": 0, "coronal": 1, "axial": 2}.get(view_index.lower(), 0)
+            
+            # Get data index from precomputed mapping
+            try:
+                gest_week = int(gest_week)
+            except (ValueError, TypeError):
+                gest_week = 15  # Default to week 15
+            
+            if gest_week in self._gest_week_to_data_idx:
+                data_idx = self._gest_week_to_data_idx[gest_week]
             else:
-                # If not found, return the closest match
-                # Find the closest gestational week in the DataFrame
-                all_gest_weeks = self.hormones_df[gest_week_id]
-                closest_idx = (all_gest_weeks - gest_week).abs().idxmin()
-                session_number = closest_idx
-
-        if session_number is not None and session_number >= len(self.data): # address the debug mode.
-            session_number = len(self.data) - 1
-        # Get the MRI volume for the selected gestational week
-        datum = self.data[session_number - self.index_tar] # this needs to be session number, not gest week.
-
-        # Use the slicer to extract the correct slice
-        # The slicer expects a list of slice indices for each axis, so we build that:
-        # Only the selected axis gets the slice_index, others get a default (e.g. center)
-        shape = datum.shape
-        print(f"Datum shape: {shape}, view_index: {view_index}, slice_index: {slice_index}")
-        slice_indices = []
-        for i in range(3):
-            if i == view_index:
-                slice_indices.append(slice_index)
-            else:
-                # Use the center slice for non-selected axes
-                slice_indices.append(shape[i] // 2)
-        # The slicer returns all three views, but we only want the selected one
-        slices = self.slicer.slice(datum, slice_indices)
-        print(f"len(slices): {len(slices)}, slice_indices: {slice_indices}")
-        # If slicer returns a list, pick the one corresponding to view_index
-        if isinstance(slices, list):
-            print(f"Returning slice for view_index {view_index}: {slices[view_index]}")
-            return slices[view_index]
-        else:
-            return slices
-        
-
-class ClosestImageLookup(Model):
-    def __init__(self, data, tar=0):
-        """Model that predicts the closest image based on week number.
-        Parameters:
-        ----------
-        data: list or array-like, paths to images for different weeks
-        tar: int, 'target index' for the image (default is 0, which is the first image)
-        """
-        super().__init__()
-        self.data = data
-        self.tar = tar
-        # Precompute week indices from image paths
-        self.week_indices = []
-        for path in self.data:
-            # Extract the week index from the path, assuming format contains "week_{index:02}"
-            import re
-            match = re.search(r"week_(\d{2})", path)
-            if match:
-                self.week_indices.append(int(match.group(1)))
-            else:
-                self.week_indices.append(None)  # or raise an error if strict
-
-    def predict(self, X):
-        # Expects X to be a tuple/list with the week number as the first element
-        week = X[0]
-        # Find the closest week index
-        min_diff = float("inf")
-        closest_idx = 0
-        for i, w in enumerate(self.week_indices):
-            if w is not None:
-                diff = abs(w - week)
-                if diff < min_diff:
-                    min_diff = diff
-                    closest_idx = i
-        return self.data[closest_idx]
+                data_idx = 0
+            
+            try:
+                slice_index = int(slice_index)
+            except (ValueError, TypeError):
+                slice_index = 0
+            
+            # Ensure indices are within bounds
+            if data_idx < 0 or data_idx >= len(self.data):
+                data_idx = 0
+            
+            # Check cache first
+            cache_key = (data_idx, view_index, slice_index)
+            if cache_key in self._slice_cache:
+                return self._slice_cache[cache_key]
+            
+            # Compute and cache
+            datum = self.data[data_idx]
+            shape = datum.shape
+            
+            # Ensure slice_index is within bounds for the selected view
+            max_slice = shape[view_index] - 1
+            if slice_index < 0:
+                slice_index = 0
+            elif slice_index > max_slice:
+                slice_index = max_slice
+            
+            slice_indices = [shape[i] // 2 if i != view_index else slice_index for i in range(3)]
+            slices = self.slicer.slice(datum, slice_indices)
+            result = slices[view_index] if isinstance(slices, list) else slices
+            
+            # Cache it (limit cache size to prevent memory issues)
+            if len(self._slice_cache) < 5000:
+                self._slice_cache[cache_key] = result
+            
+            return result
+            
+        except Exception as e:
+            import traceback
+            print(f"Error in MriModel.predict(): {e}")
+            traceback.print_exc()
+            # Return a default empty slice
+            if len(self.data) > 0:
+                sample_shape = self.data[0].shape
+                return np.zeros((sample_shape[1], sample_shape[2]), dtype=np.float32)
+            return np.zeros((100, 100), dtype=np.float32)

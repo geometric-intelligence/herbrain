@@ -1,0 +1,71 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Menopause">
+  <div class="max-w-2xl mx-auto text-center py-16">
+    <!-- Logo -->
+    <img 
+      src="/assets/menopause_logo.svg" 
+      alt="Menopause" 
+      class="w-24 h-24 mx-auto mb-6"
+    />
+    
+    <!-- Title -->
+    <h1 class="font-display text-4xl font-semibold text-herbrain-dark mb-4">
+      Menopause
+    </h1>
+    <p class="text-herbrain-coral font-medium mb-8">
+      Digital Twin
+    </p>
+    
+    <!-- Coming Soon Message -->
+    <div class="bg-white rounded-xl border border-gray-200 p-8 mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-herbrain-coral/10 rounded-full mb-4">
+        <svg class="w-8 h-8 text-herbrain-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-semibold text-herbrain-dark mb-3">
+        Coming Soon
+      </h2>
+      <p class="text-herbrain-muted leading-relaxed max-w-md mx-auto">
+        We're working on bringing you an interactive exploration of brain changes 
+        during the menopausal transition. Discover how hormonal shifts during perimenopause 
+        and menopause influence brain structure and cognitive function.
+      </p>
+    </div>
+    
+    <!-- Features Preview -->
+    <div class="grid md:grid-cols-3 gap-4 text-left">
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="font-semibold text-herbrain-dark mb-2">Transition Stages</h3>
+        <p class="text-sm text-herbrain-muted">
+          Visualize brain changes from perimenopause through post-menopause phases.
+        </p>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="font-semibold text-herbrain-dark mb-2">Hormone Decline</h3>
+        <p class="text-sm text-herbrain-muted">
+          Explore the relationship between declining estrogen and brain volume changes.
+        </p>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="font-semibold text-herbrain-dark mb-2">Cognitive Insights</h3>
+        <p class="text-sm text-herbrain-muted">
+          Understand how brain changes relate to memory and cognitive symptoms.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Back Link -->
+    <div class="mt-8">
+      <a 
+        href="/" 
+        class="text-herbrain-green hover:text-herbrain-green/80 font-medium"
+      >
+        ← Back to Home
+      </a>
+    </div>
+  </div>
+</MainLayout>

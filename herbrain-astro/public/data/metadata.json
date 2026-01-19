@@ -1,0 +1,25 @@
+{
+  "weekToSession": {
+    "0": "ses-01",
+    "5": "ses-04",
+    "10": "ses-07",
+    "15": "ses-10",
+    "20": "ses-13",
+    "25": "ses-17",
+    "30": "ses-20",
+    "35": "ses-23",
+    "40": "ses-26"
+  },
+  "sessionUrls": {
+    "ses-01": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-01/BrainNormalizedToTemplate.nii.gz",
+    "ses-04": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-04/BrainNormalizedToTemplate.nii.gz",
+    "ses-07": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-07/BrainNormalizedToTemplate.nii.gz",
+    "ses-10": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-10/BrainNormalizedToTemplate.nii.gz",
+    "ses-13": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-13/BrainNormalizedToTemplate.nii.gz",
+    "ses-17": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-17/BrainNormalizedToTemplate.nii.gz",
+    "ses-20": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-20/BrainNormalizedToTemplate.nii.gz",
+    "ses-23": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-23/BrainNormalizedToTemplate.nii.gz",
+    "ses-26": "https://pub-ae8c122d8b8a4807be40a528884c08b9.r2.dev/home/data/pregnancy/raw/mri/ses-26/BrainNormalizedToTemplate.nii.gz"
+  },
+  "_note": "Week-to-session mapping: 26 sessions distributed over 40-week pregnancy, matching original app prerender weeks [0,5,10,15,20,25,30,35,40]"
+}

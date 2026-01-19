@@ -1,0 +1,70 @@
+---
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+const navItems = [
+  { href: '/pregnancy', text: 'Pregnancy', icon: '/assets/pregnancy_logo.png' },
+  { href: '/menstruation', text: 'Menstruation', icon: '/assets/menstrual_logo.png' },
+  { href: '/menopause', text: 'Menopause', icon: '/assets/menopause_logo.svg' },
+];
+---
+
+<aside class="fixed top-0 left-0 bottom-0 w-72 p-6 bg-white border-r border-gray-200 flex flex-col">
+  <!-- Logo -->
+  <a href="/" class="block mb-2">
+    <img 
+      src="/assets/herbrain_logo.png" 
+      alt="HerBrain" 
+      class="w-52 h-auto cursor-pointer hover:opacity-90 transition-opacity"
+    />
+  </a>
+  
+  <!-- Subtitle -->
+  <p class="font-sans text-sm text-herbrain-muted mt-4 mb-0 font-normal tracking-wide">
+    Digital twins of women's brains
+  </p>
+  
+  <hr class="my-6 border-gray-200 opacity-70" />
+  
+  <!-- Navigation -->
+  <nav class="flex flex-col gap-2">
+    {navItems.map((item) => {
+      const isActive = currentPath === item.href;
+      const activeClass = item.href === '/pregnancy' 
+        ? 'active-pregnancy' 
+        : item.href === '/menstruation'
+        ? 'active-menstruation'
+        : 'active-menopause';
+      
+      return (
+        <a 
+          href={item.href}
+          class:list={[
+            'sidebar-nav-item',
+            { [activeClass]: isActive }
+          ]}
+        >
+          <img 
+            src={item.icon} 
+            alt={item.text}
+            class="sidebar-nav-icon"
+          />
+          <span class="font-sans text-lg font-medium tracking-wide">
+            {item.text}
+          </span>
+        </a>
+      );
+    })}
+  </nav>
+  
+  <!-- Spacer -->
+  <div class="flex-grow"></div>
+  
+  <!-- Footer -->
+  <div class="text-center text-herbrain-muted text-sm">
+    <p>© 2024 Geometric Intelligence</p>
+  </div>
+</aside>

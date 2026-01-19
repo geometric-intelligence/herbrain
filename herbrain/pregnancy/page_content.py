@@ -12,196 +12,294 @@ SIDEBAR_STYLE = {
     "left": 0,
     "bottom": 0,
     "width": "18rem",
-    "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
+    "padding": "1.75rem 1.25rem",
+    "backgroundColor": "#FFFFFF",
+    "borderRight": "1px solid #EAEAEA",
+    "display": "flex",
+    "flexDirection": "column",
 }
-
-
-def img_herbrain():
-    return html.Img(
-        src=get_asset_url("herbrain.png"),
-        style={"width": "100%", "height": "auto"},
-    )
-
-
-def img_study_timeline():
-    return html.Img(
-        src=get_asset_url("study_timeline.png"),
-        style={"width": "100%", "height": "auto"},
-    )
-
-
-def background_title():
-    return dbc.Row(
-        [
-            dbc.Col(
-                html.P("Background", style={"fontSize": S.title_fontsize}),
-                width=10,
-            ),
-        ],
-        align="center",
-    )
-
-def digital_twin_title():
-    return dbc.Row(
-        [
-            dbc.Col(
-                html.P("Digital Twins", style={"fontSize": S.title_fontsize}),
-                width=10,
-            ),
-        ],
-        align="center",
-    )
-
-
-def pregnancy_title():
-    return dbc.Row(
-        [
-            dbc.Col(
-                html.Img(
-                    src=get_asset_url("pregnancy_logo.png"),
-                    style={"width": "70px", "height": "auto"},
-                ),
-                width=2,
-            ),
-            dbc.Col(
-                html.P("Digital Twin of the Pregnant Brain", style={"fontSize": S.title_fontsize}),
-                width=10,
-            ),
-        ],
-        align="center",
-    )
-
-
-def acknowledgements_title():
-    return dbc.Row(
-        [
-            dbc.Col(
-                html.P("Acknowledgements", style={"fontSize": S.title_fontsize}),
-                width=10,
-            ),
-        ],
-        align="center",
-    )
 
 
 def sidebar(sidebar_elems, page_register):
     """Return the sidebar of the app."""
-    title = dbc.Row(
-        [
-            dbc.Col(
-                html.Img(
-                    src=get_asset_url("wbhi_logo.png"),
-                    style={"width": "100px", "height": "auto"},
-                ),
-                width=2,
-            ),
-            dbc.Col(width=0.5),
-            dbc.Col(
-                html.H2("HerBrain", className="display-4"),
-                width=10,
-            ),
-        ],
-        align="center",
+    # Header with logo
+    header = dcc.Link(
+        html.Img(
+            src=get_asset_url("herbrain_logo.png"),
+            style={
+                "width": "220px",
+                "height": "auto",
+                "cursor": "pointer",
+            },
+        ),
+        href="/",
+        style={"textDecoration": "none", "display": "block"},
+    )
+    
+    # Subtitle
+    subtitle = html.P(
+        "Digital twins of women's brains",
+        style={
+            "fontFamily": "'Inter', -apple-system, sans-serif",
+            "fontSize": "0.9rem",
+            "color": "#7F8C8D",
+            "marginTop": "1rem",
+            "marginBottom": "0",
+            "fontWeight": "400",
+            "letterSpacing": "0.01em",
+        }
     )
 
-    headers = []
+    # Register all routes (including inactive ones), but build custom nav items
+    nav_items = []
     for elem in sidebar_elems:
+        # Register route for all elements (active or not)
+        elem.to_dash(page_register)
+        
+        # Only add to nav if active
         if elem.active:
-            compns = elem.to_dash(page_register)
-            headers.append(compns[0])
+            # Get the href and text from the tab_header
+            href = elem.tab_header.href
+            text = elem.tab_header.text
+            image_url = elem.tab_header.image_url
+            
+            # Determine which card class to use for active state
+            card_class = "sidebar-nav-item"
+            
+            nav_item = dcc.Link(
+                html.Div(
+                    [
+                        html.Img(
+                            src=get_asset_url(image_url),
+                            className="sidebar-nav-icon",
+                        ),
+                        html.Span(
+                            text,
+                            style={
+                                "fontFamily": "'Inter', -apple-system, sans-serif",
+                                "fontSize": "1.1rem",
+                                "fontWeight": "500",
+                                "letterSpacing": "0.01em",
+                            }
+                        ),
+                    ],
+                    style={
+                        "display": "flex",
+                        "alignItems": "center",
+                    }
+                ),
+                href=href,
+                className=card_class,
+                id=f"nav-{text.lower()}",
+            )
+            nav_items.append(nav_item)
 
     return html.Div(
         [
-            title,
-            html.Hr(),
-            html.P(
-                "Explore how the female brain changes during pregnancy",
-                className="lead",
-            ),
-            dbc.Nav(
-                headers,
-                vertical=True,
-                pills=True,
-            ),
+            header,
+            subtitle,
+            html.Hr(style={"borderColor": "#EAEAEA", "marginTop": "1.75rem", "marginBottom": "1.5rem", "opacity": "0.7"}),
+            html.Div(nav_items),
         ],
         style=SIDEBAR_STYLE,
     )
 
 
 def homepage():
-    """Return the content of the homepage."""
-    banner = [
-        html.Div(style={"height": "20px"}),
-        html.Img(
-            src=get_asset_url("herbrain_logo_text.png"),
-            style={
-                "width": "80%",
-                "height": "auto",
-                "marginLeft": "10px",
-                "marginRight": "10px",
-            },
-        ),
-    ]
-
-    overview_text = html.P(
+    """Return the content of the homepage with card-based design."""
+    
+    # Color scheme - refined palette
+    green_accent = "#4A7C6F"  # Teal green for Pregnancy
+    orange_accent = "#E8927C"  # Coral/salmon for Menstruation & labels
+    bg_color = "#FAFBFC"  # Subtle off-white background
+    card_bg = "#FFFFFF"
+    text_dark = "#1A1A2E"  # Deep charcoal
+    text_muted = "#6B7280"  # Refined gray
+    
+    # Main title section - centered logo
+    header = html.Div(
         [
-            "Welcome to HerBrain! This application is a tool to explore how the brain changes during pregnancy. Ovarian hormones, such as estrogen and progesterone, are known to influence the brain, and these hormones are elevated 100-1000 fold during pregnancy.",
-            html.Br(),
-            html.Br(),
-            "The hippocampus and the structures around it are particularly sensitives to hormones. In pregnancy, sex hormones are believed to drive the decline in hippocampal volume that occurs during gestation.",
+            html.Img(
+                src=get_asset_url("herbrain_logo.png"),
+                style={
+                    "width": "320px",
+                    "height": "auto",
+                    "marginBottom": "1.5rem",
+                },
+            ),
+            html.P(
+                "Digital Twins of Women's Brains",
+                style={
+                    "fontFamily": "'Inter', -apple-system, sans-serif",
+                    "fontSize": "1.15rem",
+                    "color": text_muted,
+                    "fontWeight": "400",
+                    "letterSpacing": "0.02em",
+                }
+            ),
         ],
-        style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
+        style={
+            "textAlign": "center",
+            "paddingTop": "4rem",
+            "paddingBottom": "3.5rem",
+        }
     )
-
-    instructions_text = html.P(
-        [
-            "Use the sidebar to navigate between the different pages of the application. The 'Explore MRI Data' page allows you to explore the brain MRIs from the study. The 'AI: Hormones to Hippocampus Shape' page allows you to explore the relationship between hormones and the shape of the hippocampus.",
-        ],
-        style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
-    )
-
-    acknowledgements_text = html.P(
-        [
-            "This application was developed by Adele Myers, Sarah Kushner, Luís F. Pereira, and Nina Miolane and made possible by the support of the Women's Brain Health Initiative. Brain MRI data was collected in the study: Pritschet, Taylor, Cossio, Santander, Grotzinger, Faskowitz, Handwerker, Layher, Chrastil, Jacobs. Neuroanatomical changes observed over the course of a human pregnancy. (2024).",
-        ],
-        style={"fontSize": S.text_fontsize, "fontFamily": S.text_fontfamily},
-    )
-
-    brain_image_row = dbc.Row(
-        [dbc.Col(md=2), dbc.Col(img_herbrain(), md=8), dbc.Col(md=2)],
-        style={"marginLeft": S.margin_side, "marginRight": S.margin_side},
-    )
-
-    contents_container = dbc.Container(
-        [
-            *banner,
-            html.Hr(),
-            background_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            overview_text,
-            brain_image_row,
-            html.Div(style={"height": S.space_between_sections}),
-            html.Hr(),
-            digital_twin_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            instructions_text,
-            html.Div(style={"height": S.space_between_sections}),
-            html.Hr(),
-            acknowledgements_title(),
-            html.Div(style={"height": S.space_between_title_and_content}),
-            acknowledgements_text,
-        ],
-        fluid=True,
-    )
-
-    return [
-        dbc.Row(
+    
+    # Base card style - premium feel
+    card_style_base = {
+        "backgroundColor": card_bg,
+        "borderRadius": "16px",
+        "padding": "2.5rem 2rem",
+        "textAlign": "center",
+        "border": "1px solid #E5E7EB",
+        "height": "100%",
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center",
+    }
+    
+    # Pregnancy card
+    pregnancy_card = dcc.Link(
+        html.Div(
             [
-                dbc.Col(sm=1),
-                dbc.Col(contents_container, sm=10),
-                dbc.Col(sm=1),
-            ]
+                html.Img(
+                    src=get_asset_url("pregnancy_logo.png"),
+                    style={"width": "80px", "height": "80px", "marginBottom": "1.5rem"}
+                ),
+                html.H2(
+                    "Pregnancy",
+                    style={
+                        "fontFamily": "'Playfair Display', Georgia, serif",
+                        "fontSize": "1.85rem",
+                        "fontWeight": "600",
+                        "color": text_dark,
+                        "marginBottom": "0.5rem",
+                        "letterSpacing": "-0.01em",
+                    }
+                ),
+                html.P(
+                    "Digital Twin",
+                    style={
+                        "color": orange_accent,
+                        "fontFamily": "'Inter', sans-serif",
+                        "fontSize": "0.95rem",
+                        "fontWeight": "500",
+                        "marginBottom": "1rem",
+                        "letterSpacing": "0.02em",
+                    }
+                ),
+                html.P(
+                    "Explore brain transformations across 40 weeks of pregnancy. Track how subcortical structures respond to hormonal surges.",
+                    style={
+                        "color": text_muted,
+                        "fontFamily": "'Inter', sans-serif",
+                        "fontSize": "0.925rem",
+                        "lineHeight": "1.7",
+                        "maxWidth": "300px",
+                    }
+                ),
+            ],
+            style=card_style_base,
+            className="pregnancy-card",
+        ),
+        href="/page-1",
+        style={"textDecoration": "none", "display": "block", "height": "100%"},
+    )
+    
+    # Menstruation card  
+    menstruation_card = dcc.Link(
+        html.Div(
+            [
+                html.Img(
+                    src=get_asset_url("menstrual_logo.png"),
+                    style={"width": "80px", "height": "80px", "marginBottom": "1.5rem"}
+                ),
+                html.H2(
+                    "Menstruation",
+                    style={
+                        "fontFamily": "'Playfair Display', Georgia, serif",
+                        "fontSize": "1.85rem",
+                        "fontWeight": "600",
+                        "color": text_dark,
+                        "marginBottom": "0.5rem",
+                        "letterSpacing": "-0.01em",
+                    }
+                ),
+                html.P(
+                    "Digital Twin",
+                    style={
+                        "color": orange_accent,
+                        "fontFamily": "'Inter', sans-serif",
+                        "fontSize": "0.95rem",
+                        "fontWeight": "500",
+                        "marginBottom": "1rem",
+                        "letterSpacing": "0.02em",
+                    }
+                ),
+                html.P(
+                    "Coming soon: Explore cyclic brain changes throughout the menstrual cycle. Understand how monthly hormonal fluctuations shape neural structure.",
+                    style={
+                        "color": text_muted,
+                        "fontFamily": "'Inter', sans-serif",
+                        "fontSize": "0.925rem",
+                        "lineHeight": "1.7",
+                        "maxWidth": "300px",
+                    }
+                ),
+            ],
+            style=card_style_base,
+            className="menstruation-card",
+        ),
+        href="/page-2",
+        style={"textDecoration": "none", "display": "block", "height": "100%"},
+    )
+    
+    # Cards row
+    cards_row = dbc.Row(
+        [
+            dbc.Col(pregnancy_card, md=6, lg=5, className="mb-4 px-3"),
+            dbc.Col(menstruation_card, md=6, lg=5, className="mb-4 px-3"),
+        ],
+        justify="center",
+    )
+    
+    # Footer
+    footer = html.Div(
+        [
+            html.Hr(style={"borderColor": "#E5E7EB", "marginTop": "4rem", "opacity": "0.6"}),
+            html.P(
+                "© 2024 Geometric Intelligence",
+                style={
+                    "textAlign": "center",
+                    "color": text_muted,
+                    "fontFamily": "'Inter', sans-serif",
+                    "fontSize": "0.85rem",
+                    "paddingTop": "1.5rem",
+                    "paddingBottom": "2rem",
+                    "letterSpacing": "0.01em",
+                }
+            ),
+        ]
+    )
+    
+    # Main container with background
+    return [
+        html.Div(
+            [
+                dbc.Container(
+                    [
+                        header,
+                        cards_row,
+                        footer,
+                    ],
+                    fluid=True,
+                    style={"maxWidth": "960px"},
+                ),
+            ],
+            style={
+                "backgroundColor": bg_color,
+                "minHeight": "100vh",
+            }
         )
     ]
 
@@ -315,9 +413,11 @@ def app_layout(sidebar_elems, page_register):
     # the styles for the main content position it to the right of the sidebar and
     # add some padding.
     CONTENT_STYLE = {
-        "margin-left": "18rem",
-        "margin-right": "2rem",
-        "padding": "2rem 1rem",
+        "marginLeft": "18rem",
+        "marginRight": "1.5rem",
+        "padding": "1.5rem 1rem",
+        "minHeight": "100vh",
+        "backgroundColor": "#FAFBFC",
     }
     content = html.Div(id="page-content", style=CONTENT_STYLE)
 
@@ -326,5 +426,6 @@ def app_layout(sidebar_elems, page_register):
             dcc.Location(id="url"),
             sidebar(sidebar_elems, page_register),
             content,
-        ]
+        ],
+        style={"backgroundColor": "#FAFBFC"},
     )

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" width="200" height="180">
+  <!-- Gray ellipse background with subtle shading - matching other logos -->
+  <defs>
+    <radialGradient id="bgGradient" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#d4d4d4"/>
+      <stop offset="100%" stop-color="#b8b8b8"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Main ellipse background - wider than tall like other logos -->
+  <ellipse cx="100" cy="90" rx="95" ry="80" fill="url(#bgGradient)"/>
+  
+  <!-- Hexagons - fewer and more scattered -->
+  <!-- Large filled hexagon - center -->
+  <polygon points="100,50 125,65 125,95 100,110 75,95 75,65" 
+           fill="#e8927c" stroke="none"/>
+  
+  <!-- Medium filled hexagon - upper right -->
+  <polygon points="145,55 163,65 163,85 145,95 127,85 127,65" 
+           fill="#d97b4a" stroke="none"/>
+  
+  <!-- Small filled hexagon - left -->
+  <polygon points="50,75 63,83 63,99 50,107 37,99 37,83" 
+           fill="#e8927c" stroke="none"/>
+  
+  <!-- Medium stroked hexagon - lower right -->
+  <polygon points="135,100 153,110 153,130 135,140 117,130 117,110" 
+           fill="none" stroke="#d97b4a" stroke-width="3"/>
+  
+  <!-- Small stroked hexagon - upper left -->
+  <polygon points="70,40 82,47 82,61 70,68 58,61 58,47" 
+           fill="none" stroke="#e8927c" stroke-width="2.5"/>
+  
+  <!-- Very small filled hexagon - bottom -->
+  <polygon points="85,120 94,125 94,135 85,140 76,135 76,125" 
+           fill="#d97b4a" stroke="none"/>
+</svg>

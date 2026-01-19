@@ -1,0 +1,103 @@
+---
+import '../styles/global.css';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HerBrain - Digital twins of women's brains. Explore brain transformations during pregnancy and menstruation.">
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <title>HerBrain - Digital Twins of Women's Brains</title>
+</head>
+<body class="bg-herbrain-bg min-h-screen">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- Header -->
+    <header class="text-center pt-16 pb-14">
+      <img 
+        src="/assets/herbrain_logo.png" 
+        alt="HerBrain" 
+        class="w-80 h-auto mx-auto mb-6"
+      />
+      <p class="font-sans text-lg text-herbrain-muted font-normal tracking-wide">
+        Digital Twins of Women's Brains
+      </p>
+    </header>
+    
+    <!-- Cards -->
+    <div class="grid md:grid-cols-3 gap-6 px-3 justify-center">
+      <!-- Pregnancy Card -->
+      <a href="/pregnancy" class="block h-full no-underline">
+        <div class="pregnancy-card bg-white rounded-2xl p-8 text-center border border-gray-200 h-full flex flex-col items-center">
+          <img 
+            src="/assets/pregnancy_logo.png" 
+            alt="Pregnancy"
+            class="w-16 h-16 mb-5"
+          />
+          <h2 class="font-display text-2xl font-semibold text-herbrain-dark mb-2 tracking-tight">
+            Pregnancy
+          </h2>
+          <p class="text-herbrain-coral font-sans text-sm font-medium mb-3 tracking-wide">
+            Digital Twin
+          </p>
+          <p class="text-herbrain-muted font-sans text-sm leading-relaxed">
+            Explore brain transformations across 40 weeks of pregnancy.
+          </p>
+        </div>
+      </a>
+      
+      <!-- Menstruation Card -->
+      <a href="/menstruation" class="block h-full no-underline">
+        <div class="menstruation-card bg-white rounded-2xl p-8 text-center border border-gray-200 h-full flex flex-col items-center">
+          <img 
+            src="/assets/menstrual_logo.png" 
+            alt="Menstruation"
+            class="w-16 h-16 mb-5"
+          />
+          <h2 class="font-display text-2xl font-semibold text-herbrain-dark mb-2 tracking-tight">
+            Menstruation
+          </h2>
+          <p class="text-herbrain-coral font-sans text-sm font-medium mb-3 tracking-wide">
+            Digital Twin
+          </p>
+          <p class="text-herbrain-muted font-sans text-sm leading-relaxed">
+            Coming soon: Explore cyclic brain changes throughout the menstrual cycle.
+          </p>
+        </div>
+      </a>
+      
+      <!-- Menopause Card -->
+      <a href="/menopause" class="block h-full no-underline">
+        <div class="menopause-card bg-white rounded-2xl p-8 text-center border border-gray-200 h-full flex flex-col items-center">
+          <img 
+            src="/assets/menopause_logo.svg" 
+            alt="Menopause"
+            class="w-16 h-16 mb-5"
+          />
+          <h2 class="font-display text-2xl font-semibold text-herbrain-dark mb-2 tracking-tight">
+            Menopause
+          </h2>
+          <p class="text-herbrain-coral font-sans text-sm font-medium mb-3 tracking-wide">
+            Digital Twin
+          </p>
+          <p class="text-herbrain-muted font-sans text-sm leading-relaxed">
+            Coming soon: Explore brain changes during the menopausal transition.
+          </p>
+        </div>
+      </a>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="mt-16 pb-8">
+      <hr class="border-gray-200 opacity-60 mb-6" />
+      <p class="text-center text-herbrain-muted font-sans text-sm tracking-wide">
+        © 2024 Geometric Intelligence
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
