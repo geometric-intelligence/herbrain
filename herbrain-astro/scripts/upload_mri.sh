@@ -10,19 +10,21 @@
 
 set -e
 
-DATA_DIR="${1:-$HERBRAIN_DATA_DIR/pregnancy/raw}"
+export CLOUDFLARE_ACCOUNT_ID="d02f773269d425676a8178615df5bdc5"
+
+DATA_DIR="/home/data/pregnancy/raw/mri"
 BUCKET_NAME="herbrain-mri"
 
 if [ ! -d "$DATA_DIR" ]; then
     echo "Error: Data directory not found: $DATA_DIR"
-    echo "Usage: $0 /path/to/mri/data"
+    echo "Usage: $0"
     exit 1
 fi
 
-echo "Uploading MRI files from $DATA_DIR to R2 bucket: $BUCKET_NAME"
+echo "Uploading BrainNormalizedToTemplate.nii.gz files from $DATA_DIR to R2 bucket: $BUCKET_NAME"
 
-# Find and upload all .nii and .nii.gz files
-find "$DATA_DIR" -type f \( -name "*.nii" -o -name "*.nii.gz" \) | while read -r file; do
+# Find and upload only BrainNormalizedToTemplate.nii.gz files in ses-* directories
+find "$DATA_DIR" -type f -path "*/ses-*/BrainNormalizedToTemplate.nii.gz" | while read -r file; do
     # Get relative path from data dir
     relative_path="${file#$DATA_DIR/}"
     
