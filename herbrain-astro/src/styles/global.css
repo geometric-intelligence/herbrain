@@ -234,3 +234,15 @@ button, a, input, select {
 :focus-visible {
   @apply outline-none ring-2 ring-herbrain-green/30 ring-offset-2;
 }
+
+/* Tooltip fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

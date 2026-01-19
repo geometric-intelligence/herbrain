@@ -92,6 +92,24 @@ export default function PregnancyExplorer() {
   );
 }
 
+// Subcortical structure info: names and brief descriptions
+const STRUCTURE_INFO: Record<string, { name: string; description: string }> = {
+  'L_Thal': { name: 'Left Thalamus', description: 'Sensory relay & consciousness' },
+  'R_Thal': { name: 'Right Thalamus', description: 'Sensory relay & consciousness' },
+  'L_Caud': { name: 'Left Caudate', description: 'Learning & memory' },
+  'R_Caud': { name: 'Right Caudate', description: 'Learning & memory' },
+  'L_Puta': { name: 'Left Putamen', description: 'Motor control & learning' },
+  'R_Puta': { name: 'Right Putamen', description: 'Motor control & learning' },
+  'L_Pall': { name: 'Left Pallidum', description: 'Movement regulation' },
+  'R_Pall': { name: 'Right Pallidum', description: 'Movement regulation' },
+  'L_Hipp': { name: 'Left Hippocampus', description: 'Memory formation' },
+  'R_Hipp': { name: 'Right Hippocampus', description: 'Memory formation' },
+  'L_Amyg': { name: 'Left Amygdala', description: 'Emotion processing' },
+  'R_Amyg': { name: 'Right Amygdala', description: 'Emotion processing' },
+  'L_Accu': { name: 'Left Accumbens', description: 'Reward & motivation' },
+  'R_Accu': { name: 'Right Accumbens', description: 'Reward & motivation' },
+};
+
 /**
  * Simplified MeshExplorer that only displays, without its own slider
  * (week is controlled by parent)
@@ -101,6 +119,10 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showBrainOverlay, setShowBrainOverlay] = useState(true);
+  
+  // Hover tooltip state
+  const [hoveredStructure, setHoveredStructure] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Dynamic import to avoid SSR issues with Plotly
   const [Plot, setPlot] = useState<any>(null);
@@ -177,6 +199,30 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
     uirevision: 'constant',
   });
 
+  // Handle hover on mesh structures
+  const handleHover = useCallback((event: any) => {
+    if (event.points && event.points.length > 0) {
+      const point = event.points[0];
+      const traceName = point.data?.name;
+      
+      // Only show tooltip for subcortical structures (not brain_overlay)
+      if (traceName && traceName !== 'brain_overlay' && STRUCTURE_INFO[traceName]) {
+        setHoveredStructure(traceName);
+        // Get mouse position from the event
+        if (event.event) {
+          setTooltipPosition({
+            x: event.event.clientX || event.event.pageX || 0,
+            y: event.event.clientY || event.event.pageY || 0,
+          });
+        }
+      }
+    }
+  }, []);
+
+  const handleUnhover = useCallback(() => {
+    setHoveredStructure(null);
+  }, []);
+
   if (loading || !Plot) {
     return (
       <div className="viz-card flex flex-col h-full items-center justify-center p-6">
@@ -206,7 +252,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
         3D Brain Model
       </h2>
       
-      <div className="flex-1 flex items-center justify-center plotly-container">
+      <div className="flex-1 flex items-center justify-center plotly-container relative">
         <Plot
           data={getPlotData()}
           layout={getLayout()}
@@ -216,7 +262,38 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
             displaylogo: false,
             responsive: true,
           }}
+          onHover={handleHover}
+          onUnhover={handleUnhover}
         />
+        
+        {/* Floating Tooltip */}
+        {hoveredStructure && STRUCTURE_INFO[hoveredStructure] && (
+          <div
+            className="fixed z-50 pointer-events-none"
+            style={{
+              left: tooltipPosition.x + 14,
+              top: tooltipPosition.y + 8,
+            }}
+          >
+            <div
+              className="px-3 py-2 rounded-md"
+              style={{
+                background: 'rgba(24, 24, 27, 0.92)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                animation: 'fadeIn 0.1s ease-out',
+              }}
+            >
+              <div className="text-[13px] font-medium text-white leading-tight">
+                {STRUCTURE_INFO[hoveredStructure].name}
+              </div>
+              <div className="text-[11px] text-white/60 mt-0.5">
+                {STRUCTURE_INFO[hoveredStructure].description}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Brain Overlay Toggle + Legend */}
