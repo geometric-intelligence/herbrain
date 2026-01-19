@@ -8,7 +8,7 @@ const { currentPath } = Astro.props;
 const navItems = [
   { href: '/pregnancy', text: 'Pregnancy', icon: '/assets/pregnancy_logo.png' },
   { href: '/menstruation', text: 'Menstruation', icon: '/assets/menstrual_logo.png' },
-  { href: '/menopause', text: 'Menopause', icon: null, color: 'purple' },
+  { href: '/menopause', text: 'Menopause', icon: '/assets/menopause_logo.svg' },
 ];
 ---
 
@@ -47,19 +47,11 @@ const navItems = [
             { [activeClass]: isActive }
           ]}
         >
-          {item.icon ? (
-            <img 
-              src={item.icon} 
-              alt={item.text}
-              class="sidebar-nav-icon"
-            />
-          ) : (
-            <div class="sidebar-nav-icon bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-          )}
+          <img 
+            src={item.icon} 
+            alt={item.text}
+            class="sidebar-nav-icon"
+          />
           <span class="font-sans text-lg font-medium tracking-wide">
             {item.text}
           </span>

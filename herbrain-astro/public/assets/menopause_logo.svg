@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Gray circle background with subtle shading -->
+  <defs>
+    <radialGradient id="bgGradient" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#d4d4d4"/>
+      <stop offset="100%" stop-color="#b8b8b8"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Main circle background -->
+  <circle cx="100" cy="100" r="90" fill="url(#bgGradient)"/>
+  
+  <!-- Hexagons - fewer and more scattered -->
+  <!-- Large filled hexagon - center -->
+  <polygon points="100,55 125,70 125,100 100,115 75,100 75,70" 
+           fill="#e8927c" stroke="none"/>
+  
+  <!-- Medium filled hexagon - upper right -->
+  <polygon points="140,70 158,80 158,100 140,110 122,100 122,80" 
+           fill="#d97b4a" stroke="none"/>
+  
+  <!-- Small filled hexagon - left -->
+  <polygon points="55,85 68,93 68,109 55,117 42,109 42,93" 
+           fill="#e8927c" stroke="none"/>
+  
+  <!-- Medium stroked hexagon - lower right -->
+  <polygon points="130,115 148,125 148,145 130,155 112,145 112,125" 
+           fill="none" stroke="#d97b4a" stroke-width="3"/>
+  
+  <!-- Small stroked hexagon - upper left -->
+  <polygon points="70,50 82,57 82,71 70,78 58,71 58,57" 
+           fill="none" stroke="#e8927c" stroke-width="2.5"/>
+  
+  <!-- Very small filled hexagon - bottom -->
+  <polygon points="85,130 94,135 94,145 85,150 76,145 76,135" 
+           fill="#d97b4a" stroke="none"/>
+</svg>
