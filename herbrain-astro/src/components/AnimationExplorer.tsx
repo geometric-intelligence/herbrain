@@ -11,41 +11,41 @@ const FETUS_SIZE_BY_WEEK: Record<number, string> = {
   2: 'a poppy seed',
   3: 'a poppy seed',
   4: 'a poppy seed',
-  5: 'a sesame seed',
-  6: 'a lentil',
+  5: 'a poppy seed',
+  6: 'a poppy seed',
   7: 'a blueberry',
-  8: 'a raspberry',
-  9: 'a grape',
+  8: 'a blueberry',
+  9: 'a blueberry',
   10: 'a kumquat',
-  11: 'a fig',
+  11: 'a kumquat',
   12: 'a lime',
-  13: 'a lemon',
-  14: 'a peach',
+  13: 'a lime',
+  14: 'a lime',
   15: 'an apple',
-  16: 'an avocado',
-  17: 'a pear',
-  18: 'a bell pepper',
-  19: 'a mango',
-  20: 'a banana',
-  21: 'a carrot',
-  22: 'a papaya',
-  23: 'a grapefruit',
-  24: 'an ear of corn',
-  25: 'a cauliflower',
-  26: 'a lettuce head',
-  27: 'a cabbage',
-  28: 'an eggplant',
-  29: 'a butternut squash',
-  30: 'a coconut',
-  31: 'a pineapple',
-  32: 'a squash',
-  33: 'a durian',
-  34: 'a cantaloupe',
+  16: 'an apple',
+  17: 'an apple',
+  18: 'an apple',
+  19: 'an heirloom tomato',
+  20: 'an heirloom tomato',
+  21: 'an heirloom tomato',
+  22: 'an heirloom tomato',
+  23: 'a large mango',
+  24: 'a large mango',
+  25: 'a rutabaga',
+  26: 'a rutabaga',
+  27: 'a rutabaga',
+  28: 'a large eggplant',
+  29: 'a large eggplant',
+  30: 'a large eggplant',
+  31: 'a coconut',
+  32: 'a coconut',
+  33: 'a coconut',
+  34: 'a coconut',
   35: 'a honeydew melon',
-  36: 'a romaine lettuce',
-  37: 'a winter melon',
-  38: 'a leek',
-  39: 'a mini watermelon',
+  36: 'a honeydew melon',
+  37: 'a honeydew melon',
+  38: 'a honeydew melon',
+  39: 'a honeydew melon',
   40: 'a small pumpkin',
 };
 
@@ -76,13 +76,13 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
   };
 
   return (
-    <div className="viz-card flex flex-col h-full overflow-hidden">
-      <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide px-4 pt-4 pb-2">
+    <div className="viz-card flex flex-col h-full overflow-hidden p-5">
+      <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
         Journey
       </h2>
       
       {/* Video Container */}
-      <div className="flex-1 flex items-center justify-center px-2 py-2">
+      <div className="flex-1 flex items-center justify-center">
         <video
           ref={videoRef}
           src="/assets/pregnancy_animation.mp4"
@@ -95,7 +95,7 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
       </div>
       
       {/* Fetus size - Highlighted */}
-      <div className="px-3 pb-4 pt-3 border-t border-herbrain-border/30 mt-auto">
+      <div className="pt-3 border-t border-herbrain-border/30 mt-auto">
         <p className="text-xs text-center text-herbrain-muted/80">
           Baby is the size of
         </p>

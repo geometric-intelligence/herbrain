@@ -8,7 +8,7 @@ import '../styles/global.css';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="HerBrain - Digital twins of women's brains. Explore brain transformations during pregnancy and menstruation.">
-  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="icon" type="image/png" href="/assets/herbrain_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -29,43 +29,63 @@ import '../styles/global.css';
     </header>
     
     <!-- Cards -->
-    <div class="grid md:grid-cols-2 gap-6 px-3 justify-center">
+    <div class="grid md:grid-cols-3 gap-6 px-3 justify-center">
       <!-- Pregnancy Card -->
       <a href="/pregnancy" class="block h-full no-underline">
-        <div class="pregnancy-card bg-white rounded-2xl p-10 text-center border border-gray-200 h-full flex flex-col items-center">
+        <div class="pregnancy-card bg-white rounded-2xl p-8 text-center border border-gray-200 h-full flex flex-col items-center">
           <img 
             src="/assets/pregnancy_logo.png" 
             alt="Pregnancy"
-            class="w-20 h-20 mb-6"
+            class="w-16 h-16 mb-5"
           />
-          <h2 class="font-display text-3xl font-semibold text-herbrain-dark mb-2 tracking-tight">
+          <h2 class="font-display text-2xl font-semibold text-herbrain-dark mb-2 tracking-tight">
             Pregnancy
           </h2>
-          <p class="text-herbrain-coral font-sans text-sm font-medium mb-4 tracking-wide">
+          <p class="text-herbrain-coral font-sans text-sm font-medium mb-3 tracking-wide">
             Digital Twin
           </p>
-          <p class="text-herbrain-muted font-sans text-sm leading-relaxed max-w-xs">
-            Explore brain transformations across 40 weeks of pregnancy. Track how subcortical structures respond to hormonal surges.
+          <p class="text-herbrain-muted font-sans text-sm leading-relaxed">
+            Explore brain transformations across 40 weeks of pregnancy.
           </p>
         </div>
       </a>
       
       <!-- Menstruation Card -->
       <a href="/menstruation" class="block h-full no-underline">
-        <div class="menstruation-card bg-white rounded-2xl p-10 text-center border border-gray-200 h-full flex flex-col items-center">
+        <div class="menstruation-card bg-white rounded-2xl p-8 text-center border border-gray-200 h-full flex flex-col items-center">
           <img 
             src="/assets/menstrual_logo.png" 
             alt="Menstruation"
-            class="w-20 h-20 mb-6"
+            class="w-16 h-16 mb-5"
           />
-          <h2 class="font-display text-3xl font-semibold text-herbrain-dark mb-2 tracking-tight">
+          <h2 class="font-display text-2xl font-semibold text-herbrain-dark mb-2 tracking-tight">
             Menstruation
           </h2>
-          <p class="text-herbrain-coral font-sans text-sm font-medium mb-4 tracking-wide">
+          <p class="text-herbrain-coral font-sans text-sm font-medium mb-3 tracking-wide">
             Digital Twin
           </p>
-          <p class="text-herbrain-muted font-sans text-sm leading-relaxed max-w-xs">
-            Coming soon: Explore cyclic brain changes throughout the menstrual cycle. Understand how monthly hormonal fluctuations shape neural structure.
+          <p class="text-herbrain-muted font-sans text-sm leading-relaxed">
+            Coming soon: Explore cyclic brain changes throughout the menstrual cycle.
+          </p>
+        </div>
+      </a>
+      
+      <!-- Menopause Card -->
+      <a href="/menopause" class="block h-full no-underline">
+        <div class="menopause-card bg-white rounded-2xl p-8 text-center border border-gray-200 h-full flex flex-col items-center">
+          <div class="w-16 h-16 mb-5 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <h2 class="font-display text-2xl font-semibold text-herbrain-dark mb-2 tracking-tight">
+            Menopause
+          </h2>
+          <p class="text-purple-500 font-sans text-sm font-medium mb-3 tracking-wide">
+            Digital Twin
+          </p>
+          <p class="text-herbrain-muted font-sans text-sm leading-relaxed">
+            Coming soon: Explore brain changes during the menopausal transition.
           </p>
         </div>
       </a>

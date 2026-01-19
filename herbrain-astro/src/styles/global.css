@@ -75,6 +75,12 @@
     border-color: rgb(232 146 124 / 0.1);
   }
   
+  .sidebar-nav-item.active-menopause {
+    @apply text-purple-600 border;
+    background-color: rgb(147 51 234 / 0.08);
+    border-color: rgb(147 51 234 / 0.1);
+  }
+  
   .sidebar-nav-icon {
     @apply w-8 h-8 object-contain;
   }
@@ -90,6 +96,12 @@
     @apply transition-all duration-300;
     @apply hover:shadow-premium-lg hover:-translate-y-1;
     @apply hover:border-herbrain-coral/30;
+  }
+  
+  .menopause-card {
+    @apply transition-all duration-300;
+    @apply hover:shadow-premium-lg hover:-translate-y-1;
+    @apply hover:border-purple-500/30;
   }
   
   /* Chat bubbles - refined */

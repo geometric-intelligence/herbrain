@@ -179,7 +179,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
 
   if (loading || !Plot) {
     return (
-      <div className="premium-card-highlight flex flex-col h-full items-center justify-center p-6">
+      <div className="viz-card flex flex-col h-full items-center justify-center p-6">
         <div className="loading-spinner mb-3"></div>
         <p className="text-base text-herbrain-muted">Loading 3D visualization...</p>
       </div>
@@ -188,7 +188,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
 
   if (error) {
     return (
-      <div className="premium-card-highlight flex flex-col h-full items-center justify-center p-6">
+      <div className="viz-card flex flex-col h-full items-center justify-center p-6">
         <p className="text-red-500 text-base mb-3">{error}</p>
         <button
           onClick={() => window.location.reload()}
@@ -201,7 +201,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
   }
 
   return (
-    <div ref={containerRef} className="premium-card-highlight flex flex-col h-full p-5">
+    <div ref={containerRef} className="viz-card flex flex-col h-full p-5">
       <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
         3D Brain Model
       </h2>
