@@ -122,7 +122,8 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
   
   // Hover tooltip state
   const [hoveredStructure, setHoveredStructure] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const plotContainerRef = useRef<HTMLDivElement>(null);
 
   // Dynamic import to avoid SSR issues with Plotly
   const [Plot, setPlot] = useState<any>(null);
@@ -132,6 +133,23 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
     import('react-plotly.js').then((mod) => {
       setPlot(() => mod.default);
     });
+  }, []);
+
+  // Track mouse position within the plot container
+  useEffect(() => {
+    const container = plotContainerRef.current;
+    if (!container) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      setMousePosition({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    };
+
+    container.addEventListener('mousemove', handleMouseMove);
+    return () => container.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   useEffect(() => {
@@ -208,13 +226,6 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
       // Only show tooltip for subcortical structures (not brain_overlay)
       if (traceName && traceName !== 'brain_overlay' && STRUCTURE_INFO[traceName]) {
         setHoveredStructure(traceName);
-        // Get mouse position from the event
-        if (event.event) {
-          setTooltipPosition({
-            x: event.event.clientX || event.event.pageX || 0,
-            y: event.event.clientY || event.event.pageY || 0,
-          });
-        }
       }
     }
   }, []);
@@ -252,7 +263,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
         3D Brain Model
       </h2>
       
-      <div className="flex-1 flex items-center justify-center plotly-container relative">
+      <div ref={plotContainerRef} className="flex-1 flex items-center justify-center plotly-container relative">
         <Plot
           data={getPlotData()}
           layout={getLayout()}
@@ -266,13 +277,13 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
           onUnhover={handleUnhover}
         />
         
-        {/* Floating Tooltip */}
+        {/* Floating Tooltip - follows cursor within plot area */}
         {hoveredStructure && STRUCTURE_INFO[hoveredStructure] && (
           <div
-            className="fixed z-50 pointer-events-none"
+            className="absolute z-50 pointer-events-none"
             style={{
-              left: tooltipPosition.x + 14,
-              top: tooltipPosition.y + 8,
+              left: mousePosition.x + 16,
+              top: mousePosition.y + 12,
             }}
           >
             <div
