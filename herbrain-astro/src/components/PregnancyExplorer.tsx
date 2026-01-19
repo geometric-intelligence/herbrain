@@ -94,20 +94,20 @@ export default function PregnancyExplorer() {
 
 // Subcortical structure info: names and brief descriptions
 const STRUCTURE_INFO: Record<string, { name: string; description: string }> = {
-  'L_Thal': { name: 'Left Thalamus', description: 'Sensory relay & consciousness' },
-  'R_Thal': { name: 'Right Thalamus', description: 'Sensory relay & consciousness' },
-  'L_Caud': { name: 'Left Caudate', description: 'Learning & memory' },
-  'R_Caud': { name: 'Right Caudate', description: 'Learning & memory' },
-  'L_Puta': { name: 'Left Putamen', description: 'Motor control & learning' },
-  'R_Puta': { name: 'Right Putamen', description: 'Motor control & learning' },
-  'L_Pall': { name: 'Left Pallidum', description: 'Movement regulation' },
-  'R_Pall': { name: 'Right Pallidum', description: 'Movement regulation' },
-  'L_Hipp': { name: 'Left Hippocampus', description: 'Memory formation' },
-  'R_Hipp': { name: 'Right Hippocampus', description: 'Memory formation' },
-  'L_Amyg': { name: 'Left Amygdala', description: 'Emotion processing' },
-  'R_Amyg': { name: 'Right Amygdala', description: 'Emotion processing' },
-  'L_Accu': { name: 'Left Accumbens', description: 'Reward & motivation' },
-  'R_Accu': { name: 'Right Accumbens', description: 'Reward & motivation' },
+'L_Thal': { name: 'Left Thalamus', description: 'Sensory and motor relay, consciousness, and sleep regulation' },
+  'R_Thal': { name: 'Right Thalamus', description: 'Sensory and motor relay, consciousness, and sleep regulation' },
+  'L_Caud': { name: 'Left Caudate', description: 'Motor planning, goal-directed behavior, and learning' },
+  'R_Caud': { name: 'Right Caudate', description: 'Motor planning, goal-directed behavior, and learning' },
+  'L_Puta': { name: 'Left Putamen', description: 'Regulation of movement and procedural learning' },
+  'R_Puta': { name: 'Right Putamen', description: 'Regulation of movement and procedural learning' },
+  'L_Pall': { name: 'Left Pallidum', description: 'Regulation of voluntary movement and inhibitory control' },
+  'R_Pall': { name: 'Right Pallidum', description: 'Regulation of voluntary movement and inhibitory control' },
+  'L_Hipp': { name: 'Left Hippocampus', description: 'Memory consolidation, spatial navigation, and learning' },
+  'R_Hipp': { name: 'Right Hippocampus', description: 'Memory consolidation, spatial navigation, and learning' },
+  'L_Amyg': { name: 'Left Amygdala', description: 'Emotional processing, fear conditioning, and threat detection' },
+  'R_Amyg': { name: 'Right Amygdala', description: 'Emotional processing, fear conditioning, and threat detection' },
+  'L_Accu': { name: 'Left Accumbens', description: 'Reward processing, pleasure, and motivation' },
+  'R_Accu': { name: 'Right Accumbens', description: 'Reward processing, pleasure, and motivation' },
 };
 
 /**
@@ -287,19 +287,20 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
             }}
           >
             <div
-              className="px-3 py-2 rounded-md"
+              className="px-3.5 py-2.5 rounded-lg"
               style={{
-                background: 'rgba(24, 24, 27, 0.92)',
+                background: 'rgba(15, 23, 42, 0.95)',  // herbrain-dark (#0F172A)
                 backdropFilter: 'blur(8px)',
                 WebkitBackdropFilter: 'blur(8px)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
                 animation: 'fadeIn 0.1s ease-out',
+                maxWidth: '260px',
               }}
             >
-              <div className="text-[13px] font-medium text-white leading-tight">
+              <div className="text-[13px] font-semibold text-white leading-tight">
                 {STRUCTURE_INFO[hoveredStructure].name}
               </div>
-              <div className="text-[11px] text-white/60 mt-0.5">
+              <div className="text-[11px] text-white/70 mt-1 leading-relaxed">
                 {STRUCTURE_INFO[hoveredStructure].description}
               </div>
             </div>
