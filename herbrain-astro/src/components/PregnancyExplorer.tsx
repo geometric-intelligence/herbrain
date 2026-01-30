@@ -148,12 +148,14 @@ export default function PregnancyExplorer() {
           <BrainInsightsCard week={week} />
         </div>
 
-        {/* Week Slider - Fixed at bottom with right padding to avoid Neurobot */}
-        <div className="premium-card-static pl-4 pr-[130px] py-3 flex-shrink-0">
+        {/* Week Slider - Fixed at bottom, full width */}
+        <div className="premium-card-static px-4 py-2 flex-shrink-0">
           <WeekSlider
             value={week}
             onChange={setWeek}
             label="Gestational Week"
+            hideWeek40={true}
+            compact={true}
           />
         </div>
       </div>
