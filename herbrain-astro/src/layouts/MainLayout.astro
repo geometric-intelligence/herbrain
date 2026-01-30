@@ -1,5 +1,6 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
+import FloatingChat from '../components/FloatingChat';
 import '../styles/global.css';
 
 interface Props {
@@ -31,5 +32,8 @@ const currentPath = Astro.url.pathname;
   ]}>
     <slot />
   </main>
+  
+  {/* Floating AI Neurobot Chat - Available on all pages with sidebar */}
+  {showSidebar && <FloatingChat client:only="react" />}
 </body>
 </html>

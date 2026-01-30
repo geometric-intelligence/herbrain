@@ -39,21 +39,20 @@ export default function WeekSlider({
 
   return (
     <div className="w-full">
-      {/* Header with week number and trimester */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-        <div className="flex items-baseline gap-2 sm:gap-3">
-          <span className="text-xs sm:text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl sm:text-4xl font-semibold text-herbrain-dark tabular-nums">
+      {/* Header with week number and trimester - always inline */}
+      <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <span className="text-[10px] sm:text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
+          <div className="flex items-baseline gap-0.5 sm:gap-1">
+            <span className="text-2xl sm:text-4xl font-semibold text-herbrain-dark tabular-nums">
               {localValue}
             </span>
-            <span className="text-base sm:text-lg text-herbrain-muted/60">/ {max}</span>
+            <span className="text-sm sm:text-lg text-herbrain-muted/60">/{max}</span>
           </div>
+          <span className="pill-badge pill-badge-green text-[10px] sm:text-sm py-0.5 px-2 sm:py-1.5 sm:px-3">
+            {trimester.label}
+          </span>
         </div>
-        
-        <span className="pill-badge pill-badge-green text-xs sm:text-sm self-start sm:self-auto">
-          {trimester.label}
-        </span>
       </div>
       
       {/* Slider container */}

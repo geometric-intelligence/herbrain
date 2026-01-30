@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import AnimationExplorer from './AnimationExplorer';
 import MriViewer from './MriViewer';
-import GptChat from './GptChat';
 import WeekSlider from './WeekSlider';
 
 /**
@@ -15,29 +14,6 @@ export default function PregnancyExplorer() {
   // Mobile carousel state
   const [activeCard, setActiveCard] = useState(0);
   const cardLabels = ['3D Brain', 'Journey', 'MRI Scan'];
-
-  // Screenshot capture function for GPT chat
-  const getMeshScreenshot = useCallback(async (): Promise<string | null> => {
-    try {
-      const plotDiv = meshContainerRef.current?.querySelector('.js-plotly-plot') as HTMLElement | null;
-      if (!plotDiv) {
-        console.warn('Could not find Plotly chart element');
-        return null;
-      }
-      
-      // Dynamically import Plotly for toImage
-      const Plotly = await import('plotly.js-dist-min');
-      const dataUrl = await Plotly.default.toImage(plotDiv, {
-        format: 'png',
-        width: 800,
-        height: 600,
-      });
-      return dataUrl;
-    } catch (err) {
-      console.warn('Failed to capture mesh screenshot:', err);
-      return null;
-    }
-  }, []);
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -64,68 +40,24 @@ export default function PregnancyExplorer() {
       </header>
 
       {/* Mobile Carousel - Only visible on small screens */}
-      <div className="md:hidden">
-        {/* Card Container */}
-        <div className="relative overflow-hidden" style={{ minHeight: '380px' }}>
+      <div className="md:hidden flex flex-col">
+        {/* Card Container - Fixed height for smooth transitions */}
+        <div className="relative h-[420px] overflow-hidden">
           {/* 3D Brain Model - Card 0 */}
-          <div className={`transition-all duration-300 ${activeCard === 0 ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
+          <div className={`absolute inset-0 transition-all duration-300 ${activeCard === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
             <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
           </div>
           
           {/* Journey - Card 1 */}
-          <div className={`transition-all duration-300 ${activeCard === 1 ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
+          <div className={`absolute inset-0 transition-all duration-300 ${activeCard === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
             <AnimationExplorer week={week} />
           </div>
           
           {/* MRI Scan - Card 2 */}
-          <div className={`transition-all duration-300 ${activeCard === 2 ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
+          <div className={`absolute inset-0 transition-all duration-300 ${activeCard === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
             <MriViewer week={week} />
           </div>
         </div>
-        
-        {/* Navigation Arrows */}
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <button
-            onClick={() => setActiveCard((prev) => (prev - 1 + 3) % 3)}
-            className="p-3 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all"
-            aria-label="Previous card"
-          >
-            <svg className="w-5 h-5 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
-          {/* Dots Indicator */}
-          <div className="flex items-center gap-2">
-            {cardLabels.map((label, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveCard(idx)}
-                className={`transition-all duration-200 ${
-                  activeCard === idx 
-                    ? 'w-8 h-2 rounded-full bg-herbrain-green' 
-                    : 'w-2 h-2 rounded-full bg-herbrain-border hover:bg-herbrain-muted/50'
-                }`}
-                aria-label={`Go to ${label}`}
-              />
-            ))}
-          </div>
-          
-          <button
-            onClick={() => setActiveCard((prev) => (prev + 1) % 3)}
-            className="p-3 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all"
-            aria-label="Next card"
-          >
-            <svg className="w-5 h-5 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-        
-        {/* Current Card Label */}
-        <p className="text-center text-sm text-herbrain-muted mt-2">
-          {cardLabels[activeCard]}
-        </p>
       </div>
 
       {/* Desktop Grid - Hidden on mobile */}
@@ -147,7 +79,7 @@ export default function PregnancyExplorer() {
       </div>
 
       {/* Week Slider - YouTube style, below cards */}
-      <div className="premium-card-static px-4 sm:px-6 py-4 sm:py-5">
+      <div className="premium-card-static px-4 sm:px-6 py-3 sm:py-5">
         <WeekSlider
           value={week}
           onChange={setWeek}
@@ -155,8 +87,47 @@ export default function PregnancyExplorer() {
         />
       </div>
 
-      {/* GPT Chat */}
-      <GptChat week={week} getMeshScreenshot={getMeshScreenshot} />
+      {/* Mobile Navigation Arrows - At the very bottom */}
+      <div className="md:hidden flex items-center justify-center gap-6 py-4">
+        <button
+          onClick={() => setActiveCard((prev) => (prev - 1 + 3) % 3)}
+          className="p-3 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all active:scale-95"
+          aria-label="Previous card"
+        >
+          <svg className="w-5 h-5 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        {/* Dots Indicator with Label */}
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-2">
+            {cardLabels.map((label, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveCard(idx)}
+                className={`transition-all duration-200 ${
+                  activeCard === idx 
+                    ? 'w-8 h-2 rounded-full bg-herbrain-green' 
+                    : 'w-2 h-2 rounded-full bg-herbrain-border hover:bg-herbrain-muted/50'
+                }`}
+                aria-label={`Go to ${label}`}
+              />
+            ))}
+          </div>
+          <span className="text-xs text-herbrain-muted">{cardLabels[activeCard]}</span>
+        </div>
+        
+        <button
+          onClick={() => setActiveCard((prev) => (prev + 1) % 3)}
+          className="p-3 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all active:scale-95"
+          aria-label="Next card"
+        >
+          <svg className="w-5 h-5 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
