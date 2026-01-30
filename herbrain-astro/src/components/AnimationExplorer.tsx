@@ -76,13 +76,13 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
   };
 
   return (
-    <div className="viz-card flex flex-col h-full overflow-hidden p-5">
-      <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
+    <div className="viz-card flex flex-col h-full overflow-hidden p-4 sm:p-5">
+      <h2 className="text-xs sm:text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
         Journey
       </h2>
       
       {/* Video Container */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center min-h-[120px] sm:min-h-[160px]">
         <video
           ref={videoRef}
           src="/assets/pregnancy_animation.mp4"
@@ -90,18 +90,18 @@ export default function AnimationExplorer({ week }: AnimationExplorerProps) {
           muted
           playsInline
           onLoadedData={handleLoadedData}
-          className="max-h-48 w-auto object-contain"
+          className="max-h-32 sm:max-h-48 w-auto object-contain"
         />
       </div>
       
       {/* Fetus size - Highlighted */}
       <div className="pt-3 border-t border-herbrain-border/30 mt-auto">
-        <p className="text-xs text-center text-herbrain-muted/80">
+        <p className="text-[10px] sm:text-xs text-center text-herbrain-muted/80">
           Baby is the size of
         </p>
         <div className="flex justify-center mt-1.5">
           <span 
-            className="inline-block px-3 py-1.5 text-herbrain-green text-base font-medium rounded-full text-center"
+            className="inline-block px-2 sm:px-3 py-1 sm:py-1.5 text-herbrain-green text-sm sm:text-base font-medium rounded-full text-center"
             style={{ backgroundColor: 'rgb(61 122 107 / 0.08)' }}
           >
             {getFetusSize(week)}

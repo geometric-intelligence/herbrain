@@ -246,3 +246,15 @@ button, a, input, select {
     transform: translateY(0);
   }
 }
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  @apply fixed inset-0 bg-black/50 z-40 transition-opacity duration-300;
+}
+
+/* Mobile menu button */
+.mobile-menu-btn {
+  @apply fixed top-4 left-4 z-30 md:hidden;
+  @apply p-2.5 bg-white rounded-xl shadow-premium border border-herbrain-border/60;
+  @apply hover:shadow-premium-md transition-all duration-200;
+}

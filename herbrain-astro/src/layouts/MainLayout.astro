@@ -1,5 +1,6 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
+import FloatingChat from '../components/FloatingChat';
 import '../styles/global.css';
 
 interface Props {
@@ -27,9 +28,13 @@ const currentPath = Astro.url.pathname;
   {showSidebar && <Sidebar currentPath={currentPath} />}
   
   <main class:list={[
-    showSidebar ? 'ml-72 mr-6 p-6 min-h-screen' : 'min-h-screen'
+    showSidebar ? 'md:ml-72 p-4 md:p-6 md:mr-6 min-h-screen' : 'min-h-screen'
   ]}>
     <slot />
   </main>
+  
+  {/* Floating AI Neurobot Chat - Available on all pages with sidebar */}
+  {/* Hide floating button on pregnancy page since it has inline Neurobot button */}
+  {showSidebar && <FloatingChat client:only="react" hideFloatingButton={currentPath === '/pregnancy' || currentPath === '/pregnancy/'} />}
 </body>
 </html>

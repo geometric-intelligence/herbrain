@@ -6,6 +6,8 @@ interface WeekSliderProps {
   min?: number;
   max?: number;
   label?: string;
+  hideWeek40?: boolean;
+  compact?: boolean;
 }
 
 export default function WeekSlider({
@@ -14,6 +16,8 @@ export default function WeekSlider({
   min = 0,
   max = 40,
   label = 'Gestational Week',
+  hideWeek40 = false,
+  compact = false,
 }: WeekSliderProps) {
   const [localValue, setLocalValue] = useState(value);
 
@@ -39,19 +43,18 @@ export default function WeekSlider({
 
   return (
     <div className="w-full">
-      {/* Header with week number and trimester */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-baseline gap-3">
-          <span className="text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-semibold text-herbrain-dark tabular-nums">
+      {/* Header with week number and trimester - all on one line when compact */}
+      <div className={`flex items-center justify-between gap-2 ${compact ? 'mb-1.5' : 'mb-2 sm:mb-3'}`}>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className={`font-medium text-herbrain-muted uppercase tracking-wide ${compact ? 'text-[9px]' : 'text-[10px] sm:text-xs'}`}>{label}</span>
+          <div className="flex items-baseline gap-0.5">
+            <span className={`font-semibold text-herbrain-dark tabular-nums ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
               {localValue}
             </span>
-            <span className="text-lg text-herbrain-muted/60">/ {max}</span>
+            <span className={`text-herbrain-muted/60 ${compact ? 'text-[10px]' : 'text-xs sm:text-sm'}`}>/{max}</span>
           </div>
         </div>
-        
-        <span className="pill-badge pill-badge-green text-sm">
+        <span className={`pill-badge pill-badge-green ${compact ? 'text-[9px] py-0.5 px-1.5' : 'text-[10px] sm:text-xs py-0.5 px-2 sm:py-1 sm:px-2.5'}`}>
           {trimester.label}
         </span>
       </div>
@@ -98,11 +101,18 @@ export default function WeekSlider({
       </div>
       
       {/* Week labels */}
-      <div className="flex justify-between text-sm text-herbrain-muted mt-3 px-0.5">
-        <span>Week 0</span>
-        <span>Week 12</span>
-        <span>Week 27</span>
-        <span>Week 40</span>
+      <div className={`flex justify-between text-herbrain-muted px-0.5 ${compact ? 'text-[9px] mt-1' : 'text-[10px] sm:text-xs mt-2'}`}>
+        <span>0</span>
+        <span className="hidden sm:inline">Week 12</span>
+        <span className="sm:hidden">12</span>
+        <span className="hidden sm:inline">Week 27</span>
+        <span className="sm:hidden">27</span>
+        {!hideWeek40 && (
+          <>
+            <span className="hidden sm:inline">Week 40</span>
+            <span className="sm:hidden">40</span>
+          </>
+        )}
       </div>
     </div>
   );

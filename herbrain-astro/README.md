@@ -8,6 +8,7 @@ A static Astro website for exploring brain changes during pregnancy, converted f
 - **MRI Viewer**: Lazy-loaded NIfTI files from Cloudflare R2 storage
 - **Pregnancy Animation**: Video player with frame-based seeking
 - **AI Chat**: GPT-4o powered neurobot for answering questions about brain changes
+- **Responsive Design**: Mobile-friendly layout with collapsible sidebar and adaptive visualizations
 
 ## Quick Start
 
