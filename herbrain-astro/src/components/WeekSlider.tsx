@@ -39,9 +39,9 @@ export default function WeekSlider({
 
   return (
     <div className="w-full">
-      {/* Header with week number and trimester - always inline */}
+      {/* Header with week number and trimester - badge aligned right */}
       <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-[10px] sm:text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
           <div className="flex items-baseline gap-0.5 sm:gap-1">
             <span className="text-2xl sm:text-4xl font-semibold text-herbrain-dark tabular-nums">
@@ -49,10 +49,10 @@ export default function WeekSlider({
             </span>
             <span className="text-sm sm:text-lg text-herbrain-muted/60">/{max}</span>
           </div>
-          <span className="pill-badge pill-badge-green text-[10px] sm:text-sm py-0.5 px-2 sm:py-1.5 sm:px-3">
-            {trimester.label}
-          </span>
         </div>
+        <span className="pill-badge pill-badge-green text-[10px] sm:text-sm py-0.5 px-2 sm:py-1.5 sm:px-3">
+          {trimester.label}
+        </span>
       </div>
       
       {/* Slider container */}

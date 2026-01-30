@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import AnimationExplorer from './AnimationExplorer';
 import MriViewer from './MriViewer';
 import WeekSlider from './WeekSlider';
+import BrainInsightsCard from './BrainInsightsCard';
 
 /**
  * Main pregnancy explorer component that combines all visualization components
@@ -16,117 +17,139 @@ export default function PregnancyExplorer() {
   const cardLabels = ['3D Brain', 'Journey', 'MRI Scan'];
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="flex flex-col h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] animate-fade-in overflow-hidden">
       {/* Hero Header - Simplified for mobile */}
-      <header className="premium-card-static p-4 md:p-6">
+      <header className="premium-card-static p-3 md:p-5 flex-shrink-0">
         <div className="flex items-center gap-3 md:gap-5">
           <div className="relative flex-shrink-0">
             <div className="absolute inset-0 bg-herbrain-green/10 rounded-2xl blur-xl"></div>
             <img
               src="/assets/pregnancy_logo.png"
               alt="Pregnancy"
-              className="relative w-10 h-10 md:w-14 md:h-14 drop-shadow-sm"
+              className="relative w-8 h-8 md:w-12 md:h-12 drop-shadow-sm"
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg md:text-2xl font-semibold text-herbrain-dark tracking-tight leading-tight">
+            <h1 className="text-base md:text-xl font-semibold text-herbrain-dark tracking-tight leading-tight">
               Your Brain's Digital Twin During Pregnancy
             </h1>
-            <p className="hidden md:block text-base text-herbrain-muted mt-1.5 leading-relaxed">
+            <p className="hidden md:block text-sm text-herbrain-muted mt-1 leading-relaxed">
               Watch how your brain transforms week by week. Move the timeline below to see AI-predicted changes in real time.
             </p>
           </div>
         </div>
       </header>
 
-      {/* Mobile Carousel - Only visible on small screens */}
-      <div className="md:hidden flex flex-col">
-        {/* Card Container - Fixed height for smooth transitions */}
-        <div className="relative h-[420px] overflow-hidden">
+      {/* Mobile Layout - Only visible on small screens */}
+      <div className="md:hidden flex flex-col flex-1 min-h-0 gap-2 mt-2">
+        {/* Mobile Carousel - Responsive height based on screen */}
+        <div className="relative h-[45vh] min-h-[320px] max-h-[420px] flex-shrink-0">
           {/* 3D Brain Model - Card 0 */}
-          <div className={`absolute inset-0 transition-all duration-300 ${activeCard === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-            <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
+          <div className={`absolute inset-0 bg-white rounded-2xl overflow-hidden transition-all duration-300 ${activeCard === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+            <MeshExplorerSimple week={week} containerRef={meshContainerRef} isMobile={true} />
           </div>
           
           {/* Journey - Card 1 */}
-          <div className={`absolute inset-0 transition-all duration-300 ${activeCard === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+          <div className={`absolute inset-0 bg-white rounded-2xl overflow-hidden transition-all duration-300 ${activeCard === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
             <AnimationExplorer week={week} />
           </div>
           
           {/* MRI Scan - Card 2 */}
-          <div className={`absolute inset-0 transition-all duration-300 ${activeCard === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+          <div className={`absolute inset-0 bg-white rounded-2xl overflow-hidden transition-all duration-300 ${activeCard === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
             <MriViewer week={week} />
           </div>
         </div>
-      </div>
 
-      {/* Desktop Grid - Hidden on mobile */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-12 gap-4" style={{ minHeight: '320px' }}>
-        {/* Animation Explorer - Narrower Left Column */}
-        <div className="md:col-span-1 lg:col-span-2">
-          <AnimationExplorer week={week} />
-        </div>
-
-        {/* MRI Viewer - Middle Column */}
-        <div className="md:col-span-1 lg:col-span-4">
-          <MriViewer week={week} />
-        </div>
-
-        {/* Mesh Explorer - Right Column - Prominent */}
-        <div className="md:col-span-2 lg:col-span-6">
-          <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
-        </div>
-      </div>
-
-      {/* Week Slider - YouTube style, below cards */}
-      <div className="premium-card-static px-4 sm:px-6 py-3 sm:py-5">
-        <WeekSlider
-          value={week}
-          onChange={setWeek}
-          label="Gestational Week"
-        />
-      </div>
-
-      {/* Mobile Navigation Arrows - At the very bottom */}
-      <div className="md:hidden flex items-center justify-center gap-6 py-4">
-        <button
-          onClick={() => setActiveCard((prev) => (prev - 1 + 3) % 3)}
-          className="p-3 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all active:scale-95"
-          aria-label="Previous card"
-        >
-          <svg className="w-5 h-5 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        
-        {/* Dots Indicator with Label */}
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="flex items-center gap-2">
-            {cardLabels.map((label, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveCard(idx)}
-                className={`transition-all duration-200 ${
-                  activeCard === idx 
-                    ? 'w-8 h-2 rounded-full bg-herbrain-green' 
-                    : 'w-2 h-2 rounded-full bg-herbrain-border hover:bg-herbrain-muted/50'
-                }`}
-                aria-label={`Go to ${label}`}
-              />
-            ))}
+        {/* Mobile Navigation Arrows */}
+        <div className="flex items-center justify-center gap-6 flex-shrink-0">
+          <button
+            onClick={() => setActiveCard((prev) => (prev - 1 + 3) % 3)}
+            className="p-2 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all active:scale-95"
+            aria-label="Previous card"
+          >
+            <svg className="w-4 h-4 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          {/* Dots Indicator with Label */}
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2">
+              {cardLabels.map((label, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveCard(idx)}
+                  className={`transition-all duration-200 ${
+                    activeCard === idx 
+                      ? 'w-6 h-1.5 rounded-full bg-herbrain-green' 
+                      : 'w-1.5 h-1.5 rounded-full bg-herbrain-border hover:bg-herbrain-muted/50'
+                  }`}
+                  aria-label={`Go to ${label}`}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] text-herbrain-muted">{cardLabels[activeCard]}</span>
           </div>
-          <span className="text-xs text-herbrain-muted">{cardLabels[activeCard]}</span>
+          
+          <button
+            onClick={() => setActiveCard((prev) => (prev + 1) % 3)}
+            className="p-2 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all active:scale-95"
+            aria-label="Next card"
+          >
+            <svg className="w-4 h-4 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
-        
-        <button
-          onClick={() => setActiveCard((prev) => (prev + 1) % 3)}
-          className="p-3 rounded-full bg-white border border-herbrain-border shadow-sm hover:shadow-md transition-all active:scale-95"
-          aria-label="Next card"
-        >
-          <svg className="w-5 h-5 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+
+        {/* Brain Insights Card - Fills remaining space (only this scrolls on mobile) */}
+        <div className="flex-1 min-h-0">
+          <BrainInsightsCard week={week} />
+        </div>
+
+        {/* Week Slider - Fixed at bottom with right padding to avoid Neurobot */}
+        <div className="premium-card-static pl-4 pr-[130px] py-3 flex-shrink-0">
+          <WeekSlider
+            value={week}
+            onChange={setWeek}
+            label="Gestational Week"
+          />
+        </div>
+      </div>
+
+      {/* Desktop Layout - Hidden on mobile */}
+      <div className="hidden md:flex md:flex-col flex-1 min-h-0 gap-4 mt-4">
+        {/* Desktop Grid - Responsive height visualization row */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-12 gap-4 flex-shrink-0 h-[35vh] min-h-[300px] max-h-[400px]">
+          {/* Animation Explorer - Narrower Left Column */}
+          <div className="md:col-span-1 lg:col-span-2 h-full overflow-hidden">
+            <AnimationExplorer week={week} />
+          </div>
+
+          {/* MRI Viewer - Middle Column */}
+          <div className="md:col-span-1 lg:col-span-4 h-full overflow-hidden">
+            <MriViewer week={week} />
+          </div>
+
+          {/* Mesh Explorer - Right Column - Prominent */}
+          <div className="md:col-span-2 lg:col-span-6 h-full">
+            <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
+          </div>
+        </div>
+
+        {/* Brain Insights Card - Fills remaining space */}
+        <div className="flex-1 min-h-[200px]">
+          <BrainInsightsCard week={week} />
+        </div>
+
+        {/* Week Slider - Fixed at bottom with right padding to avoid Neurobot */}
+        <div className="premium-card-static pl-4 sm:pl-6 pr-[140px] sm:pr-[150px] py-3 sm:py-4 flex-shrink-0">
+          <WeekSlider
+            value={week}
+            onChange={setWeek}
+            label="Gestational Week"
+          />
+        </div>
       </div>
     </div>
   );
@@ -154,7 +177,7 @@ const STRUCTURE_INFO: Record<string, { name: string; description: string }> = {
  * Simplified MeshExplorer that only displays, without its own slider
  * (week is controlled by parent)
  */
-function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef?: React.RefObject<HTMLDivElement | null> }) {
+function MeshExplorerSimple({ week, containerRef, isMobile = false }: { week: number; containerRef?: React.RefObject<HTMLDivElement | null>; isMobile?: boolean }) {
   const [meshData, setMeshData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -326,7 +349,7 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
         3D Brain Model
       </h2>
       
-      <div ref={plotContainerRef} className="flex-1 flex items-center justify-center plotly-container relative">
+      <div ref={plotContainerRef} className="flex-1 flex items-center justify-center plotly-container relative overflow-hidden min-h-0">
         <Plot
           data={getPlotData()}
           layout={getLayout()}
@@ -371,35 +394,37 @@ function MeshExplorerSimple({ week, containerRef }: { week: number; containerRef
         )}
       </div>
 
-      {/* Brain Overlay Toggle + Legend */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-3 border-t border-herbrain-border/40">
-        {/* Brain Overlay Toggle */}
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={showBrainOverlay}
-            onChange={(e) => setShowBrainOverlay(e.target.checked)}
-            className="w-4 h-4 rounded border-herbrain-border text-herbrain-green focus:ring-herbrain-green/30 cursor-pointer"
-          />
-          <span className="text-xs sm:text-sm text-herbrain-muted">Show Full Brain</span>
-        </label>
+      {/* Brain Overlay Toggle + Legend - Hidden on mobile carousel */}
+      {!isMobile && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-3 border-t border-herbrain-border/40">
+          {/* Brain Overlay Toggle */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showBrainOverlay}
+              onChange={(e) => setShowBrainOverlay(e.target.checked)}
+              className="w-4 h-4 rounded border-herbrain-border text-herbrain-green focus:ring-herbrain-green/30 cursor-pointer"
+            />
+            <span className="text-xs sm:text-sm text-herbrain-muted">Show Full Brain</span>
+          </label>
 
-        {/* Compact Legend */}
-        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
-            <span className="text-[10px] sm:text-xs text-herbrain-muted">Growing</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
-            <span className="text-[10px] sm:text-xs text-herbrain-muted">Shrinking</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
-            <span className="text-[10px] sm:text-xs text-herbrain-muted">Baseline</span>
+          {/* Compact Legend */}
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
+              <span className="text-[10px] sm:text-xs text-herbrain-muted">Growing</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
+              <span className="text-[10px] sm:text-xs text-herbrain-muted">Shrinking</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
+              <span className="text-[10px] sm:text-xs text-herbrain-muted">Baseline</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
