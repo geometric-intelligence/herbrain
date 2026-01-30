@@ -6,6 +6,7 @@ interface WeekSliderProps {
   min?: number;
   max?: number;
   label?: string;
+  hideWeek40?: boolean;
 }
 
 export default function WeekSlider({
@@ -14,6 +15,7 @@ export default function WeekSlider({
   min = 0,
   max = 40,
   label = 'Gestational Week',
+  hideWeek40 = false,
 }: WeekSliderProps) {
   const [localValue, setLocalValue] = useState(value);
 
@@ -40,17 +42,17 @@ export default function WeekSlider({
   return (
     <div className="w-full">
       {/* Header with week number and trimester - badge aligned right */}
-      <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+      <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-[10px] sm:text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
+          <span className="text-[10px] sm:text-xs font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
           <div className="flex items-baseline gap-0.5 sm:gap-1">
-            <span className="text-2xl sm:text-4xl font-semibold text-herbrain-dark tabular-nums">
+            <span className="text-xl sm:text-2xl font-semibold text-herbrain-dark tabular-nums">
               {localValue}
             </span>
-            <span className="text-sm sm:text-lg text-herbrain-muted/60">/{max}</span>
+            <span className="text-xs sm:text-sm text-herbrain-muted/60">/{max}</span>
           </div>
         </div>
-        <span className="pill-badge pill-badge-green text-[10px] sm:text-sm py-0.5 px-2 sm:py-1.5 sm:px-3">
+        <span className="pill-badge pill-badge-green text-[10px] sm:text-xs py-0.5 px-2 sm:py-1 sm:px-2.5">
           {trimester.label}
         </span>
       </div>
@@ -97,14 +99,18 @@ export default function WeekSlider({
       </div>
       
       {/* Week labels */}
-      <div className="flex justify-between text-xs sm:text-sm text-herbrain-muted mt-3 px-0.5">
+      <div className="flex justify-between text-[10px] sm:text-xs text-herbrain-muted mt-2 px-0.5">
         <span>0</span>
         <span className="hidden sm:inline">Week 12</span>
         <span className="sm:hidden">12</span>
         <span className="hidden sm:inline">Week 27</span>
         <span className="sm:hidden">27</span>
-        <span className="hidden sm:inline">Week 40</span>
-        <span className="sm:hidden">40</span>
+        {!hideWeek40 && (
+          <>
+            <span className="hidden sm:inline">Week 40</span>
+            <span className="sm:hidden">40</span>
+          </>
+        )}
       </div>
     </div>
   );

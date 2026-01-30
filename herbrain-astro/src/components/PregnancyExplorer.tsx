@@ -15,6 +15,9 @@ export default function PregnancyExplorer() {
   // Mobile carousel state
   const [activeCard, setActiveCard] = useState(0);
   const cardLabels = ['3D Brain', 'Journey', 'MRI Scan'];
+  
+  // Lifted state for brain overlay toggle (shared between mobile and desktop)
+  const [showBrainOverlay, setShowBrainOverlay] = useState(true);
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] animate-fade-in overflow-hidden">
@@ -46,7 +49,13 @@ export default function PregnancyExplorer() {
         <div className="relative h-[45vh] min-h-[320px] max-h-[420px] flex-shrink-0">
           {/* 3D Brain Model - Card 0 */}
           <div className={`absolute inset-0 bg-white rounded-2xl overflow-hidden transition-all duration-300 ${activeCard === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-            <MeshExplorerSimple week={week} containerRef={meshContainerRef} isMobile={true} />
+            <MeshExplorerSimple 
+              week={week} 
+              containerRef={meshContainerRef} 
+              isMobile={true}
+              showBrainOverlay={showBrainOverlay}
+              onShowBrainOverlayChange={setShowBrainOverlay}
+            />
           </div>
           
           {/* Journey - Card 1 */}
@@ -102,6 +111,38 @@ export default function PregnancyExplorer() {
           </button>
         </div>
 
+        {/* Mobile Brain Controls - Only visible when 3D Brain card is active */}
+        {activeCard === 0 && (
+          <div className="flex flex-col items-center gap-2 px-4 py-2 bg-white rounded-xl border border-herbrain-border/60 mx-4 flex-shrink-0">
+            {/* Brain Overlay Toggle */}
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showBrainOverlay}
+                onChange={(e) => setShowBrainOverlay(e.target.checked)}
+                className="w-4 h-4 rounded border-herbrain-border text-herbrain-green focus:ring-herbrain-green/30 cursor-pointer"
+              />
+              <span className="text-xs text-herbrain-muted">Show Full Brain</span>
+            </label>
+
+            {/* Compact Legend */}
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-br from-red-400 to-red-500"></span>
+                <span className="text-[10px] text-herbrain-muted">Growing</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-br from-blue-400 to-blue-500"></span>
+                <span className="text-[10px] text-herbrain-muted">Shrinking</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #E5D4C0 0%, #D4C4B0 100%)' }}></span>
+                <span className="text-[10px] text-herbrain-muted">Baseline</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Brain Insights Card - Fills remaining space (only this scrolls on mobile) */}
         <div className="flex-1 min-h-0">
           <BrainInsightsCard week={week} />
@@ -120,7 +161,7 @@ export default function PregnancyExplorer() {
       {/* Desktop Layout - Hidden on mobile */}
       <div className="hidden md:flex md:flex-col flex-1 min-h-0 gap-4 mt-4">
         {/* Desktop Grid - Responsive height visualization row */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-12 gap-4 flex-shrink-0 h-[35vh] min-h-[300px] max-h-[400px]">
+        <div className="grid md:grid-cols-2 lg:grid-cols-12 gap-4 flex-shrink-0 h-[42vh] min-h-[340px] max-h-[500px]">
           {/* Animation Explorer - Narrower Left Column */}
           <div className="md:col-span-1 lg:col-span-2 h-full overflow-hidden">
             <AnimationExplorer week={week} />
@@ -133,21 +174,27 @@ export default function PregnancyExplorer() {
 
           {/* Mesh Explorer - Right Column - Prominent */}
           <div className="md:col-span-2 lg:col-span-6 h-full">
-            <MeshExplorerSimple week={week} containerRef={meshContainerRef} />
+            <MeshExplorerSimple 
+              week={week} 
+              containerRef={meshContainerRef}
+              showBrainOverlay={showBrainOverlay}
+              onShowBrainOverlayChange={setShowBrainOverlay}
+            />
           </div>
         </div>
 
-        {/* Brain Insights Card - Fills remaining space */}
-        <div className="flex-1 min-h-[200px]">
+        {/* Brain Insights Card - Dynamic height based on available space */}
+        <div className="flex-1 min-h-[120px]">
           <BrainInsightsCard week={week} />
         </div>
 
-        {/* Week Slider - Fixed at bottom with right padding to avoid Neurobot */}
-        <div className="premium-card-static pl-4 sm:pl-6 pr-[140px] sm:pr-[150px] py-3 sm:py-4 flex-shrink-0">
+        {/* Week Slider - Full width, compact height */}
+        <div className="premium-card-static px-4 sm:px-6 py-2 flex-shrink-0">
           <WeekSlider
             value={week}
             onChange={setWeek}
             label="Gestational Week"
+            hideWeek40={true}
           />
         </div>
       </div>
@@ -177,11 +224,22 @@ const STRUCTURE_INFO: Record<string, { name: string; description: string }> = {
  * Simplified MeshExplorer that only displays, without its own slider
  * (week is controlled by parent)
  */
-function MeshExplorerSimple({ week, containerRef, isMobile = false }: { week: number; containerRef?: React.RefObject<HTMLDivElement | null>; isMobile?: boolean }) {
+function MeshExplorerSimple({ 
+  week, 
+  containerRef, 
+  isMobile = false,
+  showBrainOverlay,
+  onShowBrainOverlayChange,
+}: { 
+  week: number; 
+  containerRef?: React.RefObject<HTMLDivElement | null>; 
+  isMobile?: boolean;
+  showBrainOverlay: boolean;
+  onShowBrainOverlayChange: (value: boolean) => void;
+}) {
   const [meshData, setMeshData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showBrainOverlay, setShowBrainOverlay] = useState(true);
   
   // Hover tooltip state
   const [hoveredStructure, setHoveredStructure] = useState<string | null>(null);
@@ -226,7 +284,11 @@ function MeshExplorerSimple({ week, containerRef, isMobile = false }: { week: nu
     const updateDimensions = () => {
       const rect = container.getBoundingClientRect();
       const width = Math.max(280, Math.min(rect.width - 20, 600));
-      const height = Math.round(width * 0.7);
+      // Calculate height based on width ratio but cap it to ensure controls are visible
+      const idealHeight = Math.round(width * 0.65); // Reduced from 0.7 to leave more room
+      // Cap height to ensure there's always space for controls (max 280px for smaller screens)
+      const maxChartHeight = isMobile ? 300 : 280;
+      const height = Math.min(idealHeight, maxChartHeight);
       setChartDimensions({ width, height });
     };
 
@@ -236,7 +298,7 @@ function MeshExplorerSimple({ week, containerRef, isMobile = false }: { week: nu
     resizeObserver.observe(container);
     
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     async function load() {
@@ -344,8 +406,8 @@ function MeshExplorerSimple({ week, containerRef, isMobile = false }: { week: nu
   }
 
   return (
-    <div ref={containerRef} className="viz-card flex flex-col h-full p-4 sm:p-5">
-      <h2 className="text-xs sm:text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
+    <div ref={containerRef} className="viz-card flex flex-col h-full p-4 sm:p-5 overflow-hidden">
+      <h2 className="text-xs sm:text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3 flex-shrink-0">
         3D Brain Model
       </h2>
       
@@ -396,13 +458,13 @@ function MeshExplorerSimple({ week, containerRef, isMobile = false }: { week: nu
 
       {/* Brain Overlay Toggle + Legend - Hidden on mobile carousel */}
       {!isMobile && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-3 border-t border-herbrain-border/40">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-3 border-t border-herbrain-border/40 flex-shrink-0">
           {/* Brain Overlay Toggle */}
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={showBrainOverlay}
-              onChange={(e) => setShowBrainOverlay(e.target.checked)}
+              onChange={(e) => onShowBrainOverlayChange(e.target.checked)}
               className="w-4 h-4 rounded border-herbrain-border text-herbrain-green focus:ring-herbrain-green/30 cursor-pointer"
             />
             <span className="text-xs sm:text-sm text-herbrain-muted">Show Full Brain</span>

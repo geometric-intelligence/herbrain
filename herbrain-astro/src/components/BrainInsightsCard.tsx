@@ -105,28 +105,28 @@ export default function BrainInsightsCard({ week }: BrainInsightsCardProps) {
       </div>
 
       {/* Content - Scrollable with responsive font sizing */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-5 lg:px-6 py-3 lg:py-4">
         {/* Title - scales up on wider screens */}
-        <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold text-herbrain-dark mb-3 lg:mb-4 leading-tight">
+        <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-semibold text-herbrain-dark mb-2 lg:mb-3 leading-tight">
           {insights.title}
         </h3>
 
-        {/* Main content paragraphs - larger font on wide screens */}
-        <div className="space-y-3 lg:space-y-4">
+        {/* Main content paragraphs - smaller min font on constrained spaces */}
+        <div className="space-y-2 lg:space-y-3">
           {insights.content.map((paragraph, idx) => (
-            <p key={idx} className="text-sm lg:text-base xl:text-lg text-herbrain-muted leading-relaxed">
+            <p key={idx} className="text-xs sm:text-sm lg:text-base text-herbrain-muted leading-relaxed">
               {formatContent(paragraph)}
             </p>
           ))}
         </div>
 
         {/* Key Fact Highlight - scales proportionally */}
-        <div className="mt-4 lg:mt-6 p-3 lg:p-4 rounded-xl bg-herbrain-green/5 border border-herbrain-green/10">
-          <div className="flex items-start gap-2 lg:gap-3">
-            <svg className="w-4 h-4 lg:w-5 lg:h-5 text-herbrain-green flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="mt-3 lg:mt-4 p-2.5 lg:p-3 rounded-xl bg-herbrain-green/5 border border-herbrain-green/10">
+          <div className="flex items-start gap-2">
+            <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-herbrain-green flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-herbrain-dark leading-relaxed">
+            <p className="text-[11px] sm:text-xs lg:text-sm text-herbrain-dark leading-relaxed">
               {formatContent(insights.keyFact)}
             </p>
           </div>
