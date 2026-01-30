@@ -34,6 +34,7 @@ const currentPath = Astro.url.pathname;
   </main>
   
   {/* Floating AI Neurobot Chat - Available on all pages with sidebar */}
-  {showSidebar && <FloatingChat client:only="react" />}
+  {/* Hide floating button on pregnancy page since it has inline Neurobot button */}
+  {showSidebar && <FloatingChat client:only="react" hideFloatingButton={currentPath === '/pregnancy' || currentPath === '/pregnancy/'} />}
 </body>
 </html>

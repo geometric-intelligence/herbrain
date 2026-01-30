@@ -40,6 +40,32 @@ export default function PregnancyExplorer() {
               Watch how your brain transforms week by week. Move the timeline below to see AI-predicted changes in real time.
             </p>
           </div>
+          {/* Neurobot Button - Right aligned */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('openNeurobot'))}
+            className="flex items-center gap-1.5 sm:gap-2 bg-herbrain-dark text-white 
+                       px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full 
+                       shadow-md hover:shadow-lg hover:scale-105
+                       transition-all duration-200 flex-shrink-0"
+            aria-label="Open AI Neurobot chat"
+          >
+            <div className="relative w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none">
+                <path 
+                  d="M12 2L13.09 8.26L18 6L14.74 10.91L21 12L14.74 13.09L18 18L13.09 15.74L12 22L10.91 15.74L6 18L9.26 13.09L3 12L9.26 10.91L6 6L10.91 8.26L12 2Z" 
+                  fill="url(#sparkleGradientInline)"
+                />
+                <defs>
+                  <linearGradient id="sparkleGradientInline" x1="3" y1="2" x2="21" y2="22">
+                    <stop offset="0%" stopColor="#F97316" />
+                    <stop offset="50%" stopColor="#3B82F6" />
+                    <stop offset="100%" stopColor="#22C55E" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <span className="font-medium text-xs sm:text-sm">Neurobot</span>
+          </button>
         </div>
       </header>
 

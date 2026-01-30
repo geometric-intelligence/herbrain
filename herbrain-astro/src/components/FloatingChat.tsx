@@ -8,12 +8,16 @@ interface Message {
   content: string;
 }
 
+interface FloatingChatProps {
+  hideFloatingButton?: boolean;
+}
+
 /**
  * Floating AI Neurobot chat component - Amazon Rufus style
  * Displays a subtle floating button in the bottom-right corner
  * that expands into a chat panel when clicked.
  */
-export default function FloatingChat() {
+export default function FloatingChat({ hideFloatingButton = false }: FloatingChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,6 +30,13 @@ export default function FloatingChat() {
   useEffect(() => {
     const key = getApiKey();
     setApiKeyState(key);
+  }, []);
+
+  // Listen for custom event to open chat from external triggers
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('openNeurobot', handleOpenChat);
+    return () => window.removeEventListener('openNeurobot', handleOpenChat);
   }, []);
 
   useEffect(() => {
@@ -115,7 +126,7 @@ export default function FloatingChat() {
   return (
     <>
       {/* Floating Trigger Button - Amazon Rufus Style */}
-      {!isOpen && (
+      {!isOpen && !hideFloatingButton && (
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 
