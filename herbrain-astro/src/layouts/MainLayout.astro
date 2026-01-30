@@ -27,7 +27,7 @@ const currentPath = Astro.url.pathname;
   {showSidebar && <Sidebar currentPath={currentPath} />}
   
   <main class:list={[
-    showSidebar ? 'ml-72 mr-6 p-6 min-h-screen' : 'min-h-screen'
+    showSidebar ? 'md:ml-72 p-4 md:p-6 md:mr-6 min-h-screen' : 'min-h-screen'
   ]}>
     <slot />
   </main>

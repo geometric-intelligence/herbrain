@@ -40,18 +40,18 @@ export default function WeekSlider({
   return (
     <div className="w-full">
       {/* Header with week number and trimester */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-baseline gap-3">
-          <span className="text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+        <div className="flex items-baseline gap-2 sm:gap-3">
+          <span className="text-xs sm:text-sm font-medium text-herbrain-muted uppercase tracking-wide">{label}</span>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-semibold text-herbrain-dark tabular-nums">
+            <span className="text-3xl sm:text-4xl font-semibold text-herbrain-dark tabular-nums">
               {localValue}
             </span>
-            <span className="text-lg text-herbrain-muted/60">/ {max}</span>
+            <span className="text-base sm:text-lg text-herbrain-muted/60">/ {max}</span>
           </div>
         </div>
         
-        <span className="pill-badge pill-badge-green text-sm">
+        <span className="pill-badge pill-badge-green text-xs sm:text-sm self-start sm:self-auto">
           {trimester.label}
         </span>
       </div>
@@ -98,11 +98,14 @@ export default function WeekSlider({
       </div>
       
       {/* Week labels */}
-      <div className="flex justify-between text-sm text-herbrain-muted mt-3 px-0.5">
-        <span>Week 0</span>
-        <span>Week 12</span>
-        <span>Week 27</span>
-        <span>Week 40</span>
+      <div className="flex justify-between text-xs sm:text-sm text-herbrain-muted mt-3 px-0.5">
+        <span>0</span>
+        <span className="hidden sm:inline">Week 12</span>
+        <span className="sm:hidden">12</span>
+        <span className="hidden sm:inline">Week 27</span>
+        <span className="sm:hidden">27</span>
+        <span className="hidden sm:inline">Week 40</span>
+        <span className="sm:hidden">40</span>
       </div>
     </div>
   );

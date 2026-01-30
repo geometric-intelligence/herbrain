@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import type { Data, Layout } from 'plotly.js';
 import {
@@ -28,6 +28,8 @@ export default function MriViewer({ week }: MriViewerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentSession, setCurrentSession] = useState<string | null>(null);
+  const [containerWidth, setContainerWidth] = useState(260);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -81,6 +83,25 @@ export default function MriViewer({ week }: MriViewerProps) {
     setSliceIndex(Math.floor(maxSlice / 2));
   }, [view, volume]);
 
+  // Responsive sizing
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => {
+      const rect = container.getBoundingClientRect();
+      const newWidth = Math.max(180, Math.min(rect.width - 24, 320));
+      setContainerWidth(newWidth);
+    };
+
+    updateWidth();
+    
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(container);
+    
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const getSliceData = useCallback((): number[][] | null => {
     if (!volume) return null;
 
@@ -112,10 +133,9 @@ export default function MriViewer({ week }: MriViewerProps) {
 
   const sliceDims = volume ? getSliceDims(volume.dims, view) : [100, 100];
   const aspectRatio = sliceDims[1] / sliceDims[0];
-  const baseWidth = 260;
   const layout: Partial<Layout> = {
-    width: baseWidth,
-    height: baseWidth * aspectRatio,
+    width: containerWidth,
+    height: containerWidth * aspectRatio,
     margin: { l: 0, r: 0, t: 0, b: 0 },
     xaxis: {
       visible: false,
@@ -137,13 +157,13 @@ export default function MriViewer({ week }: MriViewerProps) {
   const maxSlice = volume ? getMaxSliceIndex(volume.dims, view) : 100;
 
   return (
-    <div className="viz-card flex flex-col h-full p-5">
+    <div className="viz-card flex flex-col h-full p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-herbrain-dark uppercase tracking-wide mb-3">
         MRI Scan
       </h2>
       
       {/* MRI Display */}
-      <div className="relative flex-1 flex items-center justify-center bg-herbrain-dark rounded-xl overflow-hidden">
+      <div ref={containerRef} className="relative flex-1 flex items-center justify-center bg-herbrain-dark rounded-xl overflow-hidden min-h-[200px]">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-herbrain-dark/90 z-10">
             <div className="loading-spinner"></div>
@@ -194,10 +214,10 @@ export default function MriViewer({ week }: MriViewerProps) {
       </div>
 
       {/* Slice Slider */}
-      <div className="mt-4 px-1">
+      <div className="mt-3 sm:mt-4 px-1">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs text-herbrain-muted">Slice</span>
-          <span className="text-sm text-herbrain-dark tabular-nums font-medium">
+          <span className="text-xs sm:text-sm text-herbrain-dark tabular-nums font-medium">
             {sliceIndex} / {maxSlice}
           </span>
         </div>

@@ -12,7 +12,33 @@ const navItems = [
 ];
 ---
 
-<aside class="fixed top-0 left-0 bottom-0 w-72 p-6 bg-white border-r border-gray-200 flex flex-col">
+<!-- Mobile Menu Button -->
+<button
+  id="mobile-menu-btn"
+  class="mobile-menu-btn"
+  aria-label="Open menu"
+>
+  <svg class="w-6 h-6 text-herbrain-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+</button>
+
+<!-- Sidebar Overlay (mobile) -->
+<div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 p-6 bg-white border-r border-gray-200 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+  <!-- Close Button (mobile only) -->
+  <button
+    id="sidebar-close-btn"
+    class="absolute top-4 right-4 p-2 rounded-lg hover:bg-herbrain-surface md:hidden"
+    aria-label="Close menu"
+  >
+    <svg class="w-5 h-5 text-herbrain-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+
   <!-- Logo -->
   <a href="/" class="block mb-2">
     <img 
@@ -68,3 +94,45 @@ const navItems = [
     <p>© 2024 Geometric Intelligence</p>
   </div>
 </aside>
+
+<script>
+  // Mobile sidebar toggle functionality
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function openSidebar() {
+    sidebar?.classList.remove('-translate-x-full');
+    sidebar?.classList.add('translate-x-0');
+    overlay?.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar?.classList.add('-translate-x-full');
+    sidebar?.classList.remove('translate-x-0');
+    overlay?.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  mobileMenuBtn?.addEventListener('click', openSidebar);
+  sidebarCloseBtn?.addEventListener('click', closeSidebar);
+  overlay?.addEventListener('click', closeSidebar);
+
+  // Close sidebar on navigation (for SPA-like behavior)
+  sidebar?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        closeSidebar();
+      }
+    });
+  });
+
+  // Handle resize - close mobile sidebar if screen becomes large
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      closeSidebar();
+    }
+  });
+</script>
